@@ -16,6 +16,19 @@ const ReviewsPage = () => {
   const [totalReviews, setTotalReviews] = useState(0);
   const [helpfulLoading, setHelpfulLoading] = useState({});
 
+  // Get helpful reviews from localStorage
+  const getMarkedHelpful = () => {
+    const marked = localStorage.getItem('markedHelpful');
+    return marked ? new Set(JSON.parse(marked)) : new Set();
+  };
+
+  // Save helpful reviews to localStorage
+  const saveMarkedHelpful = (reviewIds) => {
+    localStorage.setItem('markedHelpful', JSON.stringify([...reviewIds]));
+  };
+
+  const [markedHelpful, setMarkedHelpful] = useState(getMarkedHelpful);
+
   // Fetch reviews from API
   const fetchReviews = async () => {
     setLoading(true);
@@ -44,11 +57,17 @@ const ReviewsPage = () => {
         setReviews(data.reviews);
         setTotalPages(data.total_pages || 1);
         setTotalReviews(data.total || data.reviews.length);
+        
+        // Check which reviews user has already marked as helpful
+        await checkHelpfulStatus(data.reviews.map(r => r.id));
       } else if (Array.isArray(data)) {
         // Simple array response
         setReviews(data);
         setTotalPages(1);
         setTotalReviews(data.length);
+        
+        // Check which reviews user has already marked as helpful
+        await checkHelpfulStatus(data.map(r => r.id));
       } else {
         setReviews([]);
         setTotalPages(1);
@@ -60,6 +79,30 @@ const ReviewsPage = () => {
       setReviews([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Check which reviews user has already marked as helpful
+  const checkHelpfulStatus = async (reviewIds) => {
+    const token = localStorage.getItem('token');
+    if (!token || reviewIds.length === 0) return;
+
+    try {
+      const response = await fetch('http://localhost:5000/api/reviews/helpful-status', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ review_ids: reviewIds })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMarkedHelpful(new Set(data.marked_reviews));
+      }
+    } catch (err) {
+      console.error('Error checking helpful status:', err);
     }
   };
 
@@ -105,6 +148,12 @@ const ReviewsPage = () => {
       return;
     }
 
+    // Check if already marked
+    if (markedHelpful.has(reviewId)) {
+      alert('You have already marked this review as helpful');
+      return;
+    }
+
     setHelpfulLoading(prev => ({ ...prev, [reviewId]: true }));
 
     try {
@@ -116,12 +165,11 @@ const ReviewsPage = () => {
         }
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to mark as helpful');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to mark as helpful');
+      }
 
       // Update the review in the local state
       setReviews(prevReviews => 
@@ -131,6 +179,9 @@ const ReviewsPage = () => {
             : review
         )
       );
+
+      // Mark this review as helpful in our tracking set
+      setMarkedHelpful(prev => new Set([...prev, reviewId]));
 
     } catch (err) {
       console.error('Error marking review as helpful:', err);
@@ -320,12 +371,21 @@ const ReviewsPage = () => {
                     <div className="flex items-center space-x-4">
                       <button 
                         onClick={() => handleMarkHelpful(review.id)}
-                        disabled={helpfulLoading[review.id]}
-                        className="flex items-center space-x-1 text-gray-500 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={helpfulLoading[review.id] || markedHelpful.has(review.id)}
+                        className={`flex items-center space-x-1 transition-colors disabled:cursor-not-allowed ${
+                          markedHelpful.has(review.id) 
+                            ? 'text-green-600 bg-green-50 px-2 py-1 rounded' 
+                            : 'text-gray-500 hover:text-blue-600 disabled:opacity-50'
+                        }`}
                       >
-                        <ThumbsUp className={`w-4 h-4 ${helpfulLoading[review.id] ? 'animate-pulse' : ''}`} />
+                        <ThumbsUp className={`w-4 h-4 ${
+                          helpfulLoading[review.id] ? 'animate-pulse' : 
+                          markedHelpful.has(review.id) ? 'fill-current' : ''
+                        }`} />
                         <span className="text-sm">
-                          {helpfulLoading[review.id] ? 'Marking...' : `${review.helpful_count || 0} helpful`}
+                          {helpfulLoading[review.id] ? 'Marking...' : 
+                           markedHelpful.has(review.id) ? `${review.helpful_count || 0} helpful ✓` :
+                           `${review.helpful_count || 0} helpful`}
                         </span>
                       </button>
                       <Link

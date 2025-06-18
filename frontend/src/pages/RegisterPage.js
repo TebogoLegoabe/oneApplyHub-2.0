@@ -137,7 +137,7 @@ const RegisterPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">S</span>
+            <span className="text-white font-bold text-xl">O</span>
           </div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
