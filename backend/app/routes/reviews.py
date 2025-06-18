@@ -219,3 +219,52 @@ def mark_helpful(review_id):
     except Exception as e:
         print(f"Error marking review helpful: {e}")
         return jsonify({'error': 'Failed to mark review as helpful'}), 500
+    
+@reviews_bp.route('/user/stats', methods=['GET'])
+@jwt_required()
+def get_user_review_stats():
+    try:
+        user_id = get_jwt_identity()
+        
+        # Get user's reviews
+        user_reviews = Review.query.filter_by(user_id=user_id).all()
+        
+        # Calculate stats
+        review_count = len(user_reviews)
+        avg_rating = 0
+        total_helpful = 0
+        
+        if review_count > 0:
+            # Calculate average rating
+            total_rating = sum(review.overall_rating for review in user_reviews)
+            avg_rating = total_rating / review_count
+            
+            # Calculate total helpful votes
+            total_helpful = sum(review.helpful_count or 0 for review in user_reviews)
+        
+        # Get recent reviews with property info
+        recent_reviews = []
+        for review in user_reviews[-3:]:  # Get last 3 reviews
+            property_obj = Property.query.get(review.property_id)
+            recent_reviews.append({
+                'id': review.id,
+                'property_name': getattr(property_obj, 'name', None) or getattr(property_obj, 'title', 'Unknown Property'),
+                'property_id': review.property_id,
+                'overall_rating': review.overall_rating,
+                'review_text': review.review_text[:100] + '...' if len(review.review_text) > 100 else review.review_text,
+                'created_at': review.created_at.isoformat() if review.created_at else None,
+                'helpful_count': review.helpful_count or 0
+            })
+        
+        return jsonify({
+            'stats': {
+                'reviewsCount': review_count,
+                'avgRating': round(avg_rating, 1),
+                'helpfulVotes': total_helpful
+            },
+            'recent_reviews': recent_reviews
+        }), 200
+        
+    except Exception as e:
+        print(f"Error fetching user review stats: {e}")
+        return jsonify({'error': 'Failed to fetch review stats'}), 500
