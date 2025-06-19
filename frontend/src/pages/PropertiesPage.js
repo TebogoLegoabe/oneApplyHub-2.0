@@ -33,13 +33,14 @@ const PropertiesPage = () => {
     }
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [key]: value,
-      page: 1 // Reset to first page when filtering
-    }));
-  };
+const handleFilterChange = (key, value) => {
+  setFilters(prev => ({
+    ...prev,
+    [key]: value,
+    // Only reset to page 1 when other filters change, not when changing page
+    ...(key !== 'page' && { page: 1 })
+  }));
+};
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -71,10 +72,10 @@ const PropertiesPage = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Student Accommodation
+            Accommodations
           </h1>
           <p className="text-gray-600">
-            Find your perfect home near Wits and UJ universities
+            Find your perfect home near campus. Search and filter properties by university, type, price, and more.
           </p>
         </div>
 
