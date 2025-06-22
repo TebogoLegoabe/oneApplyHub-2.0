@@ -15,7 +15,7 @@ def add_sample_properties():
         # Sample properties with realistic data
         properties_data = [
             {
-                "name": "Tutong Student Accommodation",
+                "name": "Thutong Student Accommodation",
                 "address": "Braamfontein, Johannesburg",
                 "property_type": "residence",
                 "price_min": 4500,

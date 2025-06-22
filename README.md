@@ -125,7 +125,7 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 
    ```bash
    cd ../backend
-   python app.py
+   python run.py
    ```
 
    The Flask API will run on `http://localhost:5000`
