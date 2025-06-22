@@ -5,12 +5,14 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 ## ✨ Features
 
 ### 🔍 **Property Discovery**
+
 - Browse verified student accommodation properties
 - Advanced filtering by price, location, property type, and amenities
 - Interactive property listings with detailed information
 - High-quality property images and virtual tours
 
 ### 📝 **Student Reviews System**
+
 - Read honest reviews from verified university students
 - Detailed rating system (overall, safety, cleanliness, management, etc.)
 - Mark reviews as helpful
@@ -18,18 +20,21 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 - Filter reviews by university (Wits/UJ) and rating
 
 ### 👤 **User Authentication**
+
 - Secure JWT-based authentication
 - Student verification system
 - Protected routes for authenticated users
 - User dashboard with personalized content
 
 ### 📱 **Responsive Design**
+
 - Mobile-first responsive design
 - Hamburger menu for mobile navigation
 - Touch-friendly interface
 - Works seamlessly across all devices
 
 ### 🎯 **University-Specific Features**
+
 - Tailored for Wits and UJ students
 - University-specific filtering and content
 - Academic year and faculty information integration
@@ -37,6 +42,7 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 ## 🛠️ Tech Stack
 
 ### **Frontend**
+
 - **React.js** - User interface library
 - **React Router** - Client-side routing
 - **Tailwind CSS** - Utility-first CSS framework
@@ -44,6 +50,7 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 - **Context API** - State management
 
 ### **Backend**
+
 - **Flask** - Python web framework
 - **SQLAlchemy** - Database ORM
 - **Flask-JWT-Extended** - JWT authentication
@@ -51,6 +58,7 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 - **SQLite** - Database (development)
 
 ### **Authentication & Security**
+
 - JWT (JSON Web Tokens) for secure authentication
 - Password hashing with Werkzeug
 - Protected API endpoints
@@ -67,41 +75,46 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 ### 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
-   git clone https://github.com/yourusername/oneapplyhub.git
+   git clone https://github.com/TebogoLegoabe/oneApplyHub-2.0.git
    cd oneapplyhub
    ```
 
 2. **Backend Setup**
+
    ```bash
    cd backend
-   
+
    # Create virtual environment
    python -m venv venv
-   
+
    # Activate virtual environment
    # On Windows:
    venv\Scripts\activate
-   # On macOS/Linux:
+   # On macOS:
    source venv/bin/activate
-   
+   # On Linux:
+   source venv/Scripts/activate
+
    # Install dependencies
    pip install flask flask-sqlalchemy flask-cors flask-jwt-extended flask-mail
-   
+
    # Initialize database
    python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
-   
+
    # Add sample data (optional)
    python add_sample_properties.py
    ```
 
 3. **Frontend Setup**
+
    ```bash
    cd ../frontend
-   
+
    # Install dependencies
    npm install
-   
+
    # Install additional packages
    npm install react-router-dom lucide-react
    ```
@@ -109,17 +122,21 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 ### 🏃‍♂️ Running the Application
 
 1. **Start the Backend Server**
+
    ```bash
-   cd backend
+   cd ../backend
    python app.py
    ```
+
    The Flask API will run on `http://localhost:5000`
 
-2. **Start the Frontend Development Server**
+2. **Start the Frontend Development Server on another terminal**
+
    ```bash
    cd frontend
    npm start
    ```
+
    The React app will run on `http://localhost:3000`
 
 3. **Access the Application**
@@ -129,16 +146,19 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 ## 📚 API Endpoints
 
 ### **Authentication**
+
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - User login
 - `POST /api/auth/logout` - User logout
 
 ### **Properties**
+
 - `GET /api/properties` - Get all properties
 - `GET /api/properties/:id` - Get specific property
 - `POST /api/properties` - Create new property (admin)
 
 ### **Reviews**
+
 - `GET /api/reviews` - Get all reviews
 - `GET /api/reviews/property/:id` - Get reviews for specific property
 - `POST /api/reviews/property/:id` - Create review for property
@@ -183,17 +203,20 @@ oneapplyhub/
 ## 🎯 Key Features in Detail
 
 ### **Smart Property Search**
+
 - Filter by price range, number of bedrooms/bathrooms
 - Search by location and amenities
 - Property type filtering (apartment, house, room, studio)
 
 ### **Comprehensive Review System**
+
 - Multiple rating categories (value, location, safety, cleanliness, management, facilities)
 - Pros and cons sections
 - Recommendation system
 - Helpful vote functionality
 
 ### **User Dashboard**
+
 - View personal reviews and bookings
 - Edit profile information
 - Manage account settings
@@ -225,7 +248,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Tebogo Legoabe** - [YourGitHub](https://github.com/TebogoLegoabe)
 
-- **To be updated :)** 
+- **To be updated :)**
 
 ## 🙏 Acknowledgments
 
