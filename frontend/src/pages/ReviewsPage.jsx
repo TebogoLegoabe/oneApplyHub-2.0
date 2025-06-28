@@ -388,19 +388,16 @@ const ReviewsPage = () => {
                            `${review.helpful_count || 0} helpful`}
                         </span>
                       
-                      </button>
-                      <button>
-                        Delete review
-                      </button>
-                      <button>
-                        Edit review
-                      </button>
-                      <Link
-                        to={`/properties/${review.property_id}`}
-                        className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      >
-                        View Property
-                      </Link>
+                              </button>
+                            <div className="flex gap-3 mt-4">
+          <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded shadow">
+            Delete Review
+          </button>
+          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded shadow">
+            Edit Review
+          </button>
+        </div>
+                      
                     </div>
                   </div>
                 </div>
