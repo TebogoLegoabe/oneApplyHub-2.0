@@ -15,7 +15,7 @@ def add_sample_properties():
         # Sample properties with realistic data
         properties_data = [
             {
-                "name": "Campus Africa- Park Mews Accommodation",
+                "name": "Campus Africa- Park Mews",
                 "address": "1 Princess Place, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5000,
@@ -27,7 +27,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "Campus Central Accommodation",
+                "name": "Campus Central ",
                 "address": "19 Girton Road, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5200,
@@ -39,7 +39,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "St Davids Place Accommodation",
+                "name": "St Davids Place ",
                 "address": "5 St Davids Place, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5200,
@@ -51,7 +51,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "The Albany Accommodation",
+                "name": "The Albany ",
                 "address": "Albany Road, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5200,
@@ -63,7 +63,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "Thrive Living- Arteria Accommodation",
+                "name": "Thrive Living- Arteria",
                 "address": "33 Princess of Wales Terrance, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 4640,
@@ -75,7 +75,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "Yale Village Accommodation",
+                "name": "Yale Village ",
                 "address": "65 Empire Road, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5250,
@@ -87,7 +87,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "CJ Students Accommodation",
+                "name": "CJ Students ",
                 "address": "123 Empire Road, Parktown, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5000,
@@ -99,7 +99,7 @@ def add_sample_properties():
                 "approved": True
             },
              {
-                "name": "Thrive Living- Apex Student Accommodation",
+                "name": "Thrive Living- Apex Student ",
                 "address": "12 Jorissen St, Braamfontein, Johannesburg",
                 "property_type": "residence",
                 "price_min": 4730,
@@ -111,7 +111,7 @@ def add_sample_properties():
                 "approved": True 
             },
             {
-                "name": "Thrive Living- Crescent Accommodation",
+                "name": "Thrive Living- Crescent ",
                 "address": "17 Eendracht St, Braamfontein, Johannesburg",
                 "property_type": "residence",
                 "price_min": 6350,
@@ -123,7 +123,7 @@ def add_sample_properties():
                 "approved": True 
             },
              {
-                "name": "Thrive Living- Horizon Heights Accommodation",
+                "name": "Thrive Living- Horizon Heights",
                 "address": "39 Twickenham Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5600,
@@ -135,7 +135,7 @@ def add_sample_properties():
                 "approved": True 
             },
              {
-                "name": "Thrive Living- Kingsway Place Accommodation",
+                "name": "Thrive Living- Kingsway Place",
                 "address": " 66 Kingsway Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5600,
@@ -147,7 +147,7 @@ def add_sample_properties():
                 "approved": True 
             },
             {
-                "name": "Thrive Living- Richmond Central Accommodation",
+                "name": "Thrive Living- Richmond Central ",
                 "address": "42 Richmond Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
                 "price_min": 4870,
@@ -159,7 +159,7 @@ def add_sample_properties():
                 "approved": True 
             },
             {
-                "name": "Thrive Living- Richmond Corner Accommodation",
+                "name": "Thrive Living- Richmond Corner ",
                 "address": "52 Richmond Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5450,
@@ -171,7 +171,7 @@ def add_sample_properties():
                 "approved": True 
             },
             {
-                "name": "South Point - Mvelelo",
+                "name": "South Point - Mvelelo ",
                 "address": "19 Melle Street, Braamfontein, Johannesburg",
                 "property_type": "apartment",
                 "price_min": 5380,
@@ -183,7 +183,7 @@ def add_sample_properties():
                 "approved": True
             },
             {
-                "name": "South Point - 56 Jorissen",
+                "name": "South Point - 56 Jorissen ",
                 "address": "56 Jorissen Street, Braamfontein, Johannesburg",
                 "property_type": "apartment",
                 "price_min": 5150,
@@ -362,65 +362,78 @@ def add_sample_properties():
                 "approved": True
             },  
             {
-                "name": "Campus Africa - 49 Jorissen",
-                "address": "49 Jorissen Street, Braamfontein, Johannesburg",
-                "property_type": "residence",
-                "price_min": 4200,
-                "price_max": 7500,
-                "description": "Campus Africa's flagship building. Modern facilities with a focus on academic success.",
-                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Centers", "Tutoring", "Gym", "Dining Hall"]),
-                "contact_info": "011-789-0123 | jorissen49@campusafrica.co.za",
-                "university": "wits",
-                "approved": True
-            },
-            {
                 "name": "Campus Africa - 80 Jorissen", 
                 "address": "80 Jorissen Street, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min": 4000,
-                "price_max": 7200,
+                "price_min": 5500,
+                "price_max": 7500,
                 "description": "Part of Campus Africa's premium student accommodation network with excellent support services.",
-                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Academic Support", "Gym"]),
-                "contact_info": "011-890-1234 | jorissen80@campusafrica.co.za",
-                "university": "wits",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
+                "university": "wits & uj",
                 "approved": True
             },
             {
-                "name": "Campus Africa - Rennie House",
-                "address": "Rennie House, Braamfontein, Johannesburg", 
+                "name": "Campus Africa - Amani House", 
+                "address": "40 Jorissen Street, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min": 4500,
-                "price_max": 8000,
-                "description": "Historic building renovated for modern student living. Combines character with contemporary amenities.",
-                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Lounges", "Heritage Building", "Gym"]),
-                "contact_info": "011-901-2345 | rennie@campusafrica.co.za",
-                "university": "wits",
+                "price_min": 5500,
+                "price_max": 7500,
+                "description": " ",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas","Entertainment Area","Laundry", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
+                "university": "wits & uj",
                 "approved": True
             },
             {
-                "name": "Wits Men's Residence",
-                "address": "Wits University Campus, Braamfontein, Johannesburg",
-                "property_type": "residence", 
-                "price_min": 2800,
-                "price_max": 4200,
-                "description": "Official Wits University residence for male students. Traditional residence experience with modern updates.",
-                "amenities": json.dumps(["WiFi", "Dining Hall", "Study Rooms", "Sports Facilities", "On-Campus"]),
-                "contact_info": "011-717-1000 | residences@wits.ac.za",
-                "university": "wits",
-                "approved": True
-            },
-            {
-                "name": "Barnato Hall",
-                "address": "Wits University Campus, Braamfontein, Johannesburg",
+                "name": "Campus Africa - Rennie House", 
+                "address": "19 Ameshoff Street, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min": 3200,
-                "price_max": 4800,
-                "description": "Premier Wits residence known for academic excellence. Mixed residence with strong community spirit.",
-                "amenities": json.dumps(["WiFi", "Dining Hall", "Study Centers", "Sports Fields", "Academic Support"]),
-                "contact_info": "011-717-1050 | barnato@wits.ac.za",
+                "price_min": 5500,
+                "price_max": 6600,
+                "description": " ",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
                 "university": "wits",
                 "approved": True
             },
+            {
+                "name": "Campus Africa - Braamlofts", 
+                "address": "24 Biccard Street, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 5500,
+                "price_max": 5950,
+                "description": " ",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {
+                "name": "Campus Africa - YMCA", 
+                "address": "104 Rissik Street, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 4300,
+                "price_max": 6400,
+                "description": "Part of Campus Africa's premium student accommodation network with excellent support services.",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
+                "university": "wits",
+                "approved": True
+            },
+            {
+                "name": "Campus Africa - Wynton Joy", 
+                "address": "3 Nugget Street, Hillbrow, Johannesburg",
+                "property_type": "residence",
+                "price_min": 5500,
+                "price_max": 5500,
+                "description": "Part of Campus Africa's premium student accommodation network with excellent support services.",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
+                "university": "wits & uj & cjc",
+                "approved": True
+            },
+        
 
         ]
         
@@ -436,6 +449,18 @@ def add_sample_properties():
                 "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
                 "contact_info":  "061-938-7611 | info@southpoint.co.za",
                 "university": "uj", 
+                "approved": True
+            },
+            {
+                "name": "Campus Africa - Dunvista Mansions", 
+                "address": "70 Banket Street, Hillbrow, Johannesburg",
+                "property_type": "residence",
+                "price_min": 5500,
+                "price_max": 5500,
+                "description": "Part of Campus Africa's premium student accommodation network with excellent support services.",
+                "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
+                "contact_info": "010-109-1700/072-475-4652 | info@campusafrica.co.za",
+                "university": "uj & cjc ",
                 "approved": True
             },
          
