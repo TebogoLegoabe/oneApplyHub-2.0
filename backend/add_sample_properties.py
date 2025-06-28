@@ -420,31 +420,8 @@ def add_sample_properties():
                 "contact_info": "011-717-1050 | barnato@wits.ac.za",
                 "university": "wits",
                 "approved": True
-            }
-                        {
-                "name": "Thutong Student Accommodation",
-                "address": "Braamfontein, Johannesburg",
-                "property_type": "residence",
-                "price_min": 4500,
-                "price_max": 6500,
-                "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus. Features include 24/7 security, WiFi, and study areas.",
-                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Common Room"]),
-                "contact_info": "011-123-4567 | thutong@apex.co.za",
-                "university": "wits",
-                "approved": True
             },
-            {
-                "name": "Rise Student Accommodation",
-                "address": "Braamfontein, Johannesburg",
-                "property_type": "residence", 
-                "price_min": 5200,
-                "price_max": 8500,
-                "description": "Premium student living with modern facilities. State-of-the-art gym, rooftop terrace, and 24/7 support.",
-                "amenities": json.dumps(["WiFi", "Gym", "24/7 Security", "Rooftop Terrace", "Study Lounges", "Laundry"]),
-                "contact_info": "011-345-6789 | info@rise.co.za",
-                "university": "wits",
-                "approved": True
-            },
+
         ]
         
         # Add some UJ properties too
@@ -461,30 +438,7 @@ def add_sample_properties():
                 "university": "uj", 
                 "approved": True
             },
-            {
-                "name": "UJ Auckland Park Residence",
-                "address": "Auckland Park, Johannesburg",
-                "property_type": "residence",
-                "price_min": 2500,
-                "price_max": 4000,
-                "description": "Official UJ residence in Auckland Park. Safe, affordable accommodation with university support.",
-                "amenities": json.dumps(["WiFi", "Dining Hall", "Study Rooms", "Security", "On-Campus"]),
-                "contact_info": "011-559-1234 | residences@uj.ac.za",
-                "university": "uj",
-                "approved": True
-            },
-            {
-                "name": "The Village UJ",
-                "address": "Near UJ Auckland Park Campus, Johannesburg",
-                "property_type": "apartment",
-                "price_min": 3200,
-                "price_max": 5500,
-                "description": "Private student accommodation close to UJ. Modern apartments with shuttle service to campus.",
-                "amenities": json.dumps(["WiFi", "Shuttle Service", "Security", "Gym", "Study Areas"]),
-                "contact_info": "011-678-2345 | info@villageuj.co.za",
-                "university": "uj",
-                "approved": True
-            }
+         
         ]
         
         all_properties = properties_data + uj_properties
