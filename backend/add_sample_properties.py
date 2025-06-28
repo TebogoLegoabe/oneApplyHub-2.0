@@ -170,31 +170,6 @@ def add_sample_properties():
                 "university": "uj & wits",
                 "approved": True 
             },
-          
-            {
-                "name": "Thutong Student Accommodation",
-                "address": "Braamfontein, Johannesburg",
-                "property_type": "residence",
-                "price_min": 4500,
-                "price_max": 6500,
-                "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus. Features include 24/7 security, WiFi, and study areas.",
-                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Common Room"]),
-                "contact_info": "011-123-4567 | thutong@apex.co.za",
-                "university": "wits",
-                "approved": True
-            },
-            {
-                "name": "Rise Student Accommodation",
-                "address": "Braamfontein, Johannesburg",
-                "property_type": "residence", 
-                "price_min": 5200,
-                "price_max": 8500,
-                "description": "Premium student living with modern facilities. State-of-the-art gym, rooftop terrace, and 24/7 support.",
-                "amenities": json.dumps(["WiFi", "Gym", "24/7 Security", "Rooftop Terrace", "Study Lounges", "Laundry"]),
-                "contact_info": "011-345-6789 | info@rise.co.za",
-                "university": "wits",
-                "approved": True
-            },
             {
                 "name": "South Point - Mvelelo",
                 "address": "19 Melle Street, Braamfontein, Johannesburg",
@@ -216,6 +191,18 @@ def add_sample_properties():
                 "description": "Prime location on Jorissen Street. Walking distance to Wits with excellent student facilities.",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Kitchen", "Parking"]),
                 "contact_info": "060-017-8099 | admin@56jorissen.co.za", 
+                "university": "wits",
+                "approved": True
+            },
+            {
+                "name": "South Point - Epozini House",
+                "address": "46 De Korte, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5430,
+                "price_max": 6310,
+                "description": " ",
+                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Kitchen", "Parking"]),
+                "contact_info": "011-489-1900 | info@southpoint.co.za", 
                 "university": "wits",
                 "approved": True
             },
@@ -292,6 +279,89 @@ def add_sample_properties():
                 "approved": True
             },
             {
+                "name": "South Point- Argon House",
+                "address": "89 Juta Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 4930,
+                "price_max": 5870,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "076-011-5702| info@southpoint.co.za",
+                "university": "wits", 
+                "approved": True
+            },  
+            {
+                "name": "South Point- K.S.I House",
+                "address": "11 Biccard Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5320,
+                "price_max": 5870,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "060-018-9901| info@southpoint.co.za",
+                "university": "wits", 
+                "approved": True
+            },  
+            {
+                "name": "South Point- Clifton Heights",
+                "address": "Cnr De Korte  Biccard Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5260,
+                "price_max": 5540,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "011-489-1900| info@southpoint.co.za",
+                "university": "wits", 
+                "approved": True
+            },  
+                        {
+                "name": "South Point- B-Hive",
+                "address": "43 Biccard Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5380,
+                "price_max": 5870,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "076-011-5702| info@southpoint.co.za",
+                "university": "wits", 
+                "approved": True
+            },  
+            {
+                "name": "South Point- Phumelela House",
+                "address": "99 Simmons Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5320,
+                "price_max": 5870,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "011-489-1918| info@southpoint.co.za",
+                "university": "wits", 
+                "approved": True
+            },  
+            {
+                "name": "South Point- Argon House",
+                "address": "89 Juta Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 4930,
+                "price_max": 5870,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "076-011-5702| info@southpoint.co.za",
+                "university": "wits & uj", 
+                "approved": True
+            },              {
+                "name": "South Point- 90 De Korte",
+                "address": " 90 De Korte Street, Braamfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5540,
+                "price_max": 6040,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "011-489-1900| info@southpoint.co.za",
+                "university": "wits & uj", 
+                "approved": True
+            },  
+            {
                 "name": "Campus Africa - 49 Jorissen",
                 "address": "49 Jorissen Street, Braamfontein, Johannesburg",
                 "property_type": "residence",
@@ -351,10 +421,46 @@ def add_sample_properties():
                 "university": "wits",
                 "approved": True
             }
+                        {
+                "name": "Thutong Student Accommodation",
+                "address": "Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 4500,
+                "price_max": 6500,
+                "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus. Features include 24/7 security, WiFi, and study areas.",
+                "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Common Room"]),
+                "contact_info": "011-123-4567 | thutong@apex.co.za",
+                "university": "wits",
+                "approved": True
+            },
+            {
+                "name": "Rise Student Accommodation",
+                "address": "Braamfontein, Johannesburg",
+                "property_type": "residence", 
+                "price_min": 5200,
+                "price_max": 8500,
+                "description": "Premium student living with modern facilities. State-of-the-art gym, rooftop terrace, and 24/7 support.",
+                "amenities": json.dumps(["WiFi", "Gym", "24/7 Security", "Rooftop Terrace", "Study Lounges", "Laundry"]),
+                "contact_info": "011-345-6789 | info@rise.co.za",
+                "university": "wits",
+                "approved": True
+            },
         ]
         
         # Add some UJ properties too
         uj_properties = [
+             {
+                "name": "South Point - Relytant",
+                "address": "136 Sivewright, New Doornfontein, Johannesburg",
+                "property_type": "apartment",
+                "price_min": 5260,
+                "price_max": 5540,
+                "description": "Budget-friendly student accommodation with essential amenities. Great value for money.",
+                "amenities": json.dumps(["WiFi", "Security", "Kitchen", "Study Room"]),
+                "contact_info":  "061-938-7611 | info@southpoint.co.za",
+                "university": "uj", 
+                "approved": True
+            },
             {
                 "name": "UJ Auckland Park Residence",
                 "address": "Auckland Park, Johannesburg",
