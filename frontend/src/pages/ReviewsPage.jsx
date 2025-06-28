@@ -387,6 +387,13 @@ const ReviewsPage = () => {
                            markedHelpful.has(review.id) ? `${review.helpful_count || 0} helpful ✓` :
                            `${review.helpful_count || 0} helpful`}
                         </span>
+                      
+                      </button>
+                      <button>
+                        Delete review
+                      </button>
+                      <button>
+                        Edit review
                       </button>
                       <Link
                         to={`/properties/${review.property_id}`}
