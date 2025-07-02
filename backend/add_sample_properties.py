@@ -6,13 +6,11 @@ def add_sample_properties():
     app = create_app()
     
     with app.app_context():
-        # Clear existing properties
         Property.query.delete()
         PropertyImage.query.delete()
         db.session.commit()
         print("Cleared existing properties")
         
-        # Sample properties with realistic data
         properties_data = [
             {
                 "name": "Campus Africa- Park Mews",
@@ -431,6 +429,42 @@ def add_sample_properties():
                 "amenities": json.dumps(["WiFi", "Security", "Study Areas", "Gym"]),
                 "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
                 "university": "wits & uj & cjc",
+                "approved": True
+            },
+            {
+                "name": "Units of Jorissen - Rise", 
+                "address": "42 Jorissen Street, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 5500,
+                "price_max": 6500,
+                "description": " A few steps away from the University of the Witwatersrand, a thriving community where you experience the epitome of modern student living ",
+                "amenities": json.dumps(["WiFi", "Security", "Laundry", "Study Area", "Gym",  "Entertainment Area",]),
+                "contact_info": "010 010 9220 | uoj@risestudentliving.com",
+                "university": "wits",
+                "approved": True
+            },
+            {
+                "name": "Braamfontein Gate", 
+                "address": "209 Smit Street, Hillbrow, Johannesburg",
+                "property_type": "apartments",
+                "price_min": 2500,
+                "price_max": 9500,
+                "description": "The tallest building in Braamfontein across the road from the Gautrain Station with a variety of unit types to choose from",
+                "amenities": json.dumps(["WiFi", "Security",,"Laundry", "Study Area", "Gym", "Sports Court", "Entertainment Area", "Swimming Pool", "Cinema","Garden"]),
+                "contact_info": "071-674-9023/082-947-0976 | info@braamfonteingate.co.za",
+                "university": "wits & uj ",
+                "approved": True
+            },
+            {   
+                "name": "YW Junction", 
+                "address": " 128 De Korte St, Braamfontein, Johannesburg",
+                "property_type": "apartments",
+                "price_min": ,
+                "price_max": ,
+                "description": " Convinient energetic communal space where community comes togather ",
+                "amenities": json.dumps([" ",]),
+                "contact_info": "087 163 9625 | hello@cjstudents.co.za",
+                "university": "wits",
                 "approved": True
             },
         
