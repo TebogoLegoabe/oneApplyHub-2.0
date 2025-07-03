@@ -510,11 +510,24 @@ def add_sample_properties():
                 "price_min":5000 ,
                 "price_max": 6700,
                 "description": "At the door of the University of the Witwatersrand, Verge 2 offers you secure rooms with the best aesthetic views. ",
-                "amenities": json.dumps([" 24/7 security","Handyman On Site","Wi-fi","Gym","Laundry",]),
+                "amenities": json.dumps([" 24/7 security","Study Room","Wi-fi","Gym","Laundry",]),
                 "contact_info": "063-360-1558|info@bornfreerentals.co.za",
                 "university": "wits",
                 "approved": True
             },
+            {   
+                "name": "Thutong", 
+                "address": " 22 Jorissen, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min":5000 ,
+                "price_max": , #all rooms cost 5000
+                "description": " student accommodation with spacious rooms designed specifically for student living. ",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Gym","Laundry",]),
+                "contact_info": "021-002-5051| info@thutongjunction.co.za",
+                "university": "wits",
+                "approved": True
+            },
+            
         
 
         ]
