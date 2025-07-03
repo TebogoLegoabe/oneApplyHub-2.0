@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, ThumbsUp, Calendar, Filter, Search, AlertCircle } from 'lucide-react';
+import { Star, MapPin, ThumbsUp, Calendar, Filter, Search, AlertCircle,Trash2, Pencil } from 'lucide-react';
+
 
 const ReviewsPage = () => {
   const [reviews, setReviews] = useState([]);
@@ -17,6 +18,9 @@ const ReviewsPage = () => {
   const [helpfulLoading, setHelpfulLoading] = useState({});
 
   // Get helpful reviews from localStorage
+  const handleDeleteReview = (id) => {
+  setReviews((prevReviews) => prevReviews.filter((review) => review.id !== id));
+};
   const getMarkedHelpful = () => {
     const marked = localStorage.getItem('markedHelpful');
     return marked ? new Set(JSON.parse(marked)) : new Set();
@@ -389,14 +393,24 @@ const ReviewsPage = () => {
                         </span>
                       
                               </button>
-                            <div className="flex gap-3 mt-4">
-          <button className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded shadow">
-            Delete Review
-          </button>
-          <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded shadow">
-            Edit Review
-          </button>
-        </div>
+              <div className="flex gap-3 mt-4">
+                  {reviews.map((review) => (
+                <div key={review.id} className="bg-red-500 p-4 rounded shadow relative ">
+                  <p className="text-gray-800">{review.comment}</p>
+                  <button
+                    onClick={() => handleDeleteReview(review.id)}
+                    className="absolute top-2 right-2 text-red-600 hover:text-red-800"
+                    title="Delete"
+                  >
+                    <Trash2 size={16} className="text-white" />
+                  </button>
+                </div>
+              ))}
+                  <button className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-3 py-2 rounded shadow">
+                    <Pencil size={16} />
+                    
+                  </button>
+            </div>
                       
                     </div>
                   </div>

@@ -50,7 +50,7 @@ const handleSubmit = async (e) => {
 };
   // Clear error when component mounts
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-grey-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -59,16 +59,7 @@ const handleSubmit = async (e) => {
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
           Sign in to oneApplyHub
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link
-            to="/register"
-            className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-          >
-            create a new account
-          </Link>
-        </p>
+        </h2> 
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
@@ -162,6 +153,15 @@ const handleSubmit = async (e) => {
                   'Sign in'
                 )}
               </button>
+              <p className="mt-2 text-center text-sm text-gray-600">
+          Don't have an account?
+          <Link
+            to="/register"
+            className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
+          >
+            Sign up
+          </Link>
+        </p>
             </div>
           </form>
 
