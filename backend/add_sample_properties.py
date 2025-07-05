@@ -18,7 +18,7 @@ def add_sample_properties():
                 "property_type": "residence",
                 "price_min": 5000,
                 "price_max": 9200,
-                "description": ""Part of Campus Africa's premium student accommodation network with excellent support services.",
+                "description": "Part of Campus Africa's premium student accommodation network with excellent support services.",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Common Room"]),
                 "contact_info": "010-109-1700/071-999-1246 | info@campusafrica.co.za",
                 "university": "wits",
@@ -66,9 +66,9 @@ def add_sample_properties():
                 "property_type": "residence",
                 "price_min": 4640,
                 "price_max": 9900,
-                "description": " ",
+                "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus.",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": "087-820-0640| hello@thrivestudentliving.co.za",
                 "university": "wits",
                 "approved": True
             },
@@ -108,7 +108,19 @@ def add_sample_properties():
                 "university": "wits",
                 "approved": True
             },
-             {
+            {   
+                "name": " Student Digz- Argyle House ", 
+                "address": " 4 Street Queens Rd, Parktown, Johannesburg",
+                "property_type": "residence",
+                "price_min": 4800 ,
+                "price_max": 6300,
+                "description": " ",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Study Area","Transport","Gym","Entertainment Room" ,]),
+                "contact_info": "071-047-5191| info@studentdigz.co.za",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {
                 "name": "Thrive Living- Apex Student ",
                 "address": "12 Jorissen St, Braamfontein, Johannesburg",
                 "property_type": "residence",
@@ -116,7 +128,7 @@ def add_sample_properties():
                 "price_max": 7700,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus.",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": " 087-820-0640|| hello@thrivestudentliving.co.za",
                 "university": "wits",
                 "approved": True 
             },
@@ -128,11 +140,11 @@ def add_sample_properties():
                 "price_max": 8000,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus.",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": "087-820-0640| | hello@thrivestudentliving.co.za",
                 "university": "wits",
                 "approved": True 
             },
-             {
+            {
                 "name": "Thrive Living- Horizon Heights",
                 "address": "39 Twickenham Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
@@ -140,11 +152,11 @@ def add_sample_properties():
                 "price_max": 6150,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus ",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": " 087-820-0640|| hello@thrivestudentliving.co.za",
                 "university": "uj & wits",
                 "approved": True 
             },
-             {
+            {
                 "name": "Thrive Living- Kingsway Place",
                 "address": " 66 Kingsway Avenue, Auckland Park, Johannesburg",
                 "property_type": "residence",
@@ -152,7 +164,7 @@ def add_sample_properties():
                 "price_max": 6150,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus ",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": "087-820-0640| | hello@thrivestudentliving.co.za",
                 "university": "uj & wits",
                 "approved": True 
             },
@@ -164,7 +176,7 @@ def add_sample_properties():
                 "price_max": 6150,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": "087-820-0640| | hello@thrivestudentliving.co.za",
                 "university": "uj & wits",
                 "approved": True 
             },
@@ -176,7 +188,7 @@ def add_sample_properties():
                 "price_max": 6800,
                 "description": "Modern student accommodation in the heart of Braamfontein, walking distance to Wits campus",
                 "amenities": json.dumps(["WiFi", "24/7 Security", "Study Areas", "Laundry", "Gym", "Common Room"]),
-                "contact_info": " | hello@thrivestudentliving.co.za",
+                "contact_info": "087-820-0640| | hello@thrivestudentliving.co.za",
                 "university": "uj & wits",
                 "approved": True 
             },
@@ -314,7 +326,7 @@ def add_sample_properties():
             },  
             {
                 "name": "South Point- Clifton Heights",
-                "address": "Cnr De Korte  Biccard Street, Braamfontein, Johannesburg",
+                "address": "92 De Korte  Biccard Street, Braamfontein, Johannesburg",
                 "property_type": "apartment",
                 "price_min": 5260,
                 "price_max": 5540,
@@ -324,7 +336,7 @@ def add_sample_properties():
                 "university": "wits", 
                 "approved": True
             },  
-                        {
+            {
                 "name": "South Point- B-Hive",
                 "address": "43 Biccard Street, Braamfontein, Johannesburg",
                 "property_type": "apartment",
@@ -471,7 +483,7 @@ def add_sample_properties():
                 "name": "Nota Bene", 
                 "address": " 46 Juta St, Braamfontein, Johannesburg",
                 "property_type": "apartments",
-                "price_min":5000 ,
+                "price_min": 5000 ,
                 "price_max": 8550,
                 "description": "Known for its state-of-the-art gym and sun deck, Nota Bene offers convenience as it is a walking distance to stores, city life and Wits main campus. ",
                 "amenities": json.dumps([" 24/7 security","Swimming Pool", "Entertainment Area", "Wi-fi","Gym","Laundry","Wall Heater",]),
@@ -483,7 +495,7 @@ def add_sample_properties():
                 "name": "J-One ", 
                 "address": " 1 Leyds Street, Biccard Street, Johannesburg",
                 "property_type": "apartments",
-                "price_min":5000 ,
+                "price_min": 5000 ,
                 "price_max": 8000,
                 "description": " Exceptional student living in the vibrant heart of Braamfontein, J-One provides a home that fosters growth, learning and an unforgettable experience ",
                 "amenities": json.dumps([" 24/7 security",,"Reliable Transport", "Sleepovers", "Wi-fi","Gym","Laundry",]),
@@ -495,7 +507,7 @@ def add_sample_properties():
                 "name": "Born Free-The Verge 1", 
                 "address": " 42 De Korte, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min":3700 ,
+                "price_min": 3700 ,
                 "price_max": 7700,
                 "description": "At the door of the University of the Witwatersrand, Verge 1 offers you secure rooms",
                 "amenities": json.dumps([" 24/7 security","Handyman On Site","Wi-fi","Gym","Laundry",]),
@@ -507,7 +519,7 @@ def add_sample_properties():
                 "name": "Born Free-The Verge 2", 
                 "address": " 22 Jorissen, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min":5000 ,
+                "price_min": 5000 ,
                 "price_max": 6700,
                 "description": "At the door of the University of the Witwatersrand, Verge 2 offers you secure rooms with the best aesthetic views. ",
                 "amenities": json.dumps([" 24/7 security","Study Room","Wi-fi","Gym","Laundry",]),
@@ -519,20 +531,88 @@ def add_sample_properties():
                 "name": "Thutong", 
                 "address": " 22 Jorissen, Braamfontein, Johannesburg",
                 "property_type": "residence",
-                "price_min":5000 ,
+                "price_min": 5000 ,
                 "price_max": , #all rooms cost 5000
-                "description": " student accommodation with spacious rooms designed specifically for student living. ",
+                "description": " Student accommodation with spacious rooms designed specifically for student living. ",
                 "amenities": json.dumps([" 24/7 security","Wi-fi","Gym","Laundry",]),
                 "contact_info": "021-002-5051| info@thutongjunction.co.za",
                 "university": "wits",
                 "approved": True
             },
-            
-        
-
+            {   
+                "name": " UGate student residence", 
+                "address": " Corner Bertha and, Ameshoff St, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 4500 ,
+                "price_max": 8200,
+                "description": "Offers premium student accommodation that supports privacy within a vibrant student community",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Study Area","Laundry","Entertainment Room",]),
+                "contact_info": "087-078-2143| info@ugate.co.za ",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {   
+                "name": " 93 on Juta", 
+                "address": " 93 Juta, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 3900 ,
+                "price_max": 6300,
+                "description": "A space that allows you to focus on your studies.",
+                "amenities": json.dumps([" 24/7 security","Wi-fi",]),
+                "contact_info": "083-264-0005| goldencitystudentres@gmail.com",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {   
+                "name": " 95 on Juta", 
+                "address": " 95 Juta, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 3500 ,
+                "price_max": 4100,
+                "description": "A space that allows you to focus on your studies.",
+                "amenities": json.dumps([" 24/7 security","Wi-fi",]),
+                "contact_info": "083-264-0005| goldencitystudentres@gmail.com",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {   
+                "name": " Student Digz-Dudley ", 
+                "address": " 145 De Korte Street, Braamfontein, Johannesburg",
+                "property_type": "residence",
+                "price_min": 4600 ,
+                "price_max": 5000,
+                "description": "Situated in one precinct, Student Digz residences are situated in one block. One entrance, one garden and amenities in one block.  ",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Study Area","Transport","Laundry","Gym","Entertainment Room",]),
+                "contact_info": "010-055-1451| info@studentdigz.co.za",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {   
+                "name": " Student Digz-Baker House ", 
+                "address": " 11 Hosptital Street, Braamfontein, Johannesburg",
+                "property_type": "apartments",
+                "price_min": 4800 ,
+                "price_max": 6300,
+                "description": "Situated in one precinct, Student Digz residences are situated in one block. One entrance, one garden and amenities in one block.  ",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Study Area","Transport","Laundry","Gym","Entertainment Room",]),
+                "contact_info": "010-055-1451| info@studentdigz.co.za",
+                "university": "wits & uj",
+                "approved": True
+            },
+            {   
+                "name": " Student Digz-Skyways ", 
+                "address": " 12 Sutherland Avenue, Braamfontein, Johannesburg",
+                "property_type": "apartments",
+                "price_min": 4800 ,
+                "price_max": 5000,
+                "description": "Situated in one precinct, Student Digz residences are situated in one block. One entrance, one garden and amenities in one block. ",
+                "amenities": json.dumps([" 24/7 security","Wi-fi","Study Area","Transport","Laundry","Gym","Entertainment Room",]),
+                "contact_info": "010-055-1451| info@studentdigz.co.za",
+                "university": "wits & uj",
+                "approved": True
+            },
         ]
         
-        # Add some UJ properties too
         uj_properties = [
              {
                 "name": "South Point - Relytant",
