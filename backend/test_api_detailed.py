@@ -6,7 +6,7 @@ def test_api_detailed():
     # Test different endpoints
     test_cases = [
         ('/', 'Basic endpoint'),
-        ('?page=1&per_page=10', 'With pagination'),
+        ('?page=1&per_page=12', 'With pagination'),
         ('?university=wits', 'Filter by Wits'),
         ('?approved=true', 'Filter by approved'),
     ]
