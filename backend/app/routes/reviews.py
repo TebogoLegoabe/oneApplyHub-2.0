@@ -11,7 +11,7 @@ reviews_bp = Blueprint('reviews', __name__)
 def get_all_reviews():
     try:
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         university = request.args.get('university')
         min_rating = request.args.get('min_rating', type=int)
         search = request.args.get('search')
@@ -87,7 +87,7 @@ def get_property_reviews(property_id):
     """Get reviews for a specific property"""
     try:
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         
         # Check if property exists
         property_obj = Property.query.get_or_404(property_id)
