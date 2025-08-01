@@ -100,8 +100,8 @@ def add_sample_properties():
                 "name": "CJ Students- YW Junction", 
                 "address": " 128 De Korte St, Braamfontein, Johannesburg",
                 "property_type": "apartments",
-                "price_min": ,                #not specified
-                "price_max": ,
+                "price_min": 5000 ,                #price not specified,added sample value to run the code
+                "price_max": 5500,
                 "description": " Convinient energetic communal space where community comes togather ",
                 "amenities": json.dumps(["WiFi", "24/7 Security","Study room","Gym","Recreational Area"]),
                 "contact_info": "087-163-9625 | hello@cjstudents.co.za",
@@ -474,7 +474,7 @@ def add_sample_properties():
                 "price_min": 2500,
                 "price_max": 9500,
                 "description": "The tallest building in Braamfontein across the road from the Gautrain Station with a variety of unit types to choose from",
-                "amenities": json.dumps(["WiFi", "Security",,"Laundry", "Study Area", "Gym", "Sports Court", "Entertainment Area", "Swimming Pool", "Cinema","Garden"]),
+                "amenities": json.dumps(["WiFi", "Security","Laundry", "Study Area", "Gym", "Sports Court", "Entertainment Area", "Swimming Pool", "Cinema","Garden"]),
                 "contact_info": "071-674-9023/082-947-0976 | info@braamfonteingate.co.za",
                 "university": "wits & uj ",
                 "approved": True
@@ -498,7 +498,7 @@ def add_sample_properties():
                 "price_min": 5000 ,
                 "price_max": 8000,
                 "description": " Exceptional student living in the vibrant heart of Braamfontein, J-One provides a home that fosters growth, learning and an unforgettable experience ",
-                "amenities": json.dumps([" 24/7 security",,"Reliable Transport", "Sleepovers", "Wi-fi","Gym","Laundry",]),
+                "amenities": json.dumps([" 24/7 security","Reliable Transport", "Sleepovers", "Wi-fi","Gym","Laundry",]),
                 "contact_info": "011-403-1111 |stay@j-one.co.za",
                 "university": "wits",
                 "approved": True
@@ -532,7 +532,7 @@ def add_sample_properties():
                 "address": " 22 Jorissen, Braamfontein, Johannesburg",
                 "property_type": "residence",
                 "price_min": 5000 ,
-                "price_max": , #all rooms cost 5000
+                "price_max": 5000, #all rooms cost 5000
                 "description": " Student accommodation with spacious rooms designed specifically for student living. ",
                 "amenities": json.dumps([" 24/7 security","Wi-fi","Gym","Laundry",]),
                 "contact_info": "021-002-5051| info@thutongjunction.co.za",
@@ -646,6 +646,7 @@ def add_sample_properties():
         # Add properties to database
         for prop_data in all_properties:
             property = Property(**prop_data)
+
             db.session.add(property)
         
         db.session.commit()
