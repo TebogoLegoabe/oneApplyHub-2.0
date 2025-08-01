@@ -78,7 +78,7 @@ def dashboard():
 def get_all_properties():
     try:
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         status = request.args.get('status', 'all')  # all, approved, pending
         
         query = Property.query
@@ -234,7 +234,7 @@ def approve_property(property_id):
 def get_all_users():
     try:
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         
         users = User.query.filter_by(is_admin=False).order_by(User.created_at.desc()).paginate(
             page=page, per_page=per_page, error_out=False
@@ -275,7 +275,7 @@ def verify_user(user_id):
 def get_all_reviews_admin():
     try:
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         
         # Get all reviews with property and user info
         query = db.session.query(Review, Property, User).join(
