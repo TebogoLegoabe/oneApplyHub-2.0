@@ -11,7 +11,7 @@ def get_properties():
     try:
         print("=== Properties API Called ===")
         page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 10, type=int)
+        per_page = request.args.get('per_page', 12, type=int)
         university = request.args.get('university')
         property_type = request.args.get('type')
         min_price = request.args.get('min_price', type=int)
