@@ -12,7 +12,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchFeaturedProperties = async () => {
       try {
-        const response = await propertiesAPI.getProperties({ per_page: 6 });
+        const response = await propertiesAPI.getProperties({ per_page: 12});
         setFeaturedProperties(response.data.properties);
       } catch (error) {
         console.error('Error fetching properties:', error);
