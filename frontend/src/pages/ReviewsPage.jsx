@@ -41,7 +41,7 @@ const ReviewsPage = () => {
       if (filters.rating !== 'all') params.append('min_rating', filters.rating);
       if (filters.search) params.append('search', filters.search);
       params.append('page', filters.page.toString());
-      params.append('per_page', '10'); // Adjust as needed
+      params.append('per_page', '12'); // Adjust as needed
       
       const response = await fetch(`http://localhost:5000/api/reviews/?${params.toString()}`);
       
