@@ -64,15 +64,17 @@ export const authAPI = {
 
 // Properties API calls
 export const propertiesAPI = {
-  getProperties: (filters = {}) => {
-    const params = new URLSearchParams();
-    Object.keys(filters).forEach(key => {
-      if (filters[key]) params.append(key, filters[key]);
+  getProperties: async ({ page = 1, per_page = 12, university = 'all', type = 'all' } = {}) => {
+    return axios.get('http://localhost:5000/api/properties', {
+      params: { page, per_page, university, type },
     });
-    return api.get(`/properties?${params}`);
   },
-  getProperty: (id) => api.get(`/properties/${id}`),
+
+  getProperty: async (id) => {
+    return axios.get(`http://localhost:5000/api/properties/${id}`);
+  },
 };
+
 
 // Reviews API calls
 export const reviewsAPI = {

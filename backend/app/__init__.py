@@ -1,3 +1,4 @@
+from flask_migrate import Migrate
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -8,6 +9,7 @@ import os
 db = SQLAlchemy()
 jwt = JWTManager()
 mail = Mail()
+migrate=Migrate()
 
 def create_app(config_class=None):
     app = Flask(__name__)
@@ -26,6 +28,7 @@ def create_app(config_class=None):
     
     # Initialize extensions
     db.init_app(app)
+    migrate.init_app(app, db)
     CORS(app, origins=['http://localhost:3000'])
     jwt.init_app(app)
     mail.init_app(app)

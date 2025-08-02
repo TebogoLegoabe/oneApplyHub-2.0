@@ -61,7 +61,7 @@ def dashboard():
         }
         
         # Get recent properties
-        recent_properties = Property.query.order_by(Property.created_at.desc()).limit(10).all()
+        recent_properties = Property.query.order_by(Property.created_at.desc()).limit(12).all()
         
         return jsonify({
             'stats': stats,
