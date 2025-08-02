@@ -150,9 +150,16 @@ const PropertyDetailPage = () => {
                 <div className="absolute top-4 left-4 bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
                   {property.university.toUpperCase()}
                 </div>
-                <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
-                  {property.property_type}
-                </div>
+                <div className="absolute top-4 right-4 flex items-center space-x-2">
+                  <span className="bg-black bg-opacity-50 text-white px-3 py-1 rounded text-sm">
+                   {property.property_type}
+                 </span>
+  {property.nsfas_accredited && (
+    <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+      NSFAS
+    </span>
+  )}
+</div>
               </div>
             </div>
 
