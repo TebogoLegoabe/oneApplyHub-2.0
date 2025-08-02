@@ -13,6 +13,7 @@ class Property(db.Model):
     contact_info = db.Column(db.Text)
     university = db.Column(db.String(50))  # 'wits', 'uj', or 'both'
     approved = db.Column(db.Boolean, default=False)
+    nsfas_accredited = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
@@ -41,6 +42,7 @@ class Property(db.Model):
             'contact_info': self.contact_info,
             'university': self.university,
             'approved': self.approved,
+            'nsfas_accredited': self.nsfas_accredited,
             'average_rating': round(self.average_rating(), 1),
             'review_count': self.review_count(),
             'created_at': self.created_at.isoformat()
