@@ -13,6 +13,7 @@ import PropertyDetailPage from './pages/PropertyDetailPage';
 import CreateReviewPage from './pages/CreateReviewPage';
 import ReviewsPage from './pages/ReviewsPage';
 import ForgotPassword from './pages/ForgotPassword';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
             <Route path="/properties" element={<PropertiesPage />} />
             <Route path="/properties/:id" element={<PropertyDetailPage />} />
             <Route path="/forgotPassword" element={<ForgotPassword/>}/>
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             <Route 
             path="/properties/:id/review" 
             element={

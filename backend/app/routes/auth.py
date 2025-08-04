@@ -1,10 +1,17 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app import db
+from app import db,mail
 from app.models import User
+from flask_mail import Message
 import re
+import jwt
+from flask_cors import CORS
+from datetime import datetime, timedelta
+from itsdangerous import URLSafeTimedSerializer
 
-auth_bp = Blueprint('auth', __name__)
+
+auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+
 
 def is_valid_university_email(email):
     """Check if email is from Wits or UJ with proper student number format"""
@@ -116,3 +123,62 @@ def get_profile():
     except Exception as e:
         print(f"Profile error: {e}")
         return jsonify({'error': 'Failed to get profile'}), 500
+def generate_serializer():
+    secret_key = 'dev-secret-key-change-in-production'  # Same as your app.config['SECRET_KEY']
+    return URLSafeTimedSerializer(secret_key)
+@auth_bp.route('/reset-password', methods=['POST'])
+def send_reset_email():
+    data = request.get_json()
+    email = data.get('email')
+    print(f"🔍 Incoming reset request for email: {email}")
+
+    if not email:
+        print("❌ No email provided")
+        return jsonify({"error": "Email is required"}), 400
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        
+        return jsonify({'error': 'No account found with that email'}), 404
+
+    try:
+        s = generate_serializer()
+        token = s.dumps(email, salt='password-reset-salt')
+        reset_url = f"http://localhost:3000/reset-password/{token}"
+        print(f"✅ Generated reset URL: {reset_url}")
+
+        msg = Message(
+            subject="Reset Your Password",
+            recipients=[email],
+            body=f"Click to reset your password: {reset_url}"
+        )
+        mail.send(msg)
+        print(f"📧 Email sent to {email}")
+        return jsonify({"message": f"Reset link sent to {email}"}), 200
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")
+        return jsonify({"error": str(e)}), 500
+@auth_bp.route('/reset-password/<token>', methods=['POST'])
+def reset_password(token):
+    data = request.get_json()
+    new_password = data.get('password')
+    
+    if not new_password:
+        return jsonify({'error': 'Password is required'}), 400
+    
+   
+
+
+    try:
+        s = generate_serializer()
+        email = s.loads(token, salt='password-reset-salt', max_age=3600)  # 1 hour expiry
+        user = User.query.filter_by(email=email).first()
+
+        
+
+        user.set_password(new_password)
+        db.session.commit()
+
+        return jsonify({'message': 'Password reset successfully'}), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400

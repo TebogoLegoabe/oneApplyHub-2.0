@@ -219,68 +219,80 @@ const HomePage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">O</span>
-                </div>
-                <span className="font-bold text-xl">oneApplyHub</span>
-              </div>
-              <p className="text-gray-400">
-                Helping students find their perfect home near Wits and UJ universities.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Browse</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><Link to="/properties" className="hover:text-white transition-colors">All Properties</Link></li>
-                <li><Link to="/properties?university=wits" className="hover:text-white transition-colors">Wits Accommodation</Link></li>
-                <li><Link to="/properties?university=uj" className="hover:text-white transition-colors">UJ Accommodation</Link></li>
-                <li><Link to="/properties?type=residence" className="hover:text-white transition-colors">Student Residences</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Report Property</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Safety Guidelines</a></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-4">Universities</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li>University of the Witwatersrand</li>
-                <li>University of Johannesburg</li>
-              </ul>
-              <div className="mt-6">
-                <h4 className="font-semibold mb-2">Connect With Us</h4>
-                <div className="flex space-x-4">
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    <span className="sr-only">Facebook</span>
-                    <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    <span className="sr-only">Twitter</span>
-                    <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                    <span className="sr-only">Instagram</span>
-                    <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
-                </div>
-              </div>
-            </div>
+
+<motion.footer
+  initial={{ opacity: 0, y: 100 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 1 }}
+  className="bg-gray-900 text-white py-12"
+>
+  <div className="container mx-auto px-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Column 1 */}
+      <div>
+        <div className="flex items-center space-x-2 mb-4">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">O</span>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 oneApplyHub. Made for students, by students.</p>
+          <span className="font-bold text-xl">oneApplyHub</span>
+        </div>
+        <p className="text-gray-400">
+          Helping students find their perfect home near Wits and UJ universities.
+        </p>
+      </div>
+
+      {/* Column 2 */}
+      <div>
+        <h3 className="font-semibold mb-4">Browse</h3>
+        <ul className="space-y-2 text-gray-400">
+          <li><Link to="/properties" className="hover:text-white">All Properties</Link></li>
+          <li><Link to="/properties?university=wits" className="hover:text-white">Wits Accommodation</Link></li>
+          <li><Link to="/properties?university=uj" className="hover:text-white">UJ Accommodation</Link></li>
+          <li><Link to="/properties?type=residence" className="hover:text-white">Student Residences</Link></li>
+        </ul>
+      </div>
+
+      {/* Column 3 */}
+      <div>
+        <h3 className="font-semibold mb-4">Support</h3>
+        <ul className="space-y-2 text-gray-400">
+          <li><a href="#" className="hover:text-white">Help Center</a></li>
+          <li><a href="#" className="hover:text-white">Contact Us</a></li>
+          <li><a href="#" className="hover:text-white">Report Property</a></li>
+          <li><a href="#" className="hover:text-white">Safety Guidelines</a></li>
+        </ul>
+      </div>
+
+      {/* Column 4 */}
+      <div>
+        <h3 className="font-semibold mb-4">Universities</h3>
+        <ul className="space-y-2 text-gray-400">
+          <li>University of the Witwatersrand</li>
+          <li>University of Johannesburg</li>
+        </ul>
+        <div className="mt-6">
+          <h4 className="font-semibold mb-2">Connect With Us</h4>
+          <div className="flex space-x-4">
+            <a href="#" className="text-gray-400 hover:text-white">
+              <div className="w-6 h-6 bg-gray-600 rounded"></div>
+            </a>
+            <a href="#" className="text-gray-400 hover:text-white">
+              <div className="w-6 h-6 bg-gray-600 rounded"></div>
+            </a>
+            <a href="#" className="text-gray-400 hover:text-white">
+              <div className="w-6 h-6 bg-gray-600 rounded"></div>
+            </a>
           </div>
         </div>
-      </footer>
+      </div>
+    </div>
+
+    <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+      <p>&copy; 2025 oneApplyHub. Made for students, by students.</p>
+    </div>
+  </div>
+</motion.footer>
+
     </div>
   );
 };
