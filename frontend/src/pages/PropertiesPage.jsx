@@ -193,15 +193,24 @@ const handleFilterChange = (key, value) => {
                   <div className="absolute top-3 left-3 bg-white text-blue-600 px-2 py-1 rounded-full text-xs font-semibold">
                     {property.university.toUpperCase()}
                   </div>
-                  <div className="absolute top-3 right-3 bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
-                    {property.property_type}
+                  <div className="absolute top-3 right-3 flex items-center space-x-2">
+                    <span className="bg-black bg-opacity-50 text-white px-2 py-1 rounded text-xs">
+                      {property.property_type}
+                    </span>
+                    {property.nsfas_accredited && (
+                      <span className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                        NSFAS
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {property.name}
-                  </h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      {property.name}
+                    </h3>
+                  </div>
                   
                   <div className="flex items-center text-gray-600 mb-3">
                     <MapPin className="w-4 h-4 mr-1" />

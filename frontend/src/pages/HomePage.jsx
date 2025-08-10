@@ -134,6 +134,11 @@ const HomePage = () => {
                     <div className="absolute top-3 left-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold">
                       {property.university}
                     </div>
+                    {property.nsfas_accredited && (
+                      <div className="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                        NSFAS
+                      </div>
+                    )}
                   </div>
                   
                   <div className="p-6">
@@ -232,10 +237,10 @@ const HomePage = () => {
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Report Property</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Safety Guidelines</a></li>
+                <li><button className="hover:text-white transition-colors text-left">Help Center</button></li>
+                <li><button className="hover:text-white transition-colors text-left">Contact Us</button></li>
+                <li><button className="hover:text-white transition-colors text-left">Report Property</button></li>
+                <li><button className="hover:text-white transition-colors text-left">Safety Guidelines</button></li>
               </ul>
             </div>
             <div>
@@ -247,18 +252,18 @@ const HomePage = () => {
               <div className="mt-6">
                 <h4 className="font-semibold mb-2">Connect With Us</h4>
                 <div className="flex space-x-4">
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  <button className="text-gray-400 hover:text-white transition-colors">
                     <span className="sr-only">Facebook</span>
                     <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  </button>
+                  <button className="text-gray-400 hover:text-white transition-colors">
                     <span className="sr-only">Twitter</span>
                     <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
-                  <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                  </button>
+                  <button className="text-gray-400 hover:text-white transition-colors">
                     <span className="sr-only">Instagram</span>
                     <div className="w-6 h-6 bg-gray-600 rounded"></div>
-                  </a>
+                  </button>
                 </div>
               </div>
             </div>

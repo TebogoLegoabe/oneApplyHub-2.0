@@ -3,7 +3,7 @@ import sqlite3
 import os
 
 def manual_check():
-    db_path = r"C:\Users\User\OneDrive\Desktop\Flask\studentstay\backend\studentstay.db"
+    db_path = r"C:\Users\User\Desktop\oneApplyHub-2.0\backend\studentstay.db"
     
     print(f"Checking database: {db_path}")
     print(f"File exists: {os.path.exists(db_path)}")
