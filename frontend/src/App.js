@@ -14,6 +14,8 @@ import CreateReviewPage from './pages/CreateReviewPage';
 import ReviewsPage from './pages/ReviewsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import StudentApplicationPage from './pages/StudentApplicationPage';
+import BursaryPage from './pages/BursaryPage';
 
 function App() {
   return (
@@ -22,6 +24,8 @@ function App() {
         <div className="App">
           <Header />
           <Routes>
+            <Route path="/bursaries" element={<BursaryPage />} />
+            <Route path="/application" element={<StudentApplicationPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />

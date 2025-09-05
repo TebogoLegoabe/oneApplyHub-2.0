@@ -61,6 +61,14 @@ const Header = () => {
               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
             </Link>
 
+            <Link 
+              to="/bursaries" 
+              className="text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
+            >
+              Bursaries
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
+            </Link>
+
             {/* Application - only show if authenticated */}
             {isAuthenticated && (
               <Link 
@@ -93,7 +101,7 @@ const Header = () => {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-gray-200">
+              <div className="flex items-center space-x-3 ml-4 pl-4 border-gray-200">
                 <Link
                   to="/login"
                   className="text-blue-700 hover:text-blue-800 transition-colors font-medium"
@@ -153,6 +161,14 @@ const Header = () => {
                 onClick={closeMobileMenu}
               >
                 Reviews
+              </Link>
+
+              <Link 
+                to="/bursaries" 
+                className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
+                onClick={closeMobileMenu}
+              >
+                Bursaries
               </Link>
 
               {/* Application - only show if authenticated */}
