@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "title": "Bursary Name",
+  "provider": "Organization",
+  "amount": "R50,000",
+  "deadline": "2024-12-31",
+  "category": "government|private|merit|international",
+  "requirements": ["req1", "req2"],
+  "applicationUrl": "https://...",
+  "status": "Open|Closed"
+}
