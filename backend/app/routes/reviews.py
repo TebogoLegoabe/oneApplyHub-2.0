@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy import or_  # Add this import
+from sqlalchemy import or_
 from app import db
 from app.models import Review, Property, User
 
@@ -16,6 +16,8 @@ def get_all_reviews():
         min_rating = request.args.get('min_rating', type=int)
         search = request.args.get('search')
         
+        print(f"Debug: Fetching reviews with filters - university: {university}, min_rating: {min_rating}, search: {search}")
+        
         # Base query - get all reviews with property and user info
         query = db.session.query(Review, Property, User).join(
             Property, Review.property_id == Property.id
@@ -23,9 +25,8 @@ def get_all_reviews():
             User, Review.user_id == User.id
         )
         
-        # Only add approved filter if the field exists
-        # Remove this line if your Property model doesn't have an 'approved' field
-        # query = query.filter(Property.approved == True)
+        # Filter by approved properties only
+        query = query.filter(Property.approved == True)
         
         # Apply filters
         if university and university != 'all':
@@ -38,8 +39,7 @@ def get_all_reviews():
             search_term = f"%{search}%"
             query = query.filter(
                 or_(
-                    Property.name.ilike(search_term),
-                    Property.title.ilike(search_term),  # In case you use 'title' instead of 'name'
+                    Property.name.ilike(search_term),  # Use 'name' not 'title'
                     Review.review_text.ilike(search_term)
                 )
             )
@@ -47,29 +47,60 @@ def get_all_reviews():
         # Order by newest first
         query = query.order_by(Review.created_at.desc())
         
+        # Get total count before pagination
+        total_count = query.count()
+        print(f"Debug: Total reviews found: {total_count}")
+        
         # Paginate
         results = query.paginate(page=page, per_page=per_page, error_out=False)
         
         # Format response
         reviews = []
         for review, property_obj, user in results.items:
-            review_dict = review.to_dict()
-            
-            # Add property info
-            review_dict['property_name'] = getattr(property_obj, 'name', None) or getattr(property_obj, 'title', 'Unknown Property')
-            review_dict['property_id'] = property_obj.id
-            
-            # Add user info (respecting anonymity)
-            if not review.anonymous:
-                review_dict['author'] = user.name
-                review_dict['author_university'] = user.university
-                review_dict['author_year'] = user.year_of_study
-            else:
-                review_dict['author'] = 'Anonymous'
-                review_dict['author_university'] = user.university if user.university else None
-                review_dict['author_year'] = None
-            
-            reviews.append(review_dict)
+            try:
+                # Create review dict manually to avoid relationship issues
+                review_dict = {
+                    'id': review.id,
+                    'user_id': review.user_id,
+                    'property_id': review.property_id,
+                    'overall_rating': review.overall_rating,
+                    'value_rating': review.value_rating,
+                    'location_rating': review.location_rating,
+                    'safety_rating': review.safety_rating,
+                    'cleanliness_rating': review.cleanliness_rating,
+                    'management_rating': review.management_rating,
+                    'facilities_rating': review.facilities_rating,
+                    'review_text': review.review_text,
+                    'pros': review.pros,
+                    'cons': review.cons,
+                    'recommend': review.recommend,
+                    'anonymous': review.anonymous,
+                    'helpful_count': review.helpful_count or 0,
+                    'created_at': review.created_at.isoformat() if review.created_at else None,
+                    'updated_at': review.updated_at.isoformat() if review.updated_at else None
+                }
+                
+                # Add property info
+                review_dict['property_name'] = property_obj.name
+                review_dict['property_id'] = property_obj.id
+                
+                # Add user info (respecting anonymity)
+                if not review.anonymous:
+                    review_dict['author'] = user.name
+                    review_dict['author_university'] = user.university
+                    review_dict['author_year'] = user.year_of_study
+                else:
+                    review_dict['author'] = 'Anonymous'
+                    review_dict['author_university'] = user.university if user.university else None
+                    review_dict['author_year'] = None
+                
+                reviews.append(review_dict)
+                
+            except Exception as e:
+                print(f"Error processing review {review.id}: {e}")
+                continue
+        
+        print(f"Debug: Successfully processed {len(reviews)} reviews")
         
         return jsonify({
             'reviews': reviews,
@@ -80,7 +111,9 @@ def get_all_reviews():
         
     except Exception as e:
         print(f"Error fetching all reviews: {e}")
-        return jsonify({'error': 'Failed to fetch reviews'}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': 'Failed to fetch reviews', 'details': str(e)}), 500
 
 @reviews_bp.route('/property/<int:property_id>', methods=['GET'])
 def get_property_reviews(property_id):
@@ -106,19 +139,44 @@ def get_property_reviews(property_id):
         # Format response
         reviews = []
         for review, user in results.items:
-            review_dict = review.to_dict()
-            
-            # Add user info (respecting anonymity)
-            if not review.anonymous:
-                review_dict['author'] = user.name
-                review_dict['author_university'] = user.university
-                review_dict['author_year'] = user.year_of_study
-            else:
-                review_dict['author'] = 'Anonymous'
-                review_dict['author_university'] = user.university if user.university else None
-                review_dict['author_year'] = None
-            
-            reviews.append(review_dict)
+            try:
+                # Create review dict manually
+                review_dict = {
+                    'id': review.id,
+                    'user_id': review.user_id,
+                    'property_id': review.property_id,
+                    'overall_rating': review.overall_rating,
+                    'value_rating': review.value_rating,
+                    'location_rating': review.location_rating,
+                    'safety_rating': review.safety_rating,
+                    'cleanliness_rating': review.cleanliness_rating,
+                    'management_rating': review.management_rating,
+                    'facilities_rating': review.facilities_rating,
+                    'review_text': review.review_text,
+                    'pros': review.pros,
+                    'cons': review.cons,
+                    'recommend': review.recommend,
+                    'anonymous': review.anonymous,
+                    'helpful_count': review.helpful_count or 0,
+                    'created_at': review.created_at.isoformat() if review.created_at else None,
+                    'updated_at': review.updated_at.isoformat() if review.updated_at else None
+                }
+                
+                # Add user info (respecting anonymity)
+                if not review.anonymous:
+                    review_dict['author'] = user.name
+                    review_dict['author_university'] = user.university
+                    review_dict['author_year'] = user.year_of_study
+                else:
+                    review_dict['author'] = 'Anonymous'
+                    review_dict['author_university'] = user.university if user.university else None
+                    review_dict['author_year'] = None
+                
+                reviews.append(review_dict)
+                
+            except Exception as e:
+                print(f"Error processing review {review.id}: {e}")
+                continue
         
         return jsonify({
             'reviews': reviews,
@@ -127,7 +185,7 @@ def get_property_reviews(property_id):
             'current_page': page,
             'property': {
                 'id': property_obj.id,
-                'name': getattr(property_obj, 'name', None) or getattr(property_obj, 'title', 'Unknown Property')
+                'name': property_obj.name
             }
         }), 200
         
@@ -142,7 +200,7 @@ def create_review(property_id):
         print("=== REVIEW REQUEST RECEIVED ===")
         print(f"Property ID: {property_id}")
         print(f"Request data: {request.get_json()}")
-        print("=== END DEBUG ===")
+        
         user_id = get_jwt_identity()
         data = request.get_json()
         
@@ -193,9 +251,21 @@ def create_review(property_id):
         db.session.add(review)
         db.session.commit()
         
+        # Return review dict manually
+        review_dict = {
+            'id': review.id,
+            'user_id': review.user_id,
+            'property_id': review.property_id,
+            'overall_rating': review.overall_rating,
+            'review_text': review.review_text,
+            'recommend': review.recommend,
+            'anonymous': review.anonymous,
+            'created_at': review.created_at.isoformat() if review.created_at else None
+        }
+        
         return jsonify({
             'message': 'Review created successfully',
-            'review': review.to_dict()
+            'review': review_dict
         }), 201
         
     except Exception as e:
@@ -208,7 +278,7 @@ def create_review(property_id):
 def mark_helpful(review_id):
     try:
         review = Review.query.get_or_404(review_id)
-        review.helpful_count += 1
+        review.helpful_count = (review.helpful_count or 0) + 1
         db.session.commit()
         
         return jsonify({
@@ -248,7 +318,7 @@ def get_user_review_stats():
             property_obj = Property.query.get(review.property_id)
             recent_reviews.append({
                 'id': review.id,
-                'property_name': getattr(property_obj, 'name', None) or getattr(property_obj, 'title', 'Unknown Property'),
+                'property_name': property_obj.name if property_obj else 'Unknown Property',
                 'property_id': review.property_id,
                 'overall_rating': review.overall_rating,
                 'review_text': review.review_text[:100] + '...' if len(review.review_text) > 100 else review.review_text,
