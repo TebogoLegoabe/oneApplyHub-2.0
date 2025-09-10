@@ -40,7 +40,11 @@ def create_app(config_class=None):
         print(f"🏠 Running in DEVELOPMENT mode")
         print(f"DATABASE PATH: {forced_db_path}")
         
-        CORS(app, origins=['http://localhost:3000', 'https://one-apply-hub-2-0.vercel.app/'])
+        # In the Railway/production section:
+        CORS(app, origins=[
+         'https://one-apply-hub-2-0-36087sdn5-tebogolegoabes-projects.vercel.app', 
+         'http://localhost:3000'
+])
     
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
