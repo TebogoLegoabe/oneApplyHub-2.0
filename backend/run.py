@@ -1,4 +1,5 @@
 from app import create_app
+import os
 
 app = create_app()
 
@@ -7,8 +8,5 @@ def home():
     return {'message': 'StudentStay API is running!', 'status': 'success'}
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
-#curl -X POST http://localhost:5000/api/admin/login \
-#  -H "Content-Type: application/json" \
- # -d '{"email":"your_admin_email","password":"your_admin_password"}'
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
