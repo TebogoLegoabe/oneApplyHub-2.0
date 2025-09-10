@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://oneapplyhub-20-production.up.railway.app/api';
 
 // Create axios instance
 const api = axios.create({
@@ -40,7 +40,7 @@ api.interceptors.response.use(
 // Test connection
 export const testConnection = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/');
+    const response = await axios.get('https://oneapplyhub-20-production.up.railway.app/');
     console.log('Flask connection test:', response.data);
     return response.data;
   } catch (error) {
@@ -65,16 +65,15 @@ export const authAPI = {
 // Properties API calls
 export const propertiesAPI = {
   getProperties: async ({ page = 1, per_page = 12, university = 'all', type = 'all' } = {}) => {
-    return axios.get('http://localhost:5000/api/properties', {
+    return axios.get('https://oneapplyhub-20-production.up.railway.app/api/properties', {
       params: { page, per_page, university, type },
     });
   },
 
   getProperty: async (id) => {
-    return axios.get(`http://localhost:5000/api/properties/${id}`);
+    return axios.get(`https://oneapplyhub-20-production.up.railway.app/api/properties/${id}`);
   },
 };
-
 
 // Reviews API calls
 export const reviewsAPI = {
