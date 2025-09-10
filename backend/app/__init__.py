@@ -25,9 +25,9 @@ def create_app(config_class=None):
         
         # CORS for your Vercel frontend
         CORS(app, origins=[
-            'https://your-vercel-app.vercel.app',  # Replace with your actual Vercel URL
-            'http://localhost:3000'
-        ])
+        'https://one-apply-hub-2-0-36087sdn5-tebogolegoabes-projects.vercel.app',
+        'http://localhost:3000'
+    ])
         
     else:
         # Local development configuration (your existing setup)
