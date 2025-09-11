@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, MapPin, Star, Wifi, Shield, Car, Users, 
-  Phone, Mail, MessageSquare, ThumbsUp, Calendar,
-  Check, X, ExternalLink, Camera
-} from 'lucide-react';
+  Phone, MessageSquare, ThumbsUp,
+  Check, Camera
+} from 'lucide-react'; // Removed unused imports: Mail, Calendar, X, ExternalLink
 import { propertiesAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth(); // Removed unused 'user'
   
   const [property, setProperty] = useState(null);
   const [reviews, setReviews] = useState([]);

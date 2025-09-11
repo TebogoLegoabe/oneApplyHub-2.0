@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 const CreateReviewPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth(); // Removed unused 'user'
   
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
