@@ -29,11 +29,11 @@ def create_app(config_class=None):
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    # CORS configuration
     allowed_origins = [
-        "http://localhost:3000",  # Local development
-        "http://127.0.0.1:3000",
-        "https://one-apply-hub-2-0-36087sdn5-tebogolegoabes-projects.vercel.app",  # Your current Vercel
+    "http://localhost:3000",  # Local development
+    "https://one-apply-hub-2-0.vercel.app",  # Main Vercel domain
+    "https://one-apply-hub-2-0-git-main-tebogolegoabes-projects.vercel.app",  # Git deployment
+    "https://one-apply-hub-2-0-omqm6pe33-tebogolegoabes-projects.vercel.app",  # Latest deployment
     ]
     
     # Add production frontend URL from environment
