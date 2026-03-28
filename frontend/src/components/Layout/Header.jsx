@@ -1,251 +1,200 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, FileText } from 'lucide-react';
+import { Menu, X, FileText, LayoutDashboard, Shield, Sun, Moon } from 'lucide-react';
+import logoImg from '../../assets/OneApply-Hub-Logo.png';
+import { useTheme } from '../../context/ThemeContext';
+
+const NAV_LINKS = [
+  { to: '/properties', label: 'Properties' },
+  { to: '/reviews',    label: 'Reviews'    },
+  { to: '/bursaries',  label: 'Bursaries'  },
+];
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
     navigate('/');
-    setIsMobileMenuOpen(false); // Close mobile menu after logout
-  };
-
-  const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const isActive = (to) => pathname === to || (to !== '/' && pathname.startsWith(to));
+
+  const ThemeToggle = () => (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 transition-all"
+      aria-label="Toggle dark mode"
+    >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </button>
+  );
+
+  const navLinkClass = (to) =>
+    `px-3 py-2 rounded-lg font-medium text-sm transition-all ${
+      isActive(to)
+        ? 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30'
+        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'
+    }`;
+
+  const mobileNavLinkClass = (to) =>
+    `block py-2.5 px-4 rounded-xl font-medium text-sm transition-all ${
+      isActive(to)
+        ? 'text-blue-700 bg-blue-50'
+        : 'text-slate-700 hover:bg-slate-50'
+    }`;
+
   return (
-    <header className="bg-white shadow-lg border-b border-gray-100 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          {/* Enhanced Logo */}
-          <Link to="/" className="flex items-center space-x-3 group" onClick={closeMobileMenu}>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-              <span className="text-white font-bold text-lg">O</span>
+    <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 group" onClick={closeMobileMenu}>
+            <img src={logoImg} alt="oneApplyHub logo" className="h-20 w-20 object-contain" />
+            <div className="flex flex-col leading-none">
+              <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">oneApplyHub</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">Student Accommodation</span>
             </div>
-            <span className="font-bold text-2xl text-gray-900 group-hover:text-blue-700 transition-colors">
-              oneApplyHub
-            </span>
           </Link>
-          
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {/* Dashboard - only show if authenticated */}
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-0.5">
             {isAuthenticated && (
-              <Link 
-                to="/dashboard" 
-                className="text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
-              >
-                Dashboard
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
+              <Link to="/dashboard" className={navLinkClass('/dashboard')}>
+                <span className="flex items-center gap-1.5">
+                  <LayoutDashboard className="w-3.5 h-3.5" />Dashboard
+                </span>
               </Link>
             )}
-            
-            <Link 
-              to="/properties" 
-              className="text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
-            >
-              Properties
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-            
-            <Link 
-              to="/reviews" 
-              className="text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
-            >
-              Reviews
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            <Link 
-              to="/bursaries" 
-              className="text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
-            >
-              Bursaries
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
-            </Link>
-
-            {/* Application - only show if authenticated */}
+            {NAV_LINKS.map(({ to, label }) => (
+              <Link key={to} to={to} className={navLinkClass(to)}>{label}</Link>
+            ))}
             {isAuthenticated && (
-              <Link 
-                to="/application" 
-                className="flex items-center text-gray-600 hover:text-blue-700 transition-colors font-medium relative group"
-              >
-                <FileText className="w-4 h-4 mr-2" />
-                Application
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-700 transition-all duration-300 group-hover:w-full"></span>
+              <Link to="/application" className={navLinkClass('/application')}>
+                <span className="flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" />Apply
+                </span>
               </Link>
             )}
-            
-            {isAuthenticated ? (
-              <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-gray-200">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {user?.name?.charAt(0)?.toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="text-sm text-gray-700 font-medium">
-                    Hello, {user?.name?.split(' ')[0]}
-                  </span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg"
-                >
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-3 ml-4 pl-4 border-gray-200">
-                <Link
-                  to="/login"
-                  className="text-blue-700 hover:text-blue-800 transition-colors font-medium"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-medium shadow-md hover:shadow-lg"
-                >
-                  Sign Up
-                </Link>
-              </div>
+            {isAuthenticated && user?.is_admin && (
+              <Link to="/admin" className={navLinkClass('/admin')}>
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-amber-500" />Admin
+                </span>
+              </Link>
             )}
           </nav>
 
-          {/* Enhanced Mobile Menu Button */}
+          {/* Desktop Auth */}
+          <div className="hidden md:flex items-center gap-2">
+            <ThemeToggle />
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-sm flex-shrink-0">
+                    <span className="text-white font-bold text-xs">
+                      {user?.name?.charAt(0)?.toUpperCase()}
+                    </span>
+                  </div>
+                  <div className="leading-none">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-white">{user?.name?.split(' ')[0]}</p>
+                    {user?.verified && <p className="text-[10px] text-emerald-600 font-medium">Verified</p>}
+                  </div>
+                </div>
+                <div className="w-px h-5 bg-slate-200 mx-1" />
+                <button
+                  onClick={handleLogout}
+                  className="text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-50 transition-all">
+                  Login
+                </Link>
+                <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-sm transition-colors">
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile toggle */}
+          <div className="md:hidden flex items-center gap-1">
+            <ThemeToggle />
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300"
-            aria-label="Toggle mobile menu"
+            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 transition-all"
+            aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
+          </div>
         </div>
 
-        {/* Enhanced Mobile Navigation Menu */}
+        {/* Mobile Nav */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-6 pb-6 border-t border-gray-100 animate-fadeIn">
-            <nav className="flex flex-col space-y-2 pt-6">
-              {/* Dashboard - only show if authenticated */}
-              {isAuthenticated && (
-                <Link 
-                  to="/dashboard" 
-                  className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
-                  onClick={closeMobileMenu}
-                >
-                  Dashboard
-                </Link>
-              )}
-              
-              <Link 
-                to="/properties" 
-                className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
-                onClick={closeMobileMenu}
-              >
-                Properties
+          <div className="md:hidden border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 space-y-0.5">
+            {isAuthenticated && (
+              <Link to="/dashboard" className={mobileNavLinkClass('/dashboard')} onClick={closeMobileMenu}>
+                <span className="flex items-center gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</span>
               </Link>
-              
-              <Link 
-                to="/reviews" 
-                className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
-                onClick={closeMobileMenu}
-              >
-                Reviews
+            )}
+            {NAV_LINKS.map(({ to, label }) => (
+              <Link key={to} to={to} className={mobileNavLinkClass(to)} onClick={closeMobileMenu}>{label}</Link>
+            ))}
+            {isAuthenticated && (
+              <Link to="/application" className={mobileNavLinkClass('/application')} onClick={closeMobileMenu}>
+                <span className="flex items-center gap-2"><FileText className="w-4 h-4" />Application</span>
               </Link>
+            )}
+            {isAuthenticated && user?.is_admin && (
+              <Link to="/admin" className={mobileNavLinkClass('/admin')} onClick={closeMobileMenu}>
+                <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-amber-500" />Admin</span>
+              </Link>
+            )}
 
-              <Link 
-                to="/bursaries" 
-                className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
-                onClick={closeMobileMenu}
-              >
-                Bursaries
-              </Link>
-
-              {/* Application - only show if authenticated */}
-              {isAuthenticated && (
-                <Link 
-                  to="/application" 
-                  className="text-gray-700 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium flex items-center"
-                  onClick={closeMobileMenu}
-                >
-                  <FileText className="w-4 h-4 mr-3" />
-                  Application
-                </Link>
-              )}
-              
+            <div className="pt-3 mt-1 border-t border-slate-100 dark:border-slate-700 px-2">
               {isAuthenticated ? (
-                <div className="flex flex-col space-y-4 pt-4 mt-4 border-t border-gray-100">
-                  <div className="px-4 py-2 flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center">
-                      <span className="text-white font-semibold">
-                        {user?.name?.charAt(0)?.toUpperCase()}
-                      </span>
+                <div className="flex items-center justify-between px-2 py-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-white font-bold text-sm">{user?.name?.charAt(0)?.toUpperCase()}</span>
                     </div>
                     <div>
-                      <span className="text-gray-800 font-medium block">
-                        {user?.name}
-                      </span>
-                      <span className="text-gray-500 text-sm">
-                        {user?.email}
-                      </span>
+                      <p className="text-sm font-semibold text-slate-800">{user?.name}</p>
+                      <p className="text-xs text-slate-400 truncate max-w-[160px]">{user?.email}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-300 font-medium shadow-md mx-4"
-                  >
+                  <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-red-100">
                     Logout
                   </button>
                 </div>
               ) : (
-                <div className="flex flex-col space-y-3 pt-4 mt-4 border-t border-gray-100">
-                  <Link
-                    to="/login"
-                    className="text-blue-700 hover:text-blue-800 hover:bg-blue-50 transition-all duration-300 py-3 px-4 rounded-lg font-medium"
-                    onClick={closeMobileMenu}
-                  >
+                <div className="flex flex-col gap-2">
+                  <Link to="/login" className="block text-center py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all" onClick={closeMobileMenu}>
                     Login
                   </Link>
-                  <Link
-                    to="/register"
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-medium text-center shadow-md mx-4"
-                    onClick={closeMobileMenu}
-                  >
-                    Sign Up
+                  <Link to="/register" className="block text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors" onClick={closeMobileMenu}>
+                    Sign Up Free
                   </Link>
                 </div>
               )}
-            </nav>
+            </div>
           </div>
         )}
       </div>
-      
-      {/* Add custom CSS for animations */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out;
-        }
-      `}</style>
     </header>
   );
 };

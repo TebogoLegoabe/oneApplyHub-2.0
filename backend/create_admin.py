@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from app import create_app, db
 from app.models import User
 
@@ -17,7 +20,7 @@ def create_admin_user():
         if existing_admin:
             existing_admin.is_admin = True
             db.session.commit()
-            print(f"✅ Made {admin_email} an admin")
+            print(f" Made {admin_email} an admin")
         else:
             # Create new admin user
             admin = User(
@@ -31,7 +34,7 @@ def create_admin_user():
             
             db.session.add(admin)
             db.session.commit()
-            print(f"✅ Created admin user: {admin_email}")
+            print(f" Created admin user: {admin_email}")
 
 if __name__ == '__main__':
     create_admin_user()

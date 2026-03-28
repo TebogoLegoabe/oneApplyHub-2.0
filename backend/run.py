@@ -1,5 +1,8 @@
-from app import create_app
 import os
+from dotenv import load_dotenv
+load_dotenv()  # Load .env before create_app() reads environment variables
+
+from app import create_app
 
 app = create_app()
 

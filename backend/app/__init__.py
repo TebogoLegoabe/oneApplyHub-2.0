@@ -1,116 +1,147 @@
-# backend/app/__init__.py - Fixed version with proper db export
-from flask import Flask, jsonify
-from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_jwt_extended import JWTManager
+import logging
 import os
 
-# Initialize extensions
+from flask import Flask, jsonify
+from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from flask_mail import Mail
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func, text
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+)
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Extension singletons — initialised in create_app()
+# ---------------------------------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
+mail = Mail()
+limiter = Limiter(key_func=get_remote_address)
 
-def create_app(config_class=None):
+
+def create_app():
     app = Flask(__name__)
 
-    # Configuration
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-secret")
-    app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "dev-jwt")
+    # -----------------------------------------------------------------------
+    # Load config
+    # -----------------------------------------------------------------------
+    from config import Config
+    Config.validate()
+    app.config.from_object(Config)
 
-    # SQLite Database configuration
-    if os.environ.get('RAILWAY_ENVIRONMENT'):
-        # Railway production - use persistent path
-        db_path = os.path.join("/app", "studentstay.db")
-    else:
-        # Local development
-        db_path = "studentstay.db"
-    
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
+    # -----------------------------------------------------------------------
+    # CORS — allow configured origins only
+    # -----------------------------------------------------------------------
     allowed_origins = [
-    "http://localhost:3000",  # Local development
-    "https://one-apply-hub-2-0.vercel.app",  # Main Vercel domain
-    "https://one-apply-hub-2-0-git-main-tebogolegoabes-projects.vercel.app",  # Git deployment
-    "https://one-apply-hub-2-0-omqm6pe33-tebogolegoabes-projects.vercel.app",  # Latest deployment
+        'http://localhost:3000',
+        'https://one-apply-hub-2-0.vercel.app',
+        'https://one-apply-hub-2-0-git-main-tebogolegoabes-projects.vercel.app',
+        'https://one-apply-hub-2-0-omqm6pe33-tebogolegoabes-projects.vercel.app',
     ]
-    
-    # Add production frontend URL from environment
+
     frontend_url = os.environ.get('FRONTEND_URL')
     if frontend_url and frontend_url not in allowed_origins:
         allowed_origins.append(frontend_url)
-    
-    # Add any additional Vercel preview URLs
+
     vercel_url = os.environ.get('VERCEL_URL')
     if vercel_url:
-        allowed_origins.extend([
-            f"https://{vercel_url}",
-            f"https://{vercel_url}.vercel.app"
-        ])
+        for origin in (f'https://{vercel_url}', f'https://{vercel_url}.vercel.app'):
+            if origin not in allowed_origins:
+                allowed_origins.append(origin)
 
     CORS(
         app,
-        resources={r"/api/*": {"origins": allowed_origins}},
+        resources={r'/api/*': {'origins': allowed_origins}},
         supports_credentials=True,
-        allow_headers=["Content-Type", "Authorization"],
-        methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        expose_headers=["Content-Type", "Authorization"],
+        allow_headers=['Content-Type', 'Authorization'],
+        methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        expose_headers=['Content-Type', 'Authorization'],
     )
 
-    # Initialize extensions with app
+    # -----------------------------------------------------------------------
+    # Initialise extensions
+    # -----------------------------------------------------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    mail.init_app(app)
+    limiter.init_app(app)
 
-    # Import models (needed for migrations)
-    from app.models import User, Property, Review, PropertyImage
+    # -----------------------------------------------------------------------
+    # Import models (required for Alembic migrations)
+    # -----------------------------------------------------------------------
+    from app.models import User, Property, Review, PropertyImage, HelpfulVote  # noqa: F401
 
-    # Create tables if they don't exist
-    with app.app_context():
-        try:
-            db.create_all()
-            print("Database tables created successfully")
-        except Exception as e:
-            print(f"Database initialization error: {e}")
-
+    # -----------------------------------------------------------------------
     # Register blueprints
+    # -----------------------------------------------------------------------
     from app.routes.auth import auth_bp
     from app.routes.properties import properties_bp
     from app.routes.reviews import reviews_bp
+    from app.routes.admin import admin_bp
 
-    app.register_blueprint(auth_bp, url_prefix="/api/auth")
-    app.register_blueprint(properties_bp, url_prefix="/api/properties")
-    app.register_blueprint(reviews_bp, url_prefix="/api/reviews")
+    app.register_blueprint(auth_bp, url_prefix='/api/auth')
+    app.register_blueprint(properties_bp, url_prefix='/api/properties')
+    app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
+    app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
-    # Health check endpoints
+    # -----------------------------------------------------------------------
+    # Health endpoints
+    # -----------------------------------------------------------------------
     @app.route('/')
     def health():
-        return jsonify(status="ok", message="oneApplyHub API is running!"), 200
-    
+        return jsonify(status='ok', message='oneApplyHub API is running'), 200
+
+    @app.route('/api/stats')
+    def public_stats():
+        from app.models import Property, Review, User
+        avg = db.session.query(func.avg(Review.overall_rating)).filter_by(approved=True).scalar()
+        return jsonify({
+            'properties': Property.query.filter_by(approved=True).count(),
+            'students': User.query.filter_by(verified=True).count(),
+            'reviews': Review.query.filter_by(approved=True).count(),
+            'avg_rating': round(float(avg), 1) if avg else None,
+        }), 200
+
     @app.route('/api/health')
     def api_health():
         try:
-            # Test database connection
-            db.session.execute('SELECT 1')
-            db_status = "connected"
-        except Exception as e:
-            db_status = f"error: {str(e)}"
-        
+            db.session.execute(text('SELECT 1'))
+            db_status = 'connected'
+        except Exception as exc:
+            logger.error('DB health check failed: %s', exc)
+            db_status = 'error'
         return jsonify({
-            "status": "ok",
-            "message": "oneApplyHub API is healthy",
-            "database": db_status,
-            "environment": os.environ.get("RAILWAY_ENVIRONMENT", "development")
+            'status': 'ok',
+            'database': db_status,
+            'environment': os.environ.get('FLASK_ENV', 'production'),
         }), 200
 
+    # -----------------------------------------------------------------------
     # Error handlers
+    # -----------------------------------------------------------------------
     @app.errorhandler(404)
-    def not_found(error):
-        return jsonify(error="Not found"), 404
+    def not_found(_):
+        return jsonify(error='Not found'), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(_):
+        return jsonify(error='Method not allowed'), 405
+
+    @app.errorhandler(429)
+    def rate_limit_exceeded(_):
+        return jsonify(error='Too many requests — please try again later'), 429
 
     @app.errorhandler(500)
-    def internal_error(error):
-        return jsonify(error="Internal server error"), 500
+    def internal_error(_):
+        return jsonify(error='Internal server error'), 500
 
     return app
