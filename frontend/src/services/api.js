@@ -1,13 +1,11 @@
 import axios from "axios";
 
 const getApiBaseUrl = () => {
-  const PRODUCTION_API_URL = "https://oneapplyhub-20-production.up.railway.app/api";
-
   if (process.env.NODE_ENV === 'development' || window.location.hostname === "localhost") {
     return "http://localhost:5000/api";
   }
 
-  return process.env.REACT_APP_API_URL || PRODUCTION_API_URL;
+  return "https://oneapplyhub-20-production-bf69.up.railway.app/api";
 };
 
 const API_BASE_URL = getApiBaseUrl();
