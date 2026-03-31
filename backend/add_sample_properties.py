@@ -16,7 +16,7 @@ def add_sample_properties():
         properties_data = json.load(f)
 
     for prop in properties_data:
-        property = Property(
+        new_property = Property(
             name=prop['name'],
             address=prop['address'],
             property_type=prop['property_type'],
@@ -25,11 +25,11 @@ def add_sample_properties():
             price_max=prop['price_max'],
             nsfas_accredited=prop['nsfas_accredited'],
             description=prop['description'],
-            amenities=prop['amenities'],
+            amenities=json.dumps(prop['amenities']),  # convert list to JSON string
             contact_info=prop['contact_info'],
             approved=prop['approved'],
         )
-        db.session.add(property)
+        db.session.add(new_property)
 
     db.session.commit()
     print(f"Added {len(properties_data)} properties successfully!")
