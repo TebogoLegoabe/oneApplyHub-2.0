@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -36,16 +36,7 @@ const RegisterPage = () => {
 
   const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
-
-  // Initialise Google Identity Services
-  useEffect(() => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId || !window.google) return;
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: handleGoogleCallback,
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const googleButtonRef = useRef(null);
 
   const handleGoogleCallback = async ({ credential }) => {
     setGoogleLoading(true);
@@ -59,12 +50,33 @@ const RegisterPage = () => {
     }
   };
 
+  // Initialise Google Identity Services and render the real button into a hidden container
+  useEffect(() => {
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    if (!clientId || !window.google || !googleButtonRef.current) return;
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCallback,
+    });
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: 'outline',
+      size: 'large',
+      width: googleButtonRef.current.offsetWidth || 400,
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleGoogleSignIn = () => {
-    if (!window.google) {
+    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    if (!clientId || !window.google) {
       setError('Google sign-in is not available. Please use email registration.');
       return;
     }
-    window.google.accounts.id.prompt();
+    const btn = googleButtonRef.current?.querySelector('div[role="button"]');
+    if (btn) {
+      btn.click();
+    } else {
+      setError('Google sign-in failed to load. Please refresh the page and try again.');
+    }
   };
 
   const handleChange = (e) => {
@@ -147,6 +159,8 @@ const RegisterPage = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+          {/* Hidden container for Google's real rendered button — required for popup to work */}
+          <div ref={googleButtonRef} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} aria-hidden="true" />
           {/* Google Sign-In */}
           <button
             type="button"
