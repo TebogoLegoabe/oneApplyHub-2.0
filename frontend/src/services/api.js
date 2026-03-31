@@ -5,7 +5,7 @@ const getApiBaseUrl = () => {
     return "http://localhost:5000/api";
   }
 
-  return "https://oneapplyhub-20-production-bf69.up.railway.app/api";
+  return "https://oneapplyhub-20-production.up.railway.app/api";
 };
 
 const API_BASE_URL = getApiBaseUrl();
