@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Mail, GraduationCap, Building, Star, MessageSquare,
-  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight,
+  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight, ShieldCheck,
 } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
 
@@ -27,11 +27,14 @@ const getRatingColor = (rating) => {
 };
 
 const DashboardPage = () => {
-  const { user } = useAuth();
+  const { user, sendVerificationCode } = useAuth();
+  const navigate = useNavigate();
   const [userStats, setUserStats] = useState({ reviewsCount: 0, avgRating: 0, helpfulVotes: 0 });
   const [recentReviews, setRecentReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState('');
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -50,6 +53,18 @@ const DashboardPage = () => {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  const handleSendVerification = async () => {
+    setVerifyLoading(true);
+    setVerifyMsg('');
+    const result = await sendVerificationCode(user.email);
+    setVerifyLoading(false);
+    if (result.success) {
+      navigate(`/verify-email?email=${encodeURIComponent(user.email)}`);
+    } else {
+      setVerifyMsg(result.error || 'Failed to send code. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
@@ -119,17 +134,34 @@ const DashboardPage = () => {
                 </div>
               </div>
 
-              <div className="px-5 pb-4">
+              <div className="px-5 pb-5 space-y-3">
                 {user?.verified ? (
                   <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3">
                     <p className="text-sm text-emerald-700 dark:text-emerald-300 font-semibold">Verified Student</p>
                   </div>
                 ) : (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3">
+                  <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 space-y-2">
                     <p className="text-sm text-amber-700 dark:text-amber-300 font-semibold">Verification Pending</p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Check your email for the verification link.</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">Enter the OTP sent to your university email to verify your account.</p>
+                    {verifyMsg && (
+                      <p className="text-xs text-red-600 dark:text-red-400">{verifyMsg}</p>
+                    )}
+                    <button
+                      onClick={handleSendVerification}
+                      disabled={verifyLoading}
+                      className="w-full flex items-center justify-center gap-2 mt-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      {verifyLoading ? 'Sending…' : 'Send Verification Code'}
+                    </button>
                   </div>
                 )}
+                <Link
+                  to="/forgot-password"
+                  className="block text-center text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+                >
+                  Forgot password?
+                </Link>
               </div>
             </div>
           </div>
