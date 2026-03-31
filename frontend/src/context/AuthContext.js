@@ -57,7 +57,16 @@ export const AuthProvider = ({ children }) => {
       await authAPI.sendVerificationCode(email);
       return { success: true };
     } catch (error) {
-      return { success: false, error: error.response?.data?.error || 'Failed to send code' };
+      const status = error.response?.status;
+      const data = error.response?.data;
+      const msg =
+        data?.error ||
+        data?.message ||
+        (status === 429 ? 'Too many attempts. Please wait a minute and try again.' : null) ||
+        (status === 500 ? 'Server error. Please try again later.' : null) ||
+        (!error.response ? 'Network error. Check your connection.' : null) ||
+        'Failed to send code. Please try again.';
+      return { success: false, error: msg };
     }
   };
 

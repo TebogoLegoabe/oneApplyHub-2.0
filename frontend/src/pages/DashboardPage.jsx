@@ -156,12 +156,6 @@ const DashboardPage = () => {
                     </button>
                   </div>
                 )}
-                <Link
-                  to="/forgot-password"
-                  className="block text-center text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-                >
-                  Forgot password?
-                </Link>
               </div>
             </div>
           </div>
