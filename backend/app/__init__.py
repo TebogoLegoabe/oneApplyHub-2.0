@@ -38,24 +38,18 @@ def create_app():
     app.config.from_object(Config)
 
     # -----------------------------------------------------------------------
-    # CORS — allow configured origins only
+    # CORS — allow localhost + any *.vercel.app deployment + custom domain
     # -----------------------------------------------------------------------
+    import re
+
     allowed_origins = [
-        'http://localhost:3000',
-        'https://one-apply-hub-2-0.vercel.app',
-        'https://one-apply-hub-2-0-git-main-tebogolegoabes-projects.vercel.app',
-        'https://one-apply-hub-2-0-omqm6pe33-tebogolegoabes-projects.vercel.app',
+        r'http://localhost:3000',
+        r'https://.*\.vercel\.app',
     ]
 
     frontend_url = os.environ.get('FRONTEND_URL')
-    if frontend_url and frontend_url not in allowed_origins:
-        allowed_origins.append(frontend_url)
-
-    vercel_url = os.environ.get('VERCEL_URL')
-    if vercel_url:
-        for origin in (f'https://{vercel_url}', f'https://{vercel_url}.vercel.app'):
-            if origin not in allowed_origins:
-                allowed_origins.append(origin)
+    if frontend_url:
+        allowed_origins.append(re.escape(frontend_url))
 
     CORS(
         app,

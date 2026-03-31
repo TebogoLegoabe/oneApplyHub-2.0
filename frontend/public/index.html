@@ -2,21 +2,60 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="oneApplyHub - Find your perfect student accommodation near Wits and UJ"
-    />
+    <meta name="theme-color" content="#2563eb" />
+
+    <!-- Primary SEO -->
+    <title>oneApplyHub | Student Accommodation near Wits &amp; UJ</title>
+    <meta name="description" content="Find verified student accommodation near Wits University and UJ. Browse NSFAS-accredited residences, apartments and private rooms. Read honest reviews from fellow students." />
+    <meta name="keywords" content="student accommodation Johannesburg, Wits accommodation, UJ accommodation, NSFAS accredited accommodation, student housing Braamfontein, student residences Parktown" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://one-apply-hub-2-0.vercel.app/" />
+
+    <!-- Open Graph (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="oneApplyHub" />
+    <meta property="og:title" content="oneApplyHub | Student Accommodation near Wits &amp; UJ" />
+    <meta property="og:description" content="Find verified student accommodation near Wits University and UJ. Browse NSFAS-accredited residences and read honest student reviews." />
+    <meta property="og:url" content="https://one-apply-hub-2-0.vercel.app/" />
+    <meta property="og:image" content="https://one-apply-hub-2-0.vercel.app/logo512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:locale" content="en_ZA" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="oneApplyHub | Student Accommodation near Wits &amp; UJ" />
+    <meta name="twitter:description" content="Find verified student accommodation near Wits University and UJ. Browse NSFAS-accredited residences and read honest student reviews." />
+    <meta name="twitter:image" content="https://one-apply-hub-2-0.vercel.app/logo512.png" />
+
+    <!-- Icons -->
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "oneApplyHub",
+      "url": "https://one-apply-hub-2-0.vercel.app/",
+      "description": "Find verified student accommodation near Wits University and UJ in Johannesburg.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://one-apply-hub-2-0.vercel.app/properties?search={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <title>oneApplyHub</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
