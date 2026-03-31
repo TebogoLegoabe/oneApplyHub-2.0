@@ -24,7 +24,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId || !window.google) return;
     window.google.accounts.id.initialize({
       client_id: clientId,
