@@ -43,13 +43,15 @@ def create_app():
     import re
 
     allowed_origins = [
-        r'http://localhost:3000',
-        r'https://.*\.vercel\.app',
+    r'http://localhost:3000',
+    r'https://.*\.vercel\.app',
+    'https://www.oneapplyhub.co.za',
+    'https://oneapplyhub.co.za',
     ]
-
+    
     frontend_url = os.environ.get('FRONTEND_URL')
     if frontend_url:
-        allowed_origins.append(re.escape(frontend_url))
+        allowed_origins.append(frontend_url)
 
     CORS(
         app,
