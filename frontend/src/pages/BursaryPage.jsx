@@ -82,7 +82,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Merit-based award for postgraduate students pursuing research in natural and social sciences. Supports full-time study and research output.',
     requirements: ['South African citizen or permanent resident', 'Honours/Masters/PhD enrolment', 'Strong academic record (75%+ average)', 'Research proposal'],
-    applicationUrl: 'https://www.nrf.ac.za',
+    applicationUrl: 'https://www.nrf.ac.za/dsti-nrf-honours-funding-for-the-2026-academic-year/',
     status: 'Open',
   },
 
@@ -100,7 +100,7 @@ const BURSARIES = [
     university: 'all',
     description: 'For students studying Electrical, Mechanical, or Civil Engineering. Includes mentorship and vacation work at Eskom facilities.',
     requirements: ['South African citizen', 'Engineering degree (Electrical, Mechanical, or Civil)', 'Academic average ≥ 60%', 'Financial need'],
-    applicationUrl: 'https://www.eskom.co.za/bursaries',
+    applicationUrl: 'https://eskomcareers.ci.hr/applicant/index.php?controller=Page&name=bursaries',
     status: 'Open',
   },
   {
@@ -116,7 +116,7 @@ const BURSARIES = [
     university: 'wits',
     description: 'Engineering and Mining-focused bursary with structured work-back agreement. Includes vacation work exposure from Year 1.',
     requirements: ['Engineering or Mining qualification', 'Academic average ≥ 65%', 'South African citizen', 'Work-back agreement'],
-    applicationUrl: 'https://www.angloamerican.com/sustainability/our-people/bursaries',
+    applicationUrl: 'https://www.angloamericankumba.com/careers/graduates-and-bursaries',
     status: 'Open',
   },
   {
@@ -132,7 +132,7 @@ const BURSARIES = [
     university: 'all',
     description: 'For students in Chemical, Mechanical, Electrical Engineering or Chemistry. Includes structured vacation work and mentorship.',
     requirements: ['STEM qualification at accredited university', 'Academic average ≥ 60%', 'Leadership potential', 'South African citizen'],
-    applicationUrl: 'https://www.sasol.com/careers/bursaries',
+    applicationUrl: 'https://www.sasolbursaries.com/welcome/',
     status: 'Open',
   },
   {
@@ -148,7 +148,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Targets Civil, Electrical, Mechanical, and Industrial Engineering students. Work-back obligation applies after graduation.',
     requirements: ['South African citizen', 'Studying Engineering at a recognised university', 'Academic average ≥ 60%', 'Financial need demonstrated'],
-    applicationUrl: 'https://www.transnet.net/careers',
+    applicationUrl: 'https://www.transnet.net/YouthDevelopmentProgrammes',
     status: 'Open',
   },
   {
@@ -198,7 +198,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Supports students in IT, Computer Science, and related fields with a focus on digital innovation and transformation skills.',
     requirements: ['Computer Science / IT / Software Engineering', 'Academic average ≥ 60%', 'South African citizen'],
-    applicationUrl: 'https://www.vodacom.co.za/vodacom/about-us/careers',
+    applicationUrl: 'https://www.vodacom.com/bursary-programme.php',
     status: 'Open',
   },
   {
@@ -214,7 +214,7 @@ const BURSARIES = [
     university: 'all',
     description: 'For Information Systems and Computer Science students who want to work in fintech, data science, or software engineering within banking.',
     requirements: ['IT / Information Systems / Computer Science', 'Academic average ≥ 65%', 'South African citizen', 'Work-back agreement'],
-    applicationUrl: 'https://www.standardbank.co.za/careers/students',
+    applicationUrl: 'https://www.standardbank.com/sbg/standard-bank-group/careers/early-careers/bursaries',
     status: 'Open',
   },
 
@@ -248,7 +248,7 @@ const BURSARIES = [
     university: 'wits',
     description: 'For students excelling in health sciences at Wits. Includes mentorship, networking events, and vacation work opportunities.',
     requirements: ['Health Sciences (Medicine, Pharmacy, Physiotherapy, etc.)', 'Academic average ≥ 70%', 'Financial need', 'Leadership potential'],
-    applicationUrl: 'https://www.discovery.co.za/corporate/bursaries',
+    applicationUrl: 'https://www.discovery.co.za/corporate/discovery-foundation-awards',
     status: 'Open',
   },
   {
@@ -269,22 +269,7 @@ const BURSARIES = [
   },
 
   // ── Business & Finance ────────────────────────────────────────────────────
-  {
-    id: 15,
-    title: 'FirstRand Bursary',
-    provider: 'FirstRand Group (FNB, RMB, WesBank)',
-    funder: 'corporate',
-    field: 'business',
-    amount: 'Full tuition + R5 000/month stipend',
-    amountValue: 0,
-    deadline: '2026-08-31',
-    level: ['undergraduate'],
-    university: 'all',
-    description: 'For students in Commerce, Finance, Economics, or Actuarial Science. Includes structured workplace exposure at FNB, RMB, or WesBank.',
-    requirements: ['Commerce / Finance / Actuarial Science', 'Academic average ≥ 65%', 'South African citizen', 'Work-back agreement'],
-    applicationUrl: 'https://www.firstrand.co.za/careers/students',
-    status: 'Open',
-  },
+
   {
     id: 16,
     title: 'Investec Bursary',
@@ -298,7 +283,23 @@ const BURSARIES = [
     university: 'wits',
     description: 'For high-performing students in Finance, Engineering, or IT at Wits or UCT. Includes structured mentorship and networking events.',
     requirements: ['Finance / Engineering / IT', 'Academic average ≥ 70%', 'South African citizen', 'Demonstrated leadership'],
-    applicationUrl: 'https://www.investec.com/en_za/welcome-to-investec/careers/students.html',
+    applicationUrl: 'https://www.investec.com/en_za/welcome-to-investec/sustainability/our-community/bursaries/tertiary-bursary-programme.html',
+    status: 'Open',
+  },
+  {
+    id: 15,
+    title: 'FirstRand Bursary',
+    provider: 'FirstRand Group (FNB, RMB, WesBank)',
+    funder: 'corporate',
+    field: 'business',
+    amount: 'Full tuition + R5 000/month stipend',
+    amountValue: 0,
+    deadline: '2026-08-31',
+    level: ['undergraduate'],
+    university: 'all',
+    description: 'For students in Commerce, Finance, Economics, or Actuarial Science. Includes structured workplace exposure at FNB, RMB, or WesBank.',
+    requirements: ['Commerce / Finance / Actuarial Science', 'Academic average ≥ 65%', 'South African citizen', 'Work-back agreement'],
+    applicationUrl: 'https://www.firstrand.co.za/foundations/scholarships/',
     status: 'Open',
   },
   {
@@ -314,7 +315,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Specifically for Actuarial Science, Statistics, and Mathematics students. Includes vacation work and study support for professional exams.',
     requirements: ['Actuarial Science / Statistics / Mathematics', 'Academic average ≥ 70%', 'South African citizen'],
-    applicationUrl: 'https://www.oldmutual.co.za/careers/students',
+    applicationUrl: 'https://www.oldmutual.co.za/careers/bursaries/',
     status: 'Open',
   },
   {
@@ -330,7 +331,7 @@ const BURSARIES = [
     university: 'wits',
     description: 'Comprehensive scholarship for academically talented students from disadvantaged backgrounds pursuing leadership-oriented degrees.',
     requirements: ['Academic excellence (top 10%)', 'Financial need', 'Leadership potential', 'African citizen'],
-    applicationUrl: 'https://mastercardfdn.org/scholars/',
+    applicationUrl: 'https://mastercardfdn.org/en/what-we-do/our-programs/mastercard-foundation-scholars-program/where-to-apply/',
     status: 'Open',
   },
 
@@ -348,7 +349,7 @@ const BURSARIES = [
     university: 'all',
     description: 'For students on the CA(SA) training route at accredited universities. SAICA partners with accounting firms for vacation work placements.',
     requirements: ['Accounting / BCom Accounting degree', 'Academic average ≥ 60%', 'South African citizen', 'Intent to qualify as CA(SA)'],
-    applicationUrl: 'https://www.saica.org.za/bursaries',
+    applicationUrl: 'https://www.thuthukabursaryfund.co.za/',
     status: 'Open',
   },
   {
@@ -364,7 +365,7 @@ const BURSARIES = [
     university: 'all',
     description: 'For Accounting students on the CA(SA) path. Includes vacation clerk positions, article clerk offers, and direct mentorship from PwC partners.',
     requirements: ['BCom Accounting / CTA', 'Academic average ≥ 60%', 'South African citizen'],
-    applicationUrl: 'https://www.pwc.co.za/en/careers/students/bursary.html',
+    applicationUrl: 'https://www.pwc.co.za/en/careers/learners/learners-bursaries.html',
     status: 'Open',
   },
   {
@@ -380,7 +381,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Supports Accounting and IT students in the CA(SA) pipeline or technology track. Vacation work and article clerk placements included.',
     requirements: ['BCom Accounting or Information Systems', 'Academic average ≥ 60%', 'South African citizen', 'Work-back agreement'],
-    applicationUrl: 'https://www2.deloitte.com/za/en/pages/careers/articles/bursary.html',
+    applicationUrl: 'https://www.deloitte.com/za/en/careers/explore-your-fit/students/financial-contribution.html',
     status: 'Open',
   },
   {
@@ -396,7 +397,7 @@ const BURSARIES = [
     university: 'all',
     description: 'BCom Accounting bursary with vacation clerkship and a pathway to article contracts at KPMG. Mentorship from senior KPMG staff.',
     requirements: ['BCom Accounting on CA(SA) path', 'Academic average ≥ 60%', 'South African citizen'],
-    applicationUrl: 'https://home.kpmg/za/en/home/careers/students.html',
+    applicationUrl: 'https://kpmg.com/za/en/careers/graduate-opportunities/bursaries.html',
     status: 'Open',
   },
 
@@ -414,7 +415,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Entrepreneurship-focused bursary for students with exceptional entrepreneurial mindset. Includes a comprehensive fellowship and business mentorship.',
     requirements: ['Entrepreneurial spirit and demonstrated initiative', 'Academic potential (60%+)', 'Leadership qualities', 'South African citizen'],
-    applicationUrl: 'https://www.allangrayorbis.org',
+    applicationUrl: 'https://allangrayorbis.org/programmes/fellowship/',
     status: 'Open',
   },
 
@@ -432,27 +433,11 @@ const BURSARIES = [
     university: 'all',
     description: 'For LLB students committed to public service law. Recipients serve a work-back period at Legal Aid SA offices after qualifying.',
     requirements: ['LLB degree programme', 'Academic average ≥ 60%', 'South African citizen', 'Commitment to public service'],
-    applicationUrl: 'https://www.legal-aid.co.za/bursaries/',
+    applicationUrl: 'https://legal-aid.co.za/working-at-legal-aid-south-africa/',
     status: 'Open',
   },
 
   // ── Sciences ──────────────────────────────────────────────────────────────
-  {
-    id: 25,
-    title: 'Sasol Chemistry Bursary',
-    provider: 'Sasol',
-    funder: 'corporate',
-    field: 'sciences',
-    amount: 'R55 000 – R100 000 per year',
-    amountValue: 77500,
-    deadline: '2026-06-30',
-    level: ['undergraduate'],
-    university: 'all',
-    description: 'For Chemistry and Chemical Engineering students with a passion for applied sciences and innovation in the energy sector.',
-    requirements: ['Chemistry / Chemical Engineering', 'Academic average ≥ 60%', 'South African citizen', 'Leadership qualities'],
-    applicationUrl: 'https://www.sasol.com/careers/bursaries',
-    status: 'Open',
-  },
   {
     id: 26,
     title: 'Golden Key Merit Scholarship',
@@ -466,7 +451,7 @@ const BURSARIES = [
     university: 'all',
     description: 'Academic excellence award for top-performing students. Golden Key membership required — automatically invited if in the top 15% of your class.',
     requirements: ['Top 15% academic performance in your class', 'Active Golden Key member', 'Community involvement and leadership'],
-    applicationUrl: 'https://www.goldenkey.org/scholarships/',
+    applicationUrl: 'https://scholarships.goldenkey.org/',
     status: 'Open',
   },
 ];

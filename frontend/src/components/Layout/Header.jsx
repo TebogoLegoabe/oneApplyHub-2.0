@@ -8,7 +8,7 @@ import { useTheme } from '../../context/ThemeContext';
 const NAV_LINKS = [
   { to: '/properties', label: 'Properties' },
   { to: '/reviews',    label: 'Reviews'    },
-  { to: '/bursaries',  label: 'Bursaries'  },
+  { to: '/bursaries',  label: 'OpportunitiesHub'  },
 ];
 
 const Header = () => {
