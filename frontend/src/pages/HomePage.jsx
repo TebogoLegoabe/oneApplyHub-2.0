@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, MapPin, Star, Shield, Users, Home, ArrowRight, CheckCircle, TrendingUp } from 'lucide-react';
 import { propertiesAPI, statsAPI } from '../services/api';
 
-/* ── Fade-in animation hook ── */
 const useFadeIn = () => {
   const ref = useRef(null);
   useEffect(() => {
@@ -20,10 +19,10 @@ const useFadeIn = () => {
 };
 
 const STAT_CONFIGS = [
-  { icon: Home,        key: 'properties', label: 'Verified Properties' },
-  { icon: Users,       key: 'students',   label: 'Happy Students'      },
-  { icon: CheckCircle, key: 'reviews',    label: 'Verified Reviews'    },
-  { icon: TrendingUp,  key: 'avg_rating', label: 'Average Rating'      },
+  { icon: Home, key: 'properties', label: 'Verified Properties' },
+  { icon: Users, key: 'students', label: 'Happy Students' },
+  { icon: CheckCircle, key: 'reviews', label: 'Verified Reviews' },
+  { icon: TrendingUp, key: 'avg_rating', label: 'Average Rating' },
 ];
 
 const FEATURES = [
@@ -49,7 +48,7 @@ const FEATURES = [
 
 const UNIV_BADGE = {
   wits: 'bg-blue-100 text-blue-800',
-  uj:   'bg-teal-100 text-teal-800',
+  uj: 'bg-teal-100 text-teal-800',
   both: 'bg-purple-100 text-purple-800',
 };
 
@@ -151,7 +150,6 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
-      {/* ── Hero ── */}
       <section className="relative py-14 md:py-20 text-white overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-16 -left-16 w-80 h-80 bg-white/5 rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
@@ -239,7 +237,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ── Stats strip ── */}
       <section className="bg-gray-50 dark:bg-gray-900 py-6">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -272,7 +269,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ── Featured Properties ── */}
       <section className="py-10 bg-white dark:bg-gray-900">
         <div
           ref={featuredRef}
@@ -319,7 +315,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ── Why Choose Us ── */}
       <section className="py-10 bg-gray-50 dark:bg-gray-900">
         <div
           ref={featuresRef}
@@ -358,7 +353,6 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* ── CTA ── */}
       <section className="py-10 bg-gradient-to-r from-blue-600 to-blue-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-1/4 w-64 h-64 bg-white/5 rounded-full animate-pulse" style={{ animationDuration: '5s' }} />

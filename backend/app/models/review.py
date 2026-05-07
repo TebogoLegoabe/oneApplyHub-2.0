@@ -1,10 +1,5 @@
-from datetime import datetime, timezone
-
 from app import db
-
-
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+from app.utils import utcnow
 
 
 class Review(db.Model):
@@ -36,8 +31,8 @@ class Review(db.Model):
     # Moderation — admin must approve before review is publicly visible
     approved = db.Column(db.Boolean, default=False, nullable=False)
 
-    created_at = db.Column(db.DateTime(timezone=True), default=_utcnow, nullable=False)
-    updated_at = db.Column(db.DateTime(timezone=True), default=_utcnow, onupdate=_utcnow, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
     # One review per user per property
     __table_args__ = (
@@ -78,7 +73,7 @@ class HelpfulVote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     review_id = db.Column(db.Integer, db.ForeignKey('review.id', ondelete='CASCADE'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
     __table_args__ = (
         db.UniqueConstraint('review_id', 'user_id', name='uq_helpful_vote_review_user'),

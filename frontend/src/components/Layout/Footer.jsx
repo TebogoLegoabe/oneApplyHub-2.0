@@ -4,10 +4,10 @@ import logoImg from '../../assets/OneApply-Hub-Logo.png';
 
 const QUICK_LINKS = [
   { to: '/properties', label: 'Browse Properties' },
-  { to: '/reviews',    label: 'Student Reviews'  },
-  { to: '/bursaries',  label: 'OpportunitiesHub'        },
-  { to: '/application',label: 'Apply Now'         },
-  { to: '/register',   label: 'Create Account'    },
+  { to: '/reviews', label: 'Student Reviews' },
+  { to: '/bursaries', label: 'OpportunitiesHub' },
+  { to: '/application', label: 'Apply Now' },
+  { to: '/register', label: 'Create Account' },
 ];
 
 const UNIVERSITIES = [

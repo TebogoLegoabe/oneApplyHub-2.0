@@ -3,7 +3,7 @@ import logging
 from functools import wraps
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db, limiter
 from app.models import HelpfulVote, Property, PropertyImage, Review, User
@@ -11,10 +11,6 @@ from app.models import HelpfulVote, Property, PropertyImage, Review, User
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
 
-
-# ---------------------------------------------------------------------------
-# Admin guard
-# ---------------------------------------------------------------------------
 
 def admin_required(fn):
     """Require a valid JWT and is_admin == True."""
@@ -27,10 +23,6 @@ def admin_required(fn):
         return fn(*args, **kwargs)
     return wrapper
 
-
-# ---------------------------------------------------------------------------
-# Stats / dashboard
-# ---------------------------------------------------------------------------
 
 @admin_bp.route('/stats', methods=['GET'])
 @admin_required
@@ -46,10 +38,6 @@ def get_stats():
         'approved_reviews': Review.query.filter_by(approved=True).count(),
     }), 200
 
-
-# ---------------------------------------------------------------------------
-# Properties
-# ---------------------------------------------------------------------------
 
 @admin_bp.route('/properties', methods=['GET'])
 @admin_required
@@ -117,8 +105,7 @@ def update_property(property_id):
         return jsonify({'error': 'Property not found'}), 404
 
     data = request.get_json(silent=True) or {}
-    string_fields = ('name', 'address', 'property_type', 'description', 'contact_info', 'university')
-    for field in string_fields:
+    for field in ('name', 'address', 'property_type', 'description', 'contact_info', 'university'):
         if field in data:
             setattr(prop, field, str(data[field]).strip())
     if 'price_min' in data:
@@ -188,10 +175,6 @@ def delete_property(property_id):
 
     return jsonify({'message': f'Property "{prop.name}" deleted'}), 200
 
-
-# ---------------------------------------------------------------------------
-# Users
-# ---------------------------------------------------------------------------
 
 @admin_bp.route('/users', methods=['GET'])
 @admin_required
@@ -268,10 +251,6 @@ def delete_user(user_id):
     return jsonify({'message': f'User "{user.email}" deleted'}), 200
 
 
-# ---------------------------------------------------------------------------
-# Reviews
-# ---------------------------------------------------------------------------
-
 @admin_bp.route('/reviews', methods=['GET'])
 @admin_required
 def list_reviews():
@@ -279,29 +258,29 @@ def list_reviews():
     per_page = min(request.args.get('per_page', 20, type=int), 100)
     status = request.args.get('status', 'all')  # all | pending | approved
 
-    query = Review.query
+    query = (
+        db.session.query(Review, Property, User)
+        .join(Property, Review.property_id == Property.id)
+        .join(User, Review.user_id == User.id)
+    )
     if status == 'pending':
-        query = query.filter_by(approved=False)
+        query = query.filter(Review.approved == False)  # noqa: E712
     elif status == 'approved':
-        query = query.filter_by(approved=True)
+        query = query.filter(Review.approved == True)   # noqa: E712
 
-    results = (
-        query
-        .order_by(Review.created_at.desc())
-        .paginate(page=page, per_page=per_page, error_out=False)
+    results = query.order_by(Review.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
     )
 
     reviews = []
-    for r in results.items:
-        prop = db.session.get(Property, r.property_id)
-        user = db.session.get(User, r.user_id)
+    for r, prop, user in results.items:
         reviews.append({
             'id': r.id,
             'property_id': r.property_id,
-            'property_name': prop.name if prop else 'Unknown',
+            'property_name': prop.name,
             'user_id': r.user_id,
-            'author': user.name if (user and not r.anonymous) else 'Anonymous',
-            'author_email': user.email if user else None,
+            'author': user.name if not r.anonymous else 'Anonymous',
+            'author_email': user.email,
             'overall_rating': r.overall_rating,
             'review_text': r.review_text[:200] + ('...' if len(r.review_text) > 200 else ''),
             'recommend': r.recommend,
