@@ -164,7 +164,7 @@ const HomePage = () => {
               className="inline-block bg-white/20 text-white px-3 py-1.5 rounded-full text-xs font-semibold mb-4"
               style={{ animation: 'fadeDown 0.6s ease forwards' }}
             >
-              🏠 Bringing Comfort to Every Doorstep
+              slogan
             </span>
             <h1
               className="text-3xl md:text-5xl font-bold mb-3 leading-tight"
@@ -179,7 +179,7 @@ const HomePage = () => {
               className="text-sm md:text-base text-blue-100 max-w-xl mx-auto leading-relaxed"
               style={{ animation: 'fadeDown 0.7s ease 0.2s both' }}
             >
-              Verified student accommodations near your university, backed by real reviews from real students.
+              Accredited student accommodations near your university, backed by reviews from students.
             </p>
           </div>
 

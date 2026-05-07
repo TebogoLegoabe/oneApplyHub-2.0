@@ -75,7 +75,7 @@ def _send_verification_email(user_email: str, code: str) -> bool:
             <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:12px;">
               <div style="text-align:center;margin-bottom:24px;">
                 <h1 style="color:#1a5fa8;font-size:24px;margin:0;">oneApplyHub</h1>
-                <p style="color:#64748b;font-size:13px;margin:4px 0 0;">Bringing Comfort to Every Doorstep</p>
+                <p style="color:#64748b;font-size:13px;margin:4px 0 0;">Slogan</p>
               </div>
               <div style="background:#ffffff;border-radius:10px;padding:28px;border:1px solid #e2e8f0;">
                 <h2 style="color:#1e293b;font-size:18px;margin-top:0;">Verify your email address</h2>
@@ -113,7 +113,7 @@ def _send_password_reset_email(user_email: str, reset_url: str) -> bool:
             <div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:32px;background:#f8fafc;border-radius:12px;">
               <div style="text-align:center;margin-bottom:24px;">
                 <h1 style="color:#1a5fa8;font-size:24px;margin:0;">oneApplyHub</h1>
-                <p style="color:#64748b;font-size:13px;margin:4px 0 0;">Bringing Comfort to Every Doorstep</p>
+                <p style="color:#64748b;font-size:13px;margin:4px 0 0;">Slogan</p>
               </div>
               <div style="background:#ffffff;border-radius:10px;padding:28px;border:1px solid #e2e8f0;">
                 <h2 style="color:#1e293b;font-size:18px;margin-top:0;">Password Reset Request</h2>
