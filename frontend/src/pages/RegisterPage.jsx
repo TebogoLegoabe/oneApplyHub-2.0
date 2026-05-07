@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -6,22 +6,14 @@ import {
   Eye, EyeOff, AlertCircle, CheckCircle, ArrowRight, UserPlus,
 } from 'lucide-react';
 import logoImg from '../assets/OneApply-Hub-Logo.png';
+import AuthBackground from '../components/AuthBackground';
+import GoogleSignInButton from '../components/GoogleSignInButton';
 
 const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Honours', 'Masters', 'PhD', 'Other'];
 const FACULTY_OPTIONS = [
   'Engineering', 'Commerce', 'Law', 'Health Sciences',
   'Humanities', 'Science', 'Education', 'Management', 'Art & Design', 'Other',
 ];
-
-// Inline Google "G" icon (no extra package needed)
-const GoogleIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-    <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
-  </svg>
-);
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -36,9 +28,8 @@ const RegisterPage = () => {
 
   const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
-  const googleButtonRef = useRef(null);
 
-  const handleGoogleCallback = async ({ credential }) => {
+  const handleGoogleSuccess = async (credential) => {
     setGoogleLoading(true);
     setError('');
     const result = await googleLogin(credential);
@@ -47,35 +38,6 @@ const RegisterPage = () => {
       navigate('/dashboard');
     } else {
       setError(result.error || 'Google sign-in failed');
-    }
-  };
-
-  // Initialise Google Identity Services and render the real button into a hidden container
-  useEffect(() => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId || !window.google || !googleButtonRef.current) return;
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: handleGoogleCallback,
-    });
-    window.google.accounts.id.renderButton(googleButtonRef.current, {
-      theme: 'outline',
-      size: 'large',
-      width: googleButtonRef.current.offsetWidth || 400,
-    });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleGoogleSignIn = () => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId || !window.google) {
-      setError('Google sign-in is not available. Please use email registration.');
-      return;
-    }
-    const btn = googleButtonRef.current?.querySelector('div[role="button"]');
-    if (btn) {
-      btn.click();
-    } else {
-      setError('Google sign-in failed to load. Please refresh the page and try again.');
     }
   };
 
@@ -136,11 +98,7 @@ const RegisterPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-        <div className="absolute top-1/2 right-10 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-        <div className="absolute bottom-10 left-1/3 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-      </div>
+      <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
         <div className="text-center mb-8">
@@ -159,22 +117,11 @@ const RegisterPage = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
-          {/* Hidden container for Google's real rendered button — required for popup to work */}
-          <div ref={googleButtonRef} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} aria-hidden="true" />
-          {/* Google Sign-In */}
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
-          >
-            {googleLoading ? (
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
-            ) : (
-              <GoogleIcon />
-            )}
-            Continue with Google
-          </button>
+          <GoogleSignInButton
+            onSuccess={handleGoogleSuccess}
+            onError={setError}
+            loading={googleLoading}
+          />
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">

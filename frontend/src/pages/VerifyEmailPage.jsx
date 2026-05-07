@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { CheckCircle, AlertCircle, Mail, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/OneApply-Hub-Logo.png';
+import AuthBackground from '../components/AuthBackground';
 
 const RESEND_COOLDOWN = 60; // seconds
 
@@ -118,14 +119,9 @@ const VerifyEmailPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-        <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-      </div>
+      <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-5">
             <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />

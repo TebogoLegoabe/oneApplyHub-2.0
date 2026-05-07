@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, Filter, MapPin, Star } from 'lucide-react';
 import { propertiesAPI } from '../services/api';
-import { parseAmenities, getAmenityIconComponent } from '../constants/amenities';
+import { parseAmenities, renderAmenityIcon } from '../constants/amenities';
 
 const INITIAL_FILTERS = {
   search: '',
@@ -11,11 +11,6 @@ const INITIAL_FILTERS = {
   minPrice: '',
   maxPrice: '',
   page: 1,
-};
-
-const getAmenityIcon = (amenity) => {
-  const Icon = getAmenityIconComponent(amenity);
-  return <Icon className="w-4 h-4" />;
 };
 
 const PropertiesPage = () => {
@@ -228,7 +223,7 @@ const PropertiesPage = () => {
                       <div className="flex flex-wrap gap-2 mb-4">
                         {amenities.slice(0, 3).map((amenity, i) => (
                           <div key={i} className="flex items-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-lg text-xs">
-                            {getAmenityIcon(amenity)}
+                            {renderAmenityIcon(amenity)}
                             <span className="ml-1.5">{amenity}</span>
                           </div>
                         ))}

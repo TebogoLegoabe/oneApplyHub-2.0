@@ -6,25 +6,7 @@ import {
   Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight, ShieldCheck,
 } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
-
-const getUniversityName = (email) => {
-  if (email?.includes('wits')) return 'University of the Witwatersrand';
-  if (email?.includes('uj')) return 'University of Johannesburg';
-  return 'University';
-};
-
-const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString('en-ZA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-
-const getRatingColor = (rating) => {
-  if (rating >= 4) return 'text-emerald-600';
-  if (rating >= 3) return 'text-amber-600';
-  return 'text-red-600';
-};
+import { formatDate, getRatingColor, getUniversityName } from '../utils/format';
 
 const DashboardPage = () => {
   const { user, sendVerificationCode } = useAuth();
@@ -102,7 +84,6 @@ const DashboardPage = () => {
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-          {/* ── Profile Card ── */}
           <div className="lg:col-span-1">
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-5 py-4">
@@ -160,7 +141,6 @@ const DashboardPage = () => {
             </div>
           </div>
 
-          {/* ── Stats & Actions ── */}
           <div className="lg:col-span-2 space-y-6">
 
             {/* Stats */}
