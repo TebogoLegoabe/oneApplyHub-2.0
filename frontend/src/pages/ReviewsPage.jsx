@@ -2,29 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ThumbsUp, Calendar, Filter, Search, AlertCircle } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
+import { formatDate, getRatingBadge, getUniversityCode } from '../utils/format';
 
 const INITIAL_FILTERS = { university: 'all', rating: 'all', search: '', page: 1 };
-
-const getRatingColor = (rating) => {
-  if (rating >= 4) return 'text-emerald-700 bg-emerald-50';
-  if (rating >= 3) return 'text-amber-700 bg-amber-50';
-  return 'text-red-700 bg-red-50';
-};
-
-const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString('en-ZA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-
-const getUniversityDisplay = (university) => {
-  if (!university) return '';
-  const lower = university.toLowerCase();
-  if (lower === 'wits') return 'WITS';
-  if (lower === 'uj') return 'UJ';
-  return university.toUpperCase();
-};
 
 const getMarkedHelpful = () => {
   try {
@@ -197,9 +177,9 @@ const ReviewsPage = () => {
         {/* Stats strip */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           {[
-            { value: totalReviews,          label: 'Total Reviews',        color: 'text-blue-600'   },
-            { value: `${averageRating}★`,   label: 'Average Rating',       color: 'text-amber-500'  },
-            { value: recommendationCount,   label: 'Recommendations',      color: 'text-emerald-600' },
+            { value: totalReviews, label: 'Total Reviews', color: 'text-blue-600' },
+            { value: `${averageRating}★`, label: 'Average Rating', color: 'text-amber-500' },
+            { value: recommendationCount, label: 'Recommendations', color: 'text-emerald-600' },
             { value: propertiesReviewedCount, label: 'Properties Reviewed', color: 'text-purple-600' },
           ].map(({ value, label, color }) => (
             <div key={label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm px-4 py-3 flex items-center gap-3">
@@ -262,7 +242,7 @@ const ReviewsPage = () => {
                         <p className="text-xs text-gray-400 dark:text-gray-500">
                           {review.author_year || review.user?.year_of_study || ''}{' '}
                           &middot;{' '}
-                          {getUniversityDisplay(review.author_university || review.user?.university)}
+                          {getUniversityCode(review.author_university || review.user?.university)}
                         </p>
                         <Link
                           to={`/properties/${review.property_id}`}
@@ -273,7 +253,7 @@ const ReviewsPage = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getRatingColor(review.overall_rating || review.rating)}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${getRatingBadge(review.overall_rating || review.rating)}`}>
                         {review.overall_rating || review.rating}/5 ★
                       </span>
                       <span className="hidden sm:flex items-center text-xs text-gray-400 gap-1">

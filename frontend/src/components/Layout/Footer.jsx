@@ -4,10 +4,10 @@ import logoImg from '../../assets/OneApply-Hub-Logo.png';
 
 const QUICK_LINKS = [
   { to: '/properties', label: 'Browse Properties' },
-  { to: '/reviews',    label: 'Student Reviews'  },
-  { to: '/bursaries',  label: 'OpportunitiesHub'        },
-  { to: '/application',label: 'Apply Now'         },
-  { to: '/register',   label: 'Create Account'    },
+  { to: '/reviews', label: 'Student Reviews' },
+  { to: '/bursaries', label: 'OpportunitiesHub' },
+  { to: '/application', label: 'Apply Now' },
+  { to: '/register', label: 'Create Account' },
 ];
 
 const UNIVERSITIES = [
@@ -27,7 +27,7 @@ const Footer = () => (
             <span className="font-bold text-lg tracking-tight">oneApplyHub</span>
           </div>
           <p className="text-gray-400 text-xs leading-relaxed mb-4">
-            Bringing comfort to every doorstep. Helping students find safe, verified accommodation near Wits and UJ.
+            Slogan. Helping students find safe, verified accommodation near Wits and UJ.
           </p>
           <div className="space-y-2 text-xs text-gray-400">
             <div className="flex items-center space-x-2">

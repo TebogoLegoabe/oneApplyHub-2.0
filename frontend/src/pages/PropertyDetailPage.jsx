@@ -5,25 +5,8 @@ import {
 } from 'lucide-react';
 import { propertiesAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { parseAmenities, getAmenityIconComponent } from '../constants/amenities';
-
-const getAmenityIcon = (amenity) => {
-  const Icon = getAmenityIconComponent(amenity);
-  return <Icon className="w-5 h-5" />;
-};
-
-const getRatingColor = (rating) => {
-  if (rating >= 4) return 'text-emerald-700 bg-emerald-100';
-  if (rating >= 3) return 'text-amber-700 bg-amber-100';
-  return 'text-red-700 bg-red-100';
-};
-
-const formatDate = (dateString) =>
-  new Date(dateString).toLocaleDateString('en-ZA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+import { parseAmenities, renderAmenityIcon } from '../constants/amenities';
+import { formatDate, getRatingBadge } from '../utils/format';
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
@@ -177,7 +160,7 @@ const PropertyDetailPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {amenities.map((amenity, i) => (
                     <div key={i} className="flex items-center space-x-3 p-3.5 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                      <div className="text-blue-600 flex-shrink-0">{getAmenityIcon(amenity)}</div>
+                      <div className="text-blue-600 flex-shrink-0">{renderAmenityIcon(amenity, 'w-5 h-5')}</div>
                       <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">{amenity}</span>
                     </div>
                   ))}
@@ -230,7 +213,7 @@ const PropertyDetailPage = () => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <span className={`px-2.5 py-1 rounded-lg text-sm font-semibold ${getRatingColor(review.overall_rating)}`}>
+                          <span className={`px-2.5 py-1 rounded-lg text-sm font-semibold ${getRatingBadge(review.overall_rating)}`}>
                             {review.overall_rating}/5 ★
                           </span>
                           <span className="text-sm text-gray-400 hidden sm:block">

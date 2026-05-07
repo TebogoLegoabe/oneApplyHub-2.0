@@ -1,12 +1,7 @@
-from datetime import datetime, timezone
-
 from sqlalchemy import func
 
 from app import db
-
-
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+from app.utils import utcnow
 
 
 class Property(db.Model):
@@ -24,7 +19,7 @@ class Property(db.Model):
     university = db.Column(db.String(50))  # 'wits', 'uj', or 'both'
     approved = db.Column(db.Boolean, default=False, nullable=False)
     nsfas_accredited = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
     # Relationships
     reviews = db.relationship('Review', backref='property', lazy='dynamic')
@@ -74,4 +69,4 @@ class PropertyImage(db.Model):
     image_url = db.Column(db.String(500), nullable=False)
     caption = db.Column(db.String(200))
     is_primary = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)

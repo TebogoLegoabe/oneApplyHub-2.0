@@ -8,17 +8,14 @@ import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/OneApply-Hub-Logo.png';
 
-// ---------------------------------------------------------------------------
-// Shared UI primitives
-// ---------------------------------------------------------------------------
 const Badge = ({ children, color = 'gray' }) => {
   const cls = {
-    green:  'bg-green-100  text-green-700',
-    amber:  'bg-amber-100  text-amber-700',
-    blue:   'bg-blue-100   text-blue-700',
-    red:    'bg-red-100    text-red-700',
+    green: 'bg-green-100 text-green-700',
+    amber: 'bg-amber-100 text-amber-700',
+    blue: 'bg-blue-100 text-blue-700',
+    red: 'bg-red-100 text-red-700',
     purple: 'bg-purple-100 text-purple-700',
-    gray:   'bg-gray-100   text-gray-600',
+    gray: 'bg-gray-100 text-gray-600',
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${cls[color]}`}>
@@ -69,9 +66,6 @@ const ConfirmButton = ({ onConfirm, children, className = '' }) => {
   return <button onClick={() => setConfirming(true)} className={className}>{children}</button>;
 };
 
-// ---------------------------------------------------------------------------
-// Modal wrapper
-// ---------------------------------------------------------------------------
 const Modal = ({ title, onClose, children }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
@@ -86,11 +80,8 @@ const Modal = ({ title, onClose, children }) => (
   </div>
 );
 
-// ---------------------------------------------------------------------------
-// Property form (used for both Add and Edit)
-// ---------------------------------------------------------------------------
 const PROPERTY_TYPES = ['apartment', 'house', 'residence', 'studio', 'other'];
-const UNIVERSITIES   = ['wits', 'uj', 'both'];
+const UNIVERSITIES = ['wits', 'uj', 'both'];
 const DEFAULT_PROPERTY = {
   name: '', address: '', property_type: 'apartment', university: 'wits',
   price_min: '', price_max: '', description: '', amenities: '',
@@ -193,17 +184,14 @@ const PropertyForm = ({ initial = DEFAULT_PROPERTY, onSubmit, onClose, loading }
   );
 };
 
-// ---------------------------------------------------------------------------
-// Overview tab
-// ---------------------------------------------------------------------------
 const Overview = ({ stats, onNav }) => {
   if (!stats) return <Spinner />;
 
   const cards = [
-    { label: 'Total Users',        value: stats.total_users,        sub: `${stats.verified_users} verified`,       icon: Users,         color: 'blue',   nav: 'Users'      },
-    { label: 'Total Properties',   value: stats.total_properties,   sub: `${stats.approved_properties} approved`,  icon: Building2,     color: 'green',  nav: 'Properties' },
-    { label: 'Pending Properties', value: stats.pending_properties, sub: 'awaiting approval',                      icon: AlertCircle,   color: 'amber',  nav: 'Properties' },
-    { label: 'Pending Reviews',    value: stats.pending_reviews,    sub: 'awaiting moderation',                    icon: MessageSquare, color: 'purple', nav: 'Reviews'    },
+    { label: 'Total Users', value: stats.total_users, sub: `${stats.verified_users} verified`, icon: Users, color: 'blue', nav: 'Users' },
+    { label: 'Total Properties', value: stats.total_properties, sub: `${stats.approved_properties} approved`, icon: Building2, color: 'green', nav: 'Properties' },
+    { label: 'Pending Properties', value: stats.pending_properties, sub: 'awaiting approval', icon: AlertCircle, color: 'amber', nav: 'Properties' },
+    { label: 'Pending Reviews', value: stats.pending_reviews, sub: 'awaiting moderation', icon: MessageSquare, color: 'purple', nav: 'Reviews' },
   ];
 
   const iconCls = {
@@ -266,9 +254,6 @@ const Overview = ({ stats, onNav }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Properties tab
-// ---------------------------------------------------------------------------
 const PropertiesTab = ({ onToast }) => {
   const [data, setData]   = useState({ properties: [], total: 0, pages: 1 });
   const [page, setPage]   = useState(1);
@@ -427,9 +412,6 @@ const PropertiesTab = ({ onToast }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Reviews tab
-// ---------------------------------------------------------------------------
 const ReviewsTab = ({ onToast }) => {
   const [data, setData]     = useState({ reviews: [], total: 0, pages: 1 });
   const [page, setPage]     = useState(1);
@@ -555,9 +537,6 @@ const ReviewsTab = ({ onToast }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Users tab
-// ---------------------------------------------------------------------------
 const UsersTab = ({ onToast }) => {
   const [data, setData]     = useState({ users: [], total: 0, pages: 1 });
   const [page, setPage]     = useState(1);
@@ -692,19 +671,13 @@ const UsersTab = ({ onToast }) => {
   );
 };
 
-// ---------------------------------------------------------------------------
-// Nav items definition
-// ---------------------------------------------------------------------------
 const NAV = [
-  { id: 'Overview',    label: 'Overview',    icon: LayoutDashboard },
-  { id: 'Properties',  label: 'Properties',  icon: Building2       },
-  { id: 'Reviews',     label: 'Reviews',     icon: MessageSquare   },
-  { id: 'Users',       label: 'Users',       icon: Users           },
+  { id: 'Overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'Properties', label: 'Properties', icon: Building2 },
+  { id: 'Reviews', label: 'Reviews', icon: MessageSquare },
+  { id: 'Users', label: 'Users', icon: Users },
 ];
 
-// ---------------------------------------------------------------------------
-// Main AdminDashboard
-// ---------------------------------------------------------------------------
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('Overview');

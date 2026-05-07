@@ -21,6 +21,10 @@ export const parseAmenities = (amenitiesString) => {
   }
 };
 
-/** Returns the icon component for an amenity, defaulting to Check. */
 export const getAmenityIconComponent = (amenity) =>
   AMENITY_ICON_MAP[amenity] ?? Check;
+
+export const renderAmenityIcon = (amenity, className = 'w-4 h-4') => {
+  const Icon = getAmenityIconComponent(amenity);
+  return <Icon className={className} />;
+};

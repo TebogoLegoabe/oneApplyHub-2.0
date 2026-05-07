@@ -17,9 +17,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Extension singletons — initialised in create_app()
-# ---------------------------------------------------------------------------
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
@@ -30,25 +27,16 @@ limiter = Limiter(key_func=get_remote_address)
 def create_app():
     app = Flask(__name__)
 
-    # -----------------------------------------------------------------------
-    # Load config
-    # -----------------------------------------------------------------------
     from config import Config
     Config.validate()
     app.config.from_object(Config)
 
-    # -----------------------------------------------------------------------
-    # CORS — allow localhost + any *.vercel.app deployment + custom domain
-    # -----------------------------------------------------------------------
-    import re
-
     allowed_origins = [
-    r'http://localhost:3000',
-    r'https://.*\.vercel\.app',
-    'https://www.oneapplyhub.co.za',
-    'https://oneapplyhub.co.za',
+        r'http://localhost:3000',
+        r'https://.*\.vercel\.app',
+        'https://www.oneapplyhub.co.za',
+        'https://oneapplyhub.co.za',
     ]
-    
     frontend_url = os.environ.get('FRONTEND_URL')
     if frontend_url:
         allowed_origins.append(frontend_url)
@@ -62,23 +50,14 @@ def create_app():
         expose_headers=['Content-Type', 'Authorization'],
     )
 
-    # -----------------------------------------------------------------------
-    # Initialise extensions
-    # -----------------------------------------------------------------------
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
 
-    # -----------------------------------------------------------------------
-    # Import models (required for Alembic migrations)
-    # -----------------------------------------------------------------------
     from app.models import User, Property, Review, PropertyImage, HelpfulVote  # noqa: F401
 
-    # -----------------------------------------------------------------------
-    # Register blueprints
-    # -----------------------------------------------------------------------
     from app.routes.auth import auth_bp
     from app.routes.properties import properties_bp
     from app.routes.reviews import reviews_bp
@@ -89,9 +68,6 @@ def create_app():
     app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
-    # -----------------------------------------------------------------------
-    # Health endpoints
-    # -----------------------------------------------------------------------
     @app.route('/')
     def health():
         return jsonify(status='ok', message='oneApplyHub API is running'), 200
@@ -121,9 +97,6 @@ def create_app():
             'environment': os.environ.get('FLASK_ENV', 'production'),
         }), 200
 
-    # -----------------------------------------------------------------------
-    # Error handlers
-    # -----------------------------------------------------------------------
     @app.errorhandler(404)
     def not_found(_):
         return jsonify(error='Not found'), 404

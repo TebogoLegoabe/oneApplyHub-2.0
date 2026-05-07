@@ -1,12 +1,7 @@
-from datetime import datetime, timezone
-
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app import db
-
-
-def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+from app.utils import utcnow
 
 
 class User(db.Model):
@@ -21,7 +16,7 @@ class User(db.Model):
     faculty = db.Column(db.String(100))
     verified = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=_utcnow, nullable=False)
+    created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
     # Password reset (token is single-use and expiring)
     reset_token = db.Column(db.String(100), nullable=True, index=True)

@@ -3,13 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { authAPI } from '../services/api';
 import logoImg from '../assets/OneApply-Hub-Logo.png';
-
-const DECORATIVE_BG = (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="absolute top-10 left-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-    <div className="absolute bottom-10 right-10 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse" />
-  </div>
-);
+import AuthBackground from '../components/AuthBackground';
 
 const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
 
@@ -71,7 +65,7 @@ const ResetPasswordPage = () => {
   if (success) {
     return (
       <div className={PAGE_WRAPPER}>
-        {DECORATIVE_BG}
+        <AuthBackground />
         <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
           <div className="bg-white dark:bg-gray-800 py-10 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -88,7 +82,7 @@ const ResetPasswordPage = () => {
 
   return (
     <div className={PAGE_WRAPPER}>
-      {DECORATIVE_BG}
+      <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
         <div className="text-center mb-8">
