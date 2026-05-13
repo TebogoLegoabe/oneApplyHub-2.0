@@ -3,7 +3,7 @@ import os
 import secrets
 from datetime import timedelta, timezone
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 from app import db, limiter
@@ -55,6 +55,7 @@ def register():
         return jsonify({'error': 'Email already registered'}), 409
 
     otp = _generate_otp()
+
     user = User(
         email=email,
         name=name,
@@ -95,18 +96,24 @@ def login():
         return jsonify({'error': 'Email and password are required'}), 400
 
     user = User.query.filter_by(email=email).first()
+
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid email or password'}), 401
 
-    return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
+    return jsonify({
+        'access_token': _make_jwt(user),
+        'user': user.to_dict()
+    }), 200
 
 
 @auth_bp.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
     user = db.session.get(User, int(get_jwt_identity()))
+
     if not user:
         return jsonify({'error': 'User not found'}), 404
+
     return jsonify({'user': user.to_dict()}), 200
 
 
@@ -121,7 +128,6 @@ def send_verification():
 
     user = User.query.filter_by(email=email).first()
 
-    # Don't reveal whether the account exists
     if not user or user.verified:
         return jsonify({'message': 'If an unverified account exists, a code has been sent'}), 200
 
@@ -137,6 +143,7 @@ def send_verification():
         return jsonify({'error': 'Failed to send verification code'}), 500
 
     send_verification_email(email, otp)
+
     return jsonify({'message': 'Verification code sent'}), 200
 
 
@@ -144,6 +151,7 @@ def send_verification():
 @limiter.limit('10 per minute')
 def verify_email():
     data = request.get_json(silent=True) or {}
+
     email = (data.get('email') or '').strip().lower()
     code = (data.get('code') or '').strip()
 
@@ -151,8 +159,8 @@ def verify_email():
         return jsonify({'error': 'Email and code are required'}), 400
 
     user = User.query.filter_by(email=email).first()
+
     if not user:
-        # Constant-time failure to avoid user enumeration
         return jsonify({'error': 'Invalid or expired verification code'}), 400
 
     if user.verified:
@@ -163,6 +171,7 @@ def verify_email():
         }), 200
 
     expires = _tz_aware(user.verification_code_expires)
+
     if (
         not user.verification_code
         or not secrets.compare_digest(user.verification_code, code)
@@ -193,40 +202,70 @@ def verify_email():
 @limiter.limit('10 per minute')
 def google_verify():
     data = request.get_json(silent=True) or {}
-    id_token_str = data.get('id_token') or data.get('credential')
+
+    id_token_str = (
+        data.get('credential')
+        or data.get('id_token')
+        or data.get('token')
+    )
 
     if not id_token_str:
         return jsonify({'error': 'Google ID token is required'}), 400
 
-    from flask import current_app
-    google_client_id = current_app.config.get('GOOGLE_CLIENT_ID')
+    google_client_id = (current_app.config.get('GOOGLE_CLIENT_ID') or '').strip()
+
     if not google_client_id:
+        logger.error('GOOGLE_CLIENT_ID is missing in backend config')
         return jsonify({'error': 'Google OAuth is not configured on this server'}), 501
 
     try:
         from google.oauth2 import id_token as google_id_token
         from google.auth.transport import requests as google_requests
+
         idinfo = google_id_token.verify_oauth2_token(
             id_token_str,
             google_requests.Request(),
             google_client_id,
         )
-    except Exception:
-        logger.warning('Google token verification failed')
-        return jsonify({'error': 'Invalid Google token'}), 401
 
-    google_id = idinfo['sub']
-    g_email = idinfo.get('email', '').lower()
+        token_audience = idinfo.get('aud')
+        if token_audience != google_client_id:
+            logger.warning(
+                'Google token audience mismatch. Token aud=%s Backend client_id=%s',
+                token_audience,
+                google_client_id
+            )
+            return jsonify({'error': 'Invalid Google token audience'}), 401
+
+    except ValueError as e:
+        logger.warning('Google token verification failed: %s', str(e))
+        return jsonify({'error': 'Invalid Google token'}), 401
+    except Exception:
+        logger.exception('Unexpected Google verification error')
+        return jsonify({'error': 'Google sign-in failed'}), 500
+
+    google_id = idinfo.get('sub')
+    g_email = (idinfo.get('email') or '').lower()
     g_name = idinfo.get('name') or g_email.split('@')[0]
 
+    if not google_id or not g_email:
+        return jsonify({'error': 'Invalid Google account data'}), 401
+
+    if not idinfo.get('email_verified', False):
+        return jsonify({'error': 'Google email is not verified'}), 403
+
     user = User.query.filter_by(google_id=google_id).first()
+
     if not user:
         user = User.query.filter_by(email=g_email).first()
+
         if user:
             user.google_id = google_id
             user.oauth_provider = 'google'
             user.verified = True
         else:
+            # TEMPORARY TESTING OPTION:
+            # If you want to test using your Gmail, comment out this block.
             if not is_valid_university_email(g_email):
                 return jsonify({
                     'error': 'Google sign-in is only available for Wits and UJ student email accounts. '
@@ -250,7 +289,10 @@ def google_verify():
             db.session.rollback()
             return jsonify({'error': 'Google sign-in failed'}), 500
 
-    return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
+    return jsonify({
+        'access_token': _make_jwt(user),
+        'user': user.to_dict()
+    }), 200
 
 
 @auth_bp.route('/forgot-password', methods=['POST'])
@@ -263,11 +305,12 @@ def forgot_password():
         return jsonify({'error': 'Email is required'}), 400
 
     user = User.query.filter_by(email=email).first()
-    # Always return the same response to prevent user enumeration
+
     if user:
         token = secrets.token_urlsafe(32)
         user.reset_token = token
         user.reset_token_expires = utcnow() + timedelta(hours=1)
+
         try:
             db.session.commit()
         except Exception:
@@ -285,6 +328,7 @@ def forgot_password():
 @limiter.limit('5 per minute')
 def reset_password():
     data = request.get_json(silent=True) or {}
+
     token = data.get('token') or ''
     new_password = data.get('password') or ''
 
@@ -296,10 +340,12 @@ def reset_password():
         return jsonify({'error': pw_error}), 400
 
     user = User.query.filter_by(reset_token=token).first()
+
     if not user:
         return jsonify({'error': 'Invalid or expired reset token'}), 400
 
     expires = _tz_aware(user.reset_token_expires)
+
     if expires is None or utcnow() > expires:
         return jsonify({'error': 'Invalid or expired reset token'}), 400
 
