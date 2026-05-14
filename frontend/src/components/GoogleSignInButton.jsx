@@ -20,16 +20,33 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
 
   useEffect(() => {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId || !window.google || !hiddenRef.current) return;
-    window.google.accounts.id.initialize({
-      client_id: clientId,
-      callback: handleCallback,
-    });
-    window.google.accounts.id.renderButton(hiddenRef.current, {
-      theme: 'outline',
-      size: 'large',
-      width: hiddenRef.current.offsetWidth || 400,
-    });
+    if (!clientId) return;
+
+    const init = () => {
+      if (!hiddenRef.current) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleCallback,
+      });
+      window.google.accounts.id.renderButton(hiddenRef.current, {
+        theme: 'outline',
+        size: 'large',
+        width: hiddenRef.current.offsetWidth || 400,
+      });
+    };
+
+    if (window.google) {
+      init();
+    } else {
+      // async defer script may not have loaded yet — poll until ready
+      const interval = setInterval(() => {
+        if (window.google) {
+          clearInterval(interval);
+          init();
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClick = () => {
