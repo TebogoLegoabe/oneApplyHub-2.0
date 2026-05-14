@@ -212,9 +212,12 @@ def google_verify():
             google_requests.Request(),
             google_client_id,
         )
-    except Exception:
-        logger.warning('Google token verification failed')
-        return jsonify({'error': 'Invalid Google token'}), 401
+    except ValueError as exc:
+        logger.warning('Google token invalid: %s', exc)
+        return jsonify({'error': 'Invalid Google token — please try signing in again'}), 401
+    except Exception as exc:
+        logger.exception('Google token verification error: %s', exc)
+        return jsonify({'error': 'Could not verify Google token — server error'}), 500
 
     google_id = idinfo['sub']
     g_email = idinfo.get('email', '').lower()
