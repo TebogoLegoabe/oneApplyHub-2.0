@@ -122,11 +122,12 @@ const DashboardPage = () => {
                   </div>
                 ) : (
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 space-y-2">
-                    <p className="text-sm text-amber-700 dark:text-amber-300 font-semibold">Verification Pending</p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400">Enter the OTP sent to your university email to verify your account.</p>
-                    {verifyMsg && (
-                      <p className="text-xs text-red-600 dark:text-red-400">{verifyMsg}</p>
-                    )}
+                    <p className="text-sm text-amber-700 dark:text-amber-300 font-semibold">Email Not Verified</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                      Verify your university email to write reviews and access all features.
+                      Check your inbox for the code or request a new one.
+                    </p>
+                    {verifyMsg && <p className="text-xs text-red-600 dark:text-red-400">{verifyMsg}</p>}
                     <button
                       onClick={handleSendVerification}
                       disabled={verifyLoading}

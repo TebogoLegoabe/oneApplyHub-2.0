@@ -1,5 +1,4 @@
 import logging
-import os
 import secrets
 from datetime import timedelta, timezone
 
@@ -10,6 +9,7 @@ from app import db, limiter
 from app.models import User
 from app.utils import utcnow, is_valid_university_email, validate_password, university_from_email
 from app.mailer import send_verification_email, send_password_reset_email
+import os
 
 logger = logging.getLogger(__name__)
 auth_bp = Blueprint('auth', __name__)
@@ -77,8 +77,11 @@ def register():
 
     send_verification_email(email, otp)
 
+    # Return a token so the user can access the dashboard immediately
     return jsonify({
         'message': 'Registration successful. Check your university email for the verification code.',
+        'access_token': _make_jwt(user),
+        'user': user.to_dict(),
         'email': email,
     }), 201
 
@@ -121,7 +124,6 @@ def send_verification():
 
     user = User.query.filter_by(email=email).first()
 
-    # Don't reveal whether the account exists
     if not user or user.verified:
         return jsonify({'message': 'If an unverified account exists, a code has been sent'}), 200
 
@@ -152,7 +154,6 @@ def verify_email():
 
     user = User.query.filter_by(email=email).first()
     if not user:
-        # Constant-time failure to avoid user enumeration
         return jsonify({'error': 'Invalid or expired verification code'}), 400
 
     if user.verified:
@@ -263,7 +264,6 @@ def forgot_password():
         return jsonify({'error': 'Email is required'}), 400
 
     user = User.query.filter_by(email=email).first()
-    # Always return the same response to prevent user enumeration
     if user:
         token = secrets.token_urlsafe(32)
         user.reset_token = token

@@ -37,7 +37,6 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const result = await login(formData.email, formData.password);
       if (result.success) {
@@ -70,11 +69,12 @@ const LoginPage = () => {
             onSuccess={handleGoogleSuccess}
             onError={setError}
             loading={googleLoading}
+            label="Continue with Google"
           />
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-gray-200 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">or sign in with email</span>
@@ -85,7 +85,7 @@ const LoginPage = () => {
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex">
                 <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="ml-3 text-sm text-red-800 font-medium">{error}</p>
+                <p className="ml-3 text-sm text-red-800 dark:text-red-300 font-medium">{error}</p>
               </div>
             )}
 
@@ -129,10 +129,7 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <Link to="/verify-email" className="text-xs text-gray-500 hover:text-blue-600 transition-colors">
-                Need to verify email?
-              </Link>
+            <div className="flex items-center justify-end">
               <Link to="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
                 Forgot password?
               </Link>

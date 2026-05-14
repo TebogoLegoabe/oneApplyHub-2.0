@@ -85,7 +85,8 @@ const RegisterPage = () => {
       });
 
       if (result.success) {
-        navigate('/verify-email', { state: { email: formData.email.trim().toLowerCase() } });
+        // User is logged in immediately — verification can be done from the dashboard
+        navigate('/dashboard', { replace: true });
       } else {
         setError(result.error);
       }

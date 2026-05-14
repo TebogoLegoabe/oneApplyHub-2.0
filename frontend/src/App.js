@@ -22,7 +22,6 @@ import BursaryPage from './pages/BursaryPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 
-// Pages that render their own full-screen layout (no header/footer chrome)
 const noShellRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/admin'];
 
 const AppLayout = () => {
