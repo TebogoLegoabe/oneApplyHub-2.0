@@ -9,38 +9,42 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Wraps Google Identity Services: renders the real GIS button in a hidden
-// container so the popup works, and exposes a styled visible button.
+// Renders Google's real GIS button as a transparent overlay on top of a custom-styled
+// visual button. The user's click hits Google's button directly, so no programmatic
+// click-forwarding is needed and popup blockers cannot interfere.
 const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue with Google' }) => {
-  const hiddenRef = useRef(null);
+  const containerRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  const handleCallback = async ({ credential }) => {
-    await onSuccess(credential);
-  };
+  // Keep the callback pointing at the latest onSuccess without re-initializing Google.
+  const onSuccessRef = useRef(onSuccess);
+  useEffect(() => { onSuccessRef.current = onSuccess; });
 
   useEffect(() => {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId) return;
+    if (!clientId) {
+      onError?.('Google sign-in is not configured. Please use email and password.');
+      return;
+    }
 
     const init = () => {
-      if (!hiddenRef.current) return;
+      if (!overlayRef.current) return;
       window.google.accounts.id.initialize({
         client_id: clientId,
-        callback: handleCallback,
+        callback: ({ credential }) => onSuccessRef.current(credential),
       });
-      window.google.accounts.id.renderButton(hiddenRef.current, {
+      window.google.accounts.id.renderButton(overlayRef.current, {
         theme: 'outline',
         size: 'large',
-        width: hiddenRef.current.offsetWidth || 400,
+        width: containerRef.current?.offsetWidth || 400,
       });
     };
 
-    if (window.google) {
+    if (window.google?.accounts) {
       init();
     } else {
-      // async defer script may not have loaded yet — poll until ready
       const interval = setInterval(() => {
-        if (window.google) {
+        if (window.google?.accounts) {
           clearInterval(interval);
           init();
         }
@@ -49,29 +53,14 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleClick = () => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-    if (!clientId || !window.google) {
-      onError?.('Google sign-in is not configured. Please use email and password.');
-      return;
-    }
-    const btn = hiddenRef.current?.querySelector('div[role="button"]');
-    if (btn) {
-      btn.click();
-    } else {
-      onError?.('Google sign-in failed to load. Please refresh the page and try again.');
-    }
-  };
-
   return (
-    <>
-      {/* Hidden container for Google's real rendered button — required for popup to work */}
-      <div ref={hiddenRef} style={{ position: 'absolute', opacity: 0, pointerEvents: 'none', height: 0, overflow: 'hidden' }} aria-hidden="true" />
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={loading}
-        className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+    // `group` lets the visual layer react to hover on the transparent overlay above it.
+    <div ref={containerRef} className="relative w-full mb-6 group">
+      {/* Visual-only layer — pointer-events: none so clicks pass through to the overlay */}
+      <div
+        className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold group-hover:bg-gray-50 dark:group-hover:bg-gray-700 group-hover:border-gray-300 transition-all"
+        style={{ pointerEvents: 'none', opacity: loading ? 0.5 : 1 }}
+        aria-hidden="true"
       >
         {loading ? (
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
@@ -79,8 +68,22 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
           <GoogleIcon />
         )}
         {label}
-      </button>
-    </>
+      </div>
+
+      {/* Google's real rendered button — transparent overlay that receives actual clicks */}
+      <div
+        ref={overlayRef}
+        style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          opacity: 0,
+          overflow: 'hidden',
+          pointerEvents: loading ? 'none' : 'auto',
+          cursor: loading ? 'not-allowed' : 'pointer',
+        }}
+        aria-label={label}
+      />
+    </div>
   );
 };
 
