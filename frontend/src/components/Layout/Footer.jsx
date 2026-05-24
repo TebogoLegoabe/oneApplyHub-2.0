@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle, Mail, Phone, MapPin } from 'lucide-react';
+import { ArrowUpRight, CheckCircle, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
 import logoImg from '../../assets/OneHubLogo.png';
 
 const QUICK_LINKS = [
@@ -16,118 +16,137 @@ const UNIVERSITIES = [
 ];
 
 const Footer = () => (
-  <footer className="bg-gray-900 text-white">
-    {/* Top accent bar */}
-    <div className="h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400" />
+  <>
+    {/* ── Section Breaker ── */}
+    <div className="relative overflow-hidden bg-gray-50 dark:bg-gray-900" style={{ height: 72 }}>
+      <svg viewBox="0 0 1440 72" preserveAspectRatio="none"
+        className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="breakerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#0f172a" />
+            <stop offset="50%" stopColor="#0f2547" />
+            <stop offset="100%" stopColor="#0f172a" />
+          </linearGradient>
+        </defs>
+        <path d="M0,0 L1440,0 L1440,72 Q720,16 0,72 Z" fill="url(#breakerGrad)" />
+      </svg>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+        <div className="h-px w-12 bg-blue-500/30" />
+        <div className="w-1.5 h-1.5 rounded-full bg-blue-500/60" />
+        <div className="h-px w-12 bg-blue-500/30" />
+      </div>
+    </div>
 
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+    {/* ── Footer ── */}
+    <footer className="bg-gradient-to-b from-[#0f172a] to-[#07101e] text-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
 
-        {/* Brand */}
-        <div>
-          <div className="flex items-center space-x-2.5 mb-3">
-            <img src={logoImg} alt="oneApplyHub logo" className="h-10 w-10 object-contain" />
-            <span className="font-extrabold text-xl tracking-tight text-white">oneApplyHub</span>
-          </div>
-          <p className="text-blue-400 text-xs font-semibold uppercase tracking-widest mb-3">
-            All Your Options. One Platform.
-          </p>
-          <p className="text-gray-500 text-xs leading-relaxed mb-5">
-            Connecting South African students with verified accommodation, bursaries, and opportunities — all in one place.
-          </p>
-          <div className="space-y-2.5 text-xs text-gray-400">
-            <a href="mailto:info@oneapplyhub.co.za" className="flex items-center space-x-2 hover:text-blue-400 transition-colors group">
-              <Mail className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 group-hover:text-blue-400" />
-              <span>info@oneapplyhub.co.za</span>
-            </a>
-            <a href="tel:+27640682586" className="flex items-center space-x-2 hover:text-blue-400 transition-colors group">
-              <Phone className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 group-hover:text-blue-400" />
-              <span>+27 64 068 2586</span>
-            </a>
-            <a href="tel:+27714227470" className="flex items-center space-x-2 hover:text-blue-400 transition-colors group">
-              <Phone className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 group-hover:text-blue-400" />
-              <span>+27 71 422 7470</span>
-            </a>
-            <div className="flex items-center space-x-2">
-              <MapPin className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-              <span>Johannesburg, South Africa</span>
+          {/* Brand */}
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-3 mb-4">
+              <img src={logoImg} alt="oneApplyHub" className="h-11 w-11 object-contain" />
+              <div>
+                <span className="block font-extrabold text-xl tracking-tight leading-none">oneApplyHub</span>
+                <span className="block text-[10px] text-blue-400 font-semibold tracking-widest uppercase mt-0.5">
+                  All Your Options. One Platform.
+                </span>
+              </div>
+            </div>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6 max-w-xs">
+              Connecting South African students with verified accommodation, bursaries, and opportunities — all in one place.
+            </p>
+            <div className="space-y-2.5">
+              {[
+                { href: 'mailto:info@oneapplyhub.co.za', icon: Mail, label: 'info@oneapplyhub.co.za' },
+                { href: 'tel:+27640682586', icon: Phone, label: '+27 64 068 2586' },
+                { href: 'tel:+27714227470', icon: Phone, label: '+27 71 422 7470' },
+              ].map(({ href, icon: Icon, label }) => (
+                <a key={href} href={href}
+                  className="flex items-center gap-3 text-slate-400 hover:text-white text-sm transition-colors group">
+                  <span className="w-7 h-7 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600/20 group-hover:border-blue-500/20 transition-all">
+                    <Icon className="w-3 h-3" />
+                  </span>
+                  {label}
+                </a>
+              ))}
+              <div className="flex items-center gap-3 text-slate-500 text-sm">
+                <span className="w-7 h-7 rounded-lg bg-white/5 border border-white/8 flex items-center justify-center flex-shrink-0">
+                  <MapPin className="w-3 h-3" />
+                </span>
+                Johannesburg, South Africa
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Quick Links */}
-        <div>
-          <h3 className="font-semibold text-sm mb-5 text-white tracking-wide">Quick Links</h3>
-          <ul className="space-y-2.5">
-            {QUICK_LINKS.map(({ to, label }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className="text-gray-400 hover:text-white transition-colors text-xs flex items-center group"
-                >
-                  <ArrowRight className="w-3 h-3 mr-1.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+          {/* Navigate */}
+          <div className="lg:col-span-3 lg:pl-6">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-5">Navigate</h3>
+            <ul className="space-y-3">
+              {QUICK_LINKS.map(({ to, label }) => (
+                <li key={to}>
+                  <Link to={to}
+                    className="flex items-center justify-between text-slate-400 hover:text-white text-sm transition-colors group">
+                    {label}
+                    <ChevronRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-blue-400" />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        {/* Universities */}
-        <div>
-          <h3 className="font-semibold text-sm mb-5 text-white tracking-wide">Supported Universities</h3>
-          <ul className="space-y-2.5 text-xs text-gray-400 mb-5">
-            {UNIVERSITIES.map((name) => (
-              <li key={name} className="flex items-start space-x-2">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                <span>{name}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="p-3.5 bg-gradient-to-br from-gray-800 to-gray-800/60 rounded-xl border border-gray-700/80">
-            <p className="text-xs text-gray-400 leading-relaxed">
-              All listed properties are verified for student safety, quality, and affordability.
+          {/* Universities */}
+          <div className="lg:col-span-2">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-5">Universities</h3>
+            <ul className="space-y-3 mb-5">
+              {UNIVERSITIES.map((name) => (
+                <li key={name} className="flex items-start gap-2">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-slate-400 text-xs leading-relaxed">{name}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-xl bg-white/4 border border-white/6 px-3 py-3">
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                All properties verified for student safety and quality.
+              </p>
+            </div>
+          </div>
+
+          {/* Newsletter */}
+          <div className="lg:col-span-3">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-5">Stay Updated</h3>
+            <p className="text-slate-400 text-sm leading-relaxed mb-4">
+              New properties, bursary deadlines, and opportunities — straight to your inbox.
             </p>
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-2">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-blue-500 text-white text-sm px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 placeholder-slate-600 transition-all"
+              />
+              <button type="submit"
+                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                Subscribe <ArrowUpRight className="w-3.5 h-3.5" />
+              </button>
+            </form>
           </div>
         </div>
-
-        {/* Newsletter */}
-        <div>
-          <h3 className="font-semibold text-sm mb-5 text-white tracking-wide">Stay Updated</h3>
-          <p className="text-gray-400 text-xs mb-4 leading-relaxed">
-            Get notified about new properties, bursary deadlines, and student opportunities.
-          </p>
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-2.5">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="w-full bg-gray-800 border border-gray-700 hover:border-gray-600 focus:border-blue-500 text-white text-xs px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 placeholder-gray-500 transition-colors"
-            />
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white text-xs font-semibold px-3 py-2.5 rounded-xl transition-all duration-200 shadow-md shadow-blue-900/30"
-            >
-              Subscribe
-            </button>
-          </form>
-        </div>
       </div>
-    </div>
 
-    {/* Bottom Bar */}
-    <div className="border-t border-gray-800/80">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 gap-2">
+      {/* Bottom bar */}
+      <div className="border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <p>&copy; {new Date().getFullYear()} oneApplyHub. Made for students, by students.</p>
-          <div className="flex items-center space-x-5">
-            <button className="hover:text-gray-300 transition-colors">Privacy Policy</button>
-            <button className="hover:text-gray-300 transition-colors">Terms of Service</button>
-            <Link to="/login" className="hover:text-gray-300 transition-colors">Contact Us</Link>
+          <div className="flex items-center gap-6">
+            <button className="hover:text-slate-300 transition-colors">Privacy Policy</button>
+            <button className="hover:text-slate-300 transition-colors">Terms of Service</button>
+            <Link to="/login" className="hover:text-slate-300 transition-colors">Contact Us</Link>
           </div>
         </div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </>
 );
 
 export default Footer;

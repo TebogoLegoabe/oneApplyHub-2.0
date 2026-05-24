@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Mail, GraduationCap, Building, Star, MessageSquare,
-  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight, ShieldCheck, Shield,
+  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight,
+  ShieldCheck, Shield, CheckCircle, AlertTriangle,
 } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
 import { formatDate, getRatingColor, getUniversityName } from '../utils/format';
@@ -32,9 +33,7 @@ const DashboardPage = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
+  useEffect(() => { fetchUserData(); }, [fetchUserData]);
 
   const handleSendVerification = async () => {
     setVerifyLoading(true);
@@ -48,90 +47,87 @@ const DashboardPage = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
+  const initial = user?.name?.charAt(0)?.toUpperCase();
 
-      {/* Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 text-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white font-bold text-lg">
-                {user?.name?.charAt(0)?.toUpperCase()}
-              </span>
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+
+      {/* ── Page Header ── */}
+      <div className="bg-[#070d1a] border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0 text-white font-black text-xl">
+              {initial}
             </div>
             <div>
-              <h1 className="text-xl font-extrabold">Welcome back, {user?.name?.split(' ')[0]}!</h1>
-              <p className="text-slate-300 text-xs mt-0.5">
-                Review accommodations and help fellow students find the best places to stay.
-              </p>
+              <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-0.5">Dashboard</p>
+              <h1 className="text-2xl font-black text-white leading-tight">
+                Welcome back, {user?.name?.split(' ')[0]}
+              </h1>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        {/* Error */}
         {error && (
-          <div className="mb-5 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
-            <p className="text-red-800 text-sm">{error}</p>
-            <button onClick={fetchUserData} className="text-red-600 hover:text-red-700 font-semibold text-sm ml-4">
-              Retry
-            </button>
+          <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center justify-between">
+            <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+            <button onClick={fetchUserData} className="text-red-600 font-semibold text-sm ml-4 hover:text-red-700">Retry</button>
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-5 py-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
-                    <User className="w-5 h-5 text-white" />
+          {/* ── Left Column ── */}
+          <div className="space-y-4">
+
+            {/* Profile Card */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-5 pt-5 pb-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    {initial}
                   </div>
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{user?.name}</h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {user?.year_of_study} &middot; {user?.faculty}
-                    </p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-gray-900 dark:text-white text-sm truncate">{user?.name}</p>
+                    <p className="text-xs text-gray-400 truncate">{user?.year_of_study} · {user?.faculty}</p>
                   </div>
                 </div>
               </div>
-
-              <div className="px-5 py-4 space-y-2.5">
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <Mail className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" />
-                  <span className="truncate">{user?.email}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <Building className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" />
-                  <span>{getUniversityName(user?.email)}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                  <GraduationCap className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" />
-                  <span>{user?.year_of_study} Student</span>
-                </div>
+              <div className="px-5 py-4 space-y-3">
+                {[
+                  { icon: Mail,         value: user?.email,                   muted: true },
+                  { icon: Building,     value: getUniversityName(user?.email) },
+                  { icon: GraduationCap,value: `${user?.year_of_study} Student` },
+                ].map(({ icon: Icon, value }) => (
+                  <div key={value} className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                    <Icon className="w-4 h-4 text-gray-300 dark:text-gray-600 flex-shrink-0" />
+                    <span className="truncate">{value}</span>
+                  </div>
+                ))}
               </div>
-
-              <div className="px-5 pb-5 space-y-3">
+              <div className="px-5 pb-5">
                 {user?.verified ? (
-                  <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3">
-                    <p className="text-sm text-emerald-700 dark:text-emerald-300 font-semibold">Verified Student</p>
+                  <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Verified Student</span>
                   </div>
                 ) : (
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 space-y-2">
-                    <p className="text-sm text-amber-700 dark:text-amber-300 font-semibold">Email Not Verified</p>
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                      <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">Email Not Verified</span>
+                    </div>
+                    <p className="text-xs text-amber-600 dark:text-amber-400 leading-relaxed">
                       Verify your university email to write reviews and access all features.
-                      Check your inbox for the code or request a new one.
                     </p>
-                    {verifyMsg && <p className="text-xs text-red-600 dark:text-red-400">{verifyMsg}</p>}
+                    {verifyMsg && <p className="text-xs text-red-600">{verifyMsg}</p>}
                     <button
                       onClick={handleSendVerification}
                       disabled={verifyLoading}
-                      className="w-full flex items-center justify-center gap-2 mt-1 py-2 px-3 bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-2 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-colors"
                     >
                       <ShieldCheck className="w-3.5 h-3.5" />
                       {verifyLoading ? 'Sending…' : 'Send Verification Code'}
@@ -141,136 +137,135 @@ const DashboardPage = () => {
               </div>
             </div>
 
-            {/* Security card */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 px-5 py-4 mt-4">
-              <div className="flex items-center justify-between">
+            {/* Security Card */}
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 px-5 py-4">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Two-Factor Auth</span>
+                  <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Two-Factor Auth</span>
                 </div>
                 {user?.mfa_enabled ? (
-                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-700">Active</span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400 px-2 py-0.5 rounded-full">Active</span>
                 ) : (
-                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700">Not set up</span>
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400 px-2 py-0.5 rounded-full">Off</span>
                 )}
               </div>
-              <Link
-                to="/mfa-setup"
-                className="mt-3 block text-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-              >
-                {user?.mfa_enabled ? 'Manage MFA' : 'Enable MFA'} →
+              <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+                {user?.mfa_enabled ? 'Your account is protected with an authenticator app.' : 'Add an extra layer of security to your account.'}
+              </p>
+              <Link to="/mfa-setup"
+                className="flex items-center justify-between text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 group transition-colors">
+                {user?.mfa_enabled ? 'Manage 2FA' : 'Enable 2FA'}
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           </div>
 
-          <div className="lg:col-span-2 space-y-6">
+          {/* ── Right Column ── */}
+          <div className="lg:col-span-2 space-y-5">
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               {[
-                { icon: MessageSquare, iconBg: 'bg-blue-50', iconColor: 'text-blue-600', value: userStats.reviewsCount, label: 'Reviews Written' },
-                { icon: Star, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', value: userStats.avgRating > 0 ? userStats.avgRating : '—', label: 'Avg Rating Given' },
-                { icon: ThumbsUp, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', value: userStats.helpfulVotes, label: 'Helpful Votes' },
-              ].map(({ icon: Icon, iconBg, iconColor, value, label }) => (
-                <div key={label} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-9 h-9 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <Icon className={`w-4 h-4 ${iconColor}`} />
-                    </div>
-                    <div>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? '—' : value}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{label}</p>
-                    </div>
+                { icon: MessageSquare, value: userStats.reviewsCount, label: 'Reviews',       color: 'text-blue-600',    bg: 'bg-blue-50 dark:bg-blue-900/20'   },
+                { icon: Star,          value: userStats.avgRating > 0 ? userStats.avgRating : '—', label: 'Avg Rating', color: 'text-amber-500',   bg: 'bg-amber-50 dark:bg-amber-900/20' },
+                { icon: ThumbsUp,      value: userStats.helpfulVotes, label: 'Helpful Votes', color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+              ].map(({ icon: Icon, value, label, color, bg }) => (
+                <div key={label} className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-4 flex flex-col gap-3">
+                  <div className={`w-9 h-9 ${bg} rounded-xl flex items-center justify-center`}>
+                    <Icon className={`w-4 h-4 ${color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-black text-gray-900 dark:text-white leading-none mb-0.5">
+                      {loading ? <span className="inline-block w-8 h-6 bg-gray-100 dark:bg-gray-800 animate-pulse rounded" /> : value}
+                    </p>
+                    <p className="text-xs text-gray-400 font-medium">{label}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Quick Actions</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <Link
-                  to="/properties"
-                  className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
-                >
-                  <Eye className="w-4 h-4 mr-2" /> Browse Properties
+                <Link to="/properties"
+                  className="flex items-center gap-3 px-4 py-3.5 bg-slate-900 dark:bg-white hover:bg-blue-600 dark:hover:bg-blue-600 text-white dark:text-slate-900 dark:hover:text-white rounded-xl font-semibold text-sm transition-all group">
+                  <Eye className="w-4 h-4" />
+                  <span>Browse</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </Link>
-                <Link
-                  to="/reviews"
-                  className="flex items-center justify-center px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-semibold text-sm"
-                >
-                  <Plus className="w-4 h-4 mr-2" /> My Reviews
+                <Link to="/reviews"
+                  className="flex items-center gap-3 px-4 py-3.5 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm transition-all group border border-gray-100 dark:border-gray-700">
+                  <Plus className="w-4 h-4" />
+                  <span>My Reviews</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </Link>
-                <Link
-                  to="/application"
-                  className="flex items-center justify-center px-4 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-semibold text-sm"
-                >
-                  <FileText className="w-4 h-4 mr-2" /> Apply Now
+                <Link to="/application"
+                  className="flex items-center gap-3 px-4 py-3.5 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm transition-all group border border-gray-100 dark:border-gray-700">
+                  <FileText className="w-4 h-4" />
+                  <span>Apply Now</span>
+                  <ArrowRight className="w-3.5 h-3.5 ml-auto opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
                 </Link>
               </div>
             </div>
 
             {/* Recent Reviews */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-5">
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Your Recent Reviews</h3>
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-gray-900 dark:text-white">Your Recent Reviews</h3>
+                {recentReviews.length > 0 && (
+                  <Link to="/reviews" className="text-xs text-blue-600 hover:text-blue-700 font-semibold">View all</Link>
+                )}
+              </div>
 
               {loading ? (
-                <div className="space-y-4 animate-pulse">
+                <div className="space-y-3 animate-pulse">
                   {[...Array(2)].map((_, i) => (
-                    <div key={i} className="space-y-2">
-                      <div className="h-4 bg-gray-100 rounded w-1/3" />
-                      <div className="h-14 bg-gray-100 rounded" />
+                    <div key={i} className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 space-y-2">
+                      <div className="h-3.5 bg-gray-100 dark:bg-gray-700 rounded w-1/3" />
+                      <div className="h-10 bg-gray-100 dark:bg-gray-700 rounded" />
                     </div>
                   ))}
                 </div>
               ) : userStats.reviewsCount === 0 ? (
-                <div className="text-center py-10">
-                  <MessageSquare className="w-10 h-10 text-gray-200 mx-auto mb-3" />
-                  <h4 className="text-sm font-semibold text-gray-900 mb-1">No reviews yet</h4>
-                  <p className="text-sm text-gray-500 mb-5">Share your experience to help fellow students!</p>
-                  <Link
-                    to="/properties"
-                    className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 group"
-                  >
+                <div className="text-center py-12 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl">
+                  <MessageSquare className="w-10 h-10 text-gray-200 dark:text-gray-700 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">No reviews yet</p>
+                  <p className="text-xs text-gray-400 mb-5">Share your experience to help fellow students find the best accommodation.</p>
+                  <Link to="/properties"
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 group">
                     Write Your First Review
-                    <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {recentReviews.map((review) => (
-                    <div key={review.id} className="border border-gray-100 dark:border-gray-700 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
-                        <Link
-                          to={`/properties/${review.property_id}`}
-                          className="font-semibold text-blue-600 hover:text-blue-700 text-sm"
-                        >
+                    <div key={review.id}
+                      className="rounded-xl border border-gray-100 dark:border-gray-800 p-4 hover:border-gray-200 dark:hover:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all">
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <Link to={`/properties/${review.property_id}`}
+                          className="font-semibold text-blue-600 hover:text-blue-700 text-sm leading-snug">
                           {review.property_name}
                         </Link>
-                        <span className={`text-sm font-bold ${getRatingColor(review.overall_rating)}`}>
+                        <span className={`text-xs font-bold flex-shrink-0 ${getRatingColor(review.overall_rating)}`}>
                           {review.overall_rating}/5
                         </span>
                       </div>
-                      <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3">{review.review_text}</p>
-                      <div className="flex items-center space-x-4 text-xs text-gray-400">
-                        <span className="flex items-center">
-                          <Calendar className="w-3 h-3 mr-1" /> {formatDate(review.created_at)}
+                      <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-2 mb-3 leading-relaxed">
+                        {review.review_text}
+                      </p>
+                      <div className="flex items-center gap-4 text-[10px] text-gray-400 font-medium uppercase tracking-wide">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" /> {formatDate(review.created_at)}
                         </span>
-                        <span className="flex items-center">
-                          <ThumbsUp className="w-3 h-3 mr-1" /> {review.helpful_count} helpful
+                        <span className="flex items-center gap-1">
+                          <ThumbsUp className="w-3 h-3" /> {review.helpful_count} helpful
                         </span>
                       </div>
                     </div>
                   ))}
-                  {recentReviews.length > 0 && (
-                    <Link
-                      to="/reviews"
-                      className="block text-center text-sm text-blue-600 hover:text-blue-700 font-semibold pt-2"
-                    >
-                      View all reviews
-                    </Link>
-                  )}
                 </div>
               )}
             </div>
