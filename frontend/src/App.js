@@ -21,6 +21,7 @@ import StudentApplicationPage from './pages/StudentApplicationPage';
 import BursaryPage from './pages/BursaryPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
+import MFASetupPage from './pages/MFASetupPage';
 
 const noShellRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/admin'];
 
@@ -64,6 +65,14 @@ const AppLayout = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mfa-setup"
+            element={
+              <ProtectedRoute>
+                <MFASetupPage />
               </ProtectedRoute>
             }
           />

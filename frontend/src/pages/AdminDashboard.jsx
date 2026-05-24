@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import logoImg from '../assets/OneApply-Hub-Logo.png';
+import logoImg from '../assets/OneHubLogo.png';
 
 const Badge = ({ children, color = 'gray' }) => {
   const cls = {

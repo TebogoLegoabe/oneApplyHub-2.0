@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, mfaAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -35,11 +35,25 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
-      const { access_token, user: userData } = response.data;
+      const { access_token, user: userData, mfa_required, mfa_token } = response.data;
+      if (mfa_required) {
+        return { success: true, mfa_required: true, mfa_token };
+      }
       _storeSession(access_token, userData);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Login failed' };
+    }
+  };
+
+  const verifyMFALogin = async (mfa_token, code) => {
+    try {
+      const response = await mfaAPI.verifyLogin(mfa_token, code);
+      const { access_token, user: userData } = response.data;
+      _storeSession(access_token, userData);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Invalid code' };
     }
   };
 
@@ -116,6 +130,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     isAuthenticated: !!user,
     login,
+    verifyMFALogin,
     register,
     logout,
     sendVerificationCode,

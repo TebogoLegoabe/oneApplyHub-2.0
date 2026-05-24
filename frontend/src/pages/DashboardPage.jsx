@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Mail, GraduationCap, Building, Star, MessageSquare,
-  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight, ShieldCheck,
+  Plus, Eye, Calendar, ThumbsUp, FileText, ArrowRight, ShieldCheck, Shield,
 } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
 import { formatDate, getRatingColor, getUniversityName } from '../utils/format';
@@ -139,6 +139,27 @@ const DashboardPage = () => {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* Security card */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 px-5 py-4 mt-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Two-Factor Auth</span>
+                </div>
+                {user?.mfa_enabled ? (
+                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-700">Active</span>
+                ) : (
+                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700">Not set up</span>
+                )}
+              </div>
+              <Link
+                to="/mfa-setup"
+                className="mt-3 block text-center text-xs font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+              >
+                {user?.mfa_enabled ? 'Manage MFA' : 'Enable MFA'} →
+              </Link>
             </div>
           </div>
 

@@ -30,6 +30,13 @@ class User(db.Model):
     google_id = db.Column(db.String(100), nullable=True, unique=True)
     oauth_provider = db.Column(db.String(20), nullable=True)  # 'google' or None
 
+    # TOTP-based MFA
+    mfa_enabled = db.Column(db.Boolean, default=False, nullable=False)
+    mfa_secret = db.Column(db.String(64), nullable=True)
+    mfa_backup_codes = db.Column(db.Text, nullable=True)  # JSON list of one-time backup codes
+    mfa_pending_token = db.Column(db.String(100), nullable=True, index=True)
+    mfa_pending_expires = db.Column(db.DateTime(timezone=True), nullable=True)
+
     # Relationships
     reviews = db.relationship('Review', backref='author', lazy='dynamic')
 
@@ -52,5 +59,6 @@ class User(db.Model):
             'verified': self.verified,
             'is_admin': self.is_admin,
             'oauth_provider': self.oauth_provider,
+            'mfa_enabled': self.mfa_enabled,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

@@ -162,7 +162,7 @@ const HomePage = () => {
               className="inline-block bg-white/20 text-white px-3 py-1.5 rounded-full text-xs font-semibold mb-4"
               style={{ animation: 'fadeDown 0.6s ease forwards' }}
             >
-              slogan
+              All Your Options. One Platform.
             </span>
             <h1
               className="text-3xl md:text-5xl font-bold mb-3 leading-tight"

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
 import { authAPI } from '../services/api';
-import logoImg from '../assets/OneApply-Hub-Logo.png';
+import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 
 const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Menu, X, FileText, LayoutDashboard, Shield, Sun, Moon } from 'lucide-react';
-import logoImg from '../../assets/OneApply-Hub-Logo.png';
+import logoImg from '../../assets/OneHubLogo.png';
 import { useTheme } from '../../context/ThemeContext';
 
 const NAV_LINKS = [

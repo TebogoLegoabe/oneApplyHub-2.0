@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, Mail, Phone, MapPin } from 'lucide-react';
-import logoImg from '../../assets/OneApply-Hub-Logo.png';
+import logoImg from '../../assets/OneHubLogo.png';
 
 const QUICK_LINKS = [
   { to: '/properties', label: 'Browse Properties' },
@@ -27,7 +27,7 @@ const Footer = () => (
             <span className="font-bold text-lg tracking-tight">oneApplyHub</span>
           </div>
           <p className="text-gray-400 text-xs leading-relaxed mb-4">
-            Slogan. Helping students find safe, verified accommodation near Wits and UJ.
+            All Your Options. One Platform.
           </p>
           <div className="space-y-2 text-xs text-gray-400">
             <div className="flex items-center space-x-2">

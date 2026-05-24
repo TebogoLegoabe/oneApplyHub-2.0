@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { CheckCircle, AlertCircle, Mail, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import logoImg from '../assets/OneApply-Hub-Logo.png';
+import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 
 const RESEND_COOLDOWN = 60; // seconds

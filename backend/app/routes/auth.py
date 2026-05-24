@@ -1,7 +1,12 @@
+import base64
+import io
+import json
 import logging
 import secrets
 from datetime import timedelta, timezone
 
+import pyotp
+import qrcode
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
@@ -27,6 +32,18 @@ def _tz_aware(dt):
     if dt is None:
         return None
     return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
+def _check_backup_code(user: User, code: str) -> bool:
+    if not user.mfa_backup_codes:
+        return False
+    codes = json.loads(user.mfa_backup_codes)
+    normalized = code.upper().strip().replace('-', '').replace(' ', '')
+    if normalized in codes:
+        codes.remove(normalized)
+        user.mfa_backup_codes = json.dumps(codes)
+        return True
+    return False
 
 
 @auth_bp.route('/register', methods=['POST'])
@@ -100,6 +117,18 @@ def login():
     user = User.query.filter_by(email=email).first()
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid email or password'}), 401
+
+    if user.mfa_enabled:
+        pending_token = secrets.token_urlsafe(32)
+        user.mfa_pending_token = pending_token
+        user.mfa_pending_expires = utcnow() + timedelta(minutes=5)
+        try:
+            db.session.commit()
+        except Exception:
+            logger.exception('DB error during MFA login for %s', email)
+            db.session.rollback()
+            return jsonify({'error': 'Login failed'}), 500
+        return jsonify({'mfa_required': True, 'mfa_token': pending_token}), 200
 
     return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
 
@@ -318,3 +347,156 @@ def reset_password():
         return jsonify({'error': 'Failed to reset password'}), 500
 
     return jsonify({'message': 'Password reset successful'}), 200
+
+
+# ── MFA endpoints ─────────────────────────────────────────────────────────────
+
+@auth_bp.route('/mfa/verify-login', methods=['POST'])
+@limiter.limit('10 per minute')
+def mfa_verify_login():
+    data = request.get_json(silent=True) or {}
+    mfa_token = (data.get('mfa_token') or '').strip()
+    code = (data.get('code') or '').strip()
+
+    if not mfa_token or not code:
+        return jsonify({'error': 'MFA token and code are required'}), 400
+
+    user = User.query.filter_by(mfa_pending_token=mfa_token).first()
+    if not user:
+        return jsonify({'error': 'Invalid or expired MFA session — please log in again'}), 401
+
+    expires = _tz_aware(user.mfa_pending_expires)
+    if expires is None or utcnow() > expires:
+        user.mfa_pending_token = None
+        user.mfa_pending_expires = None
+        db.session.commit()
+        return jsonify({'error': 'MFA session expired — please log in again'}), 401
+
+    if _check_backup_code(user, code):
+        user.mfa_pending_token = None
+        user.mfa_pending_expires = None
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            return jsonify({'error': 'Login failed'}), 500
+        return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
+
+    totp = pyotp.TOTP(user.mfa_secret)
+    if not totp.verify(code, valid_window=1):
+        return jsonify({'error': 'Invalid authenticator code'}), 400
+
+    user.mfa_pending_token = None
+    user.mfa_pending_expires = None
+    try:
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        return jsonify({'error': 'Login failed'}), 500
+
+    return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
+
+
+@auth_bp.route('/mfa/setup', methods=['POST'])
+@jwt_required()
+@limiter.limit('5 per minute')
+def mfa_setup():
+    user = db.session.get(User, int(get_jwt_identity()))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    if user.mfa_enabled:
+        return jsonify({'error': 'MFA is already enabled'}), 400
+
+    secret = pyotp.random_base32()
+    totp = pyotp.TOTP(secret)
+    uri = totp.provisioning_uri(name=user.email, issuer_name='oneApplyHub')
+
+    qr = qrcode.QRCode(box_size=10, border=2)
+    qr.add_data(uri)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='black', back_color='white')
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    qr_b64 = base64.b64encode(buf.getvalue()).decode()
+
+    user.mfa_secret = secret
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('DB error during MFA setup for user %s', user.id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to generate MFA setup'}), 500
+
+    return jsonify({'qr_code': qr_b64, 'secret': secret}), 200
+
+
+@auth_bp.route('/mfa/enable', methods=['POST'])
+@jwt_required()
+@limiter.limit('5 per minute')
+def mfa_enable():
+    user = db.session.get(User, int(get_jwt_identity()))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    if user.mfa_enabled:
+        return jsonify({'error': 'MFA is already enabled'}), 400
+    if not user.mfa_secret:
+        return jsonify({'error': 'Call /mfa/setup first'}), 400
+
+    data = request.get_json(silent=True) or {}
+    code = (data.get('code') or '').strip()
+    if not code:
+        return jsonify({'error': 'Authenticator code is required'}), 400
+
+    totp = pyotp.TOTP(user.mfa_secret)
+    if not totp.verify(code, valid_window=1):
+        return jsonify({'error': 'Invalid authenticator code — try again'}), 400
+
+    backup_codes = [secrets.token_hex(4).upper() for _ in range(8)]
+    user.mfa_enabled = True
+    user.mfa_backup_codes = json.dumps(backup_codes)
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('DB error enabling MFA for user %s', user.id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to enable MFA'}), 500
+
+    return jsonify({'backup_codes': backup_codes, 'user': user.to_dict()}), 200
+
+
+@auth_bp.route('/mfa/disable', methods=['POST'])
+@jwt_required()
+@limiter.limit('5 per minute')
+def mfa_disable():
+    user = db.session.get(User, int(get_jwt_identity()))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    if not user.mfa_enabled:
+        return jsonify({'error': 'MFA is not enabled'}), 400
+
+    data = request.get_json(silent=True) or {}
+    password = data.get('password') or ''
+    code = (data.get('code') or '').strip()
+
+    if not password and not user.oauth_provider:
+        return jsonify({'error': 'Password confirmation is required'}), 400
+
+    if user.password_hash and not user.check_password(password):
+        return jsonify({'error': 'Incorrect password'}), 401
+
+    if code:
+        totp = pyotp.TOTP(user.mfa_secret)
+        if not totp.verify(code, valid_window=1):
+            return jsonify({'error': 'Invalid authenticator code'}), 400
+
+    user.mfa_enabled = False
+    user.mfa_secret = None
+    user.mfa_backup_codes = None
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('DB error disabling MFA for user %s', user.id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to disable MFA'}), 500
+
+    return jsonify({'message': 'MFA disabled successfully', 'user': user.to_dict()}), 200

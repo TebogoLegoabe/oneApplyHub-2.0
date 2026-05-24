@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight } from 'lucide-react';
-import logoImg from '../assets/OneApply-Hub-Logo.png';
+import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
+import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -13,7 +13,11 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
 
-  const { login, googleLogin } = useAuth();
+  const [mfaRequired, setMfaRequired] = useState(false);
+  const [mfaToken, setMfaToken] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
+
+  const { login, verifyMFALogin, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleGoogleSuccess = async (credential) => {
@@ -39,7 +43,10 @@ const LoginPage = () => {
     setError('');
     try {
       const result = await login(formData.email, formData.password);
-      if (result.success) {
+      if (result.success && result.mfa_required) {
+        setMfaToken(result.mfa_token);
+        setMfaRequired(true);
+      } else if (result.success) {
         navigate('/dashboard', { replace: true });
       } else {
         setError(result.error);
@@ -51,11 +58,101 @@ const LoginPage = () => {
     }
   };
 
+  const handleMfaSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const result = await verifyMFALogin(mfaToken, mfaCode);
+    setLoading(false);
+    if (result.success) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      setError(result.error);
+      if (result.error?.includes('expired') || result.error?.includes('session')) {
+        setMfaRequired(false);
+        setMfaToken('');
+        setMfaCode('');
+      }
+    }
+  };
+
+  if (mfaRequired) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+        <AuthBackground />
+        <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-5">
+              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                <ShieldCheck className="w-7 h-7 text-blue-600 dark:text-blue-400" />
+              </div>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Two-Factor Auth</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Enter the 6-digit code from your authenticator app</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+            <form className="space-y-5" onSubmit={handleMfaSubmit}>
+              {error && (
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex">
+                  <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="ml-3 text-sm text-red-800 dark:text-red-300 font-medium">{error}</p>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                  Authenticator Code
+                </label>
+                <input
+                  type="text" inputMode="numeric" autoComplete="one-time-code"
+                  maxLength={8} required autoFocus
+                  className="w-full text-center text-2xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="000000"
+                  value={mfaCode}
+                  onChange={(e) => { setMfaCode(e.target.value); if (error) setError(''); }}
+                />
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+                  You can also use one of your 8-character backup codes.
+                </p>
+              </div>
+              <button
+                type="submit" disabled={loading || mfaCode.length < 6}
+                className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              >
+                {loading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3" />
+                    Verifying...
+                  </div>
+                ) : 'Verify'}
+              </button>
+            </form>
+            <button
+              onClick={() => { setMfaRequired(false); setMfaToken(''); setMfaCode(''); setError(''); }}
+              className="mt-4 w-full text-center text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+            >
+              Back to login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
+        <div className="mb-4">
+          <Link
+            to="/"
+            className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            Back to Home
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <div className="flex justify-center mb-5">
             <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />

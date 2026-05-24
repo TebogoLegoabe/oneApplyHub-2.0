@@ -55,6 +55,14 @@ export const authAPI = {
   googleVerify: (idToken) => api.post('/auth/google/verify', { id_token: idToken }),
 };
 
+// MFA API
+export const mfaAPI = {
+  verifyLogin: (mfa_token, code) => api.post('/auth/mfa/verify-login', { mfa_token, code }),
+  setup: () => api.post('/auth/mfa/setup'),
+  enable: (code) => api.post('/auth/mfa/enable', { code }),
+  disable: (password, code) => api.post('/auth/mfa/disable', { password, code }),
+};
+
 // Public Stats API
 export const statsAPI = {
   getStats: () => api.get('/stats'),

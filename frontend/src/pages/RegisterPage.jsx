@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Mail, Lock, User, GraduationCap, Building,
-  Eye, EyeOff, AlertCircle, CheckCircle, ArrowRight, UserPlus,
+  Eye, EyeOff, AlertCircle, CheckCircle, ArrowRight, ArrowLeft, UserPlus,
 } from 'lucide-react';
-import logoImg from '../assets/OneApply-Hub-Logo.png';
+import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -102,6 +102,16 @@ const RegisterPage = () => {
       <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
+        <div className="mb-4">
+          <Link
+            to="/"
+            className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            Back to Home
+          </Link>
+        </div>
+
         <div className="text-center mb-8">
           <div className="flex justify-center mb-5">
             <img src={logoImg} alt="oneApplyHub logo" className="h-20 w-20 object-contain" />
