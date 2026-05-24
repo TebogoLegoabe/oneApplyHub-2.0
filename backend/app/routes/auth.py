@@ -260,16 +260,10 @@ def google_verify():
             user.oauth_provider = 'google'
             user.verified = True
         else:
-            if not is_valid_university_email(g_email):
-                return jsonify({
-                    'error': 'Google sign-in is only available for Wits and UJ student email accounts. '
-                             'Please use your student email (e.g. 2307134@students.wits.ac.za).'
-                }), 403
-
             user = User(
                 email=g_email,
                 name=g_name,
-                university=university_from_email(g_email),
+                university=university_from_email(g_email) or 'Other',
                 verified=True,
                 google_id=google_id,
                 oauth_provider='google',
