@@ -58,11 +58,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group" onClick={closeMobileMenu}>
-            <img src={logoImg} alt="oneApplyHub logo" className="h-12 w-12 object-contain" />
+          <Link to="/" className="flex items-center gap-2.5 group" onClick={closeMobileMenu}>
+            <img src={logoImg} alt="oneApplyHub logo" className="h-20 w-20 object-contain" />
             <div className="flex flex-col leading-none">
               <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">oneApplyHub</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">All Your Options. One Platform.</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">Student Accommodation</span>
             </div>
           </Link>
 
