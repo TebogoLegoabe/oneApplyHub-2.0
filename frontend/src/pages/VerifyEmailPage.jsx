@@ -105,7 +105,7 @@ const VerifyEmailPage = () => {
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex items-center justify-center px-4">
-        <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm border border-gray-100 dark:border-gray-700/60 max-w-md w-full text-center">
+        <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-700/60 max-w-md w-full text-center">
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="p-10">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -141,7 +141,7 @@ const VerifyEmailPage = () => {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">

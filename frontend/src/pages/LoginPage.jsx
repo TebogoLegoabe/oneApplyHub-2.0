@@ -89,7 +89,7 @@ const LoginPage = () => {
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Two-Factor Auth</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Enter the 6-digit code from your authenticator app</p>
           </div>
-          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
             <div className="py-8 px-8">
             <form className="space-y-5" onSubmit={handleMfaSubmit}>
@@ -160,7 +160,7 @@ const LoginPage = () => {
           <p className="text-sm text-gray-500 dark:text-gray-400">Sign in to your oneApplyHub account</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
             <GoogleSignInButton

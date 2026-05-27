@@ -112,7 +112,7 @@ const RegisterPage = () => {
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
           <GoogleSignInButton

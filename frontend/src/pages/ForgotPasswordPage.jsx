@@ -33,7 +33,7 @@ const ForgotPasswordPage = () => {
       <div className={PAGE_WRAPPER}>
         <AuthBackground />
         <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm text-center">
+          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden text-center">
             <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
             <div className="py-10 px-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -75,7 +75,7 @@ const ForgotPasswordPage = () => {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
