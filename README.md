@@ -256,6 +256,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by the need for reliable student accommodation information
 - Thanks to all students who will contribute reviews and feedback
 
+## 🌐 Live Demo
+https://www.oneapplyhub.co.za/
+
 ## 📞 Support
 
 If you have any questions or need help getting started:
