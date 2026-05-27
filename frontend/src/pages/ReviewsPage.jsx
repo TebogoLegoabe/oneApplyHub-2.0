@@ -119,11 +119,11 @@ const ReviewsPage = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
       {/* Page Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+      <div className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-2xl font-bold mb-1">Student Reviews</h1>
+          <h1 className="text-2xl md:text-3xl font-bold mb-1">Student Reviews</h1>
           <p className="text-blue-100 text-sm">
-            Honest reviews from verified Wits and UJ students about their accommodation experiences.
+            Honest reviews from verified students about their accommodation experiences.
           </p>
         </div>
       </div>
@@ -343,7 +343,7 @@ const ReviewsPage = () => {
         )}
 
         {/* CTA */}
-        <div className="mt-8 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-7 text-white text-center">
+        <div className="mt-8 bg-gradient-to-r from-blue-600 via-indigo-700 to-violet-800 rounded-2xl p-7 text-white text-center">
           <h3 className="text-xl font-bold mb-2">Share Your Experience</h3>
           <p className="text-blue-100 mb-5 text-sm">
             Help fellow students by sharing your honest review of your accommodation.

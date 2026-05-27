@@ -104,21 +104,24 @@ const VerifyEmailPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 max-w-md w-full text-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex items-center justify-center px-4">
+        <div className="bg-white dark:bg-gray-800/90 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-sm border border-gray-100 dark:border-gray-700/60 max-w-md w-full text-center">
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="p-10">
           <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="w-8 h-8 text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Email Verified!</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-1">Your account is now active.</p>
           <p className="text-sm text-gray-400 dark:text-gray-500">Redirecting to your dashboard...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
@@ -138,7 +141,9 @@ const VerifyEmailPage = () => {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* OTP digit inputs */}
             <div>
@@ -156,8 +161,8 @@ const VerifyEmailPage = () => {
                     value={digit}
                     onChange={(e) => handleDigitChange(i, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(i, e)}
-                    className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${
-                      digit ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                    className={`w-12 h-14 text-center text-xl font-bold border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all ${
+                      digit ? 'border-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700/80 text-gray-900 dark:text-white'
                     }`}
                     autoFocus={i === 0}
                   />
@@ -175,7 +180,7 @@ const VerifyEmailPage = () => {
             <button
               type="submit"
               disabled={loading || digits.join('').length < 6}
-              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -201,13 +206,14 @@ const VerifyEmailPage = () => {
             </button>
           </div>
 
-          <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-700 text-center">
+          <div className="mt-5 pt-5 border-t border-gray-100 dark:border-gray-700/60 text-center">
             <Link
               to="/login"
-              className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 transition-colors"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-indigo-600 transition-colors"
             >
               Back to Login
             </Link>
+          </div>
           </div>
         </div>
 

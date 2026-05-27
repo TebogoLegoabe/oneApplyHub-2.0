@@ -64,15 +64,16 @@ const PropertiesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Page Header */}
-        <div className="mb-5">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Accommodations</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Find your perfect home near campus filter by university, type, and price.
+      <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-2xl md:text-3xl font-bold mb-1">Find Your Accommodation</h1>
+          <p className="text-sm text-blue-100 max-w-xl">
+            Browse verified student properties near Wits and UJ. Filter by university, type, and price range.
           </p>
         </div>
+      </section>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-5">

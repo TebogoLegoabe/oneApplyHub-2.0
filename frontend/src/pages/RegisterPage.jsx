@@ -5,7 +5,6 @@ import {
   Mail, Lock, User, GraduationCap, Building,
   Eye, EyeOff, AlertCircle, CheckCircle, ArrowRight, ArrowLeft, UserPlus,
 } from 'lucide-react';
-import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -49,17 +48,6 @@ const RegisterPage = () => {
   const validateForm = () => {
     if (!formData.name.trim()) { setError('Please enter your full name'); return false; }
     if (!formData.email.trim()) { setError('Please enter your email address'); return false; }
-
-    const email = formData.email.trim().toLowerCase();
-    if (!email.endsWith('@students.wits.ac.za') && !email.endsWith('@student.uj.ac.za')) {
-      setError('Please use your university email (@students.wits.ac.za or @student.uj.ac.za)');
-      return false;
-    }
-    const localPart = email.split('@')[0];
-    if (!/^\d{6,10}$/.test(localPart)) {
-      setError('Your email must start with your student number (e.g. 2307134@students.wits.ac.za)');
-      return false;
-    }
     if (formData.password.length < 8) { setError('Password must be at least 8 characters'); return false; }
     if (!/[A-Za-z]/.test(formData.password) || !/\d/.test(formData.password)) {
       setError('Password must contain at least one letter and one number');
@@ -98,14 +86,14 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       <AuthBackground />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
         <div className="mb-4">
           <Link
             to="/"
-            className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+            className="inline-flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
           >
             <ArrowLeft className="w-4 h-4 mr-1.5" />
             Back to Home
@@ -113,21 +101,20 @@ const RegisterPage = () => {
         </div>
 
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-5">
-            <img src={logoImg} alt="oneApplyHub logo" className="h-20 w-20 object-contain" />
-          </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Join Our Community</h2>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">Connect with fellow students and find your perfect accommodation</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Connect with fellow students and find your perfect accommodation</p>
           <div className="flex items-center justify-center space-x-2 mt-4">
             <span className="text-gray-500 dark:text-gray-400 text-sm">Already have an account?</span>
-            <Link to="/login" className="font-semibold text-blue-700 hover:text-blue-800 transition-colors flex items-center text-sm group">
+            <Link to="/login" className="font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition-colors flex items-center text-sm group">
               Sign in here
               <ArrowRight className="ml-1 w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="py-8 px-8">
           <GoogleSignInButton
             onSuccess={handleGoogleSuccess}
             onError={setError}
@@ -136,10 +123,10 @@ const RegisterPage = () => {
 
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-gray-200 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">or register with university email</span>
+              <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium">or sign up with email</span>
             </div>
           </div>
 
@@ -159,7 +146,7 @@ const RegisterPage = () => {
                 </div>
                 <input
                   id="name" name="name" type="text" required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-all"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 transition-all"
                   placeholder="Enter your full name"
                   value={formData.name} onChange={handleChange}
                 />
@@ -167,19 +154,18 @@ const RegisterPage = () => {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">University Email</label>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 text-blue-500" />
+                  <Mail className="h-4 w-4 text-indigo-400" />
                 </div>
                 <input
                   id="email" name="email" type="email" required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-all"
-                  placeholder="1234567@students.wits.ac.za"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 transition-all"
+                  placeholder="Enter your email address"
                   value={formData.email} onChange={handleChange}
                 />
               </div>
-              <p className="mt-1.5 text-xs text-gray-400">student-number@students.wits.ac.za or student-number@student.uj.ac.za</p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -191,7 +177,7 @@ const RegisterPage = () => {
                   </div>
                   <select
                     id="year_of_study" name="year_of_study"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 bg-white transition-all"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 bg-white transition-all"
                     value={formData.year_of_study} onChange={handleChange}
                   >
                     <option value="">Select year</option>
@@ -207,7 +193,7 @@ const RegisterPage = () => {
                   </div>
                   <select
                     id="faculty" name="faculty"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 bg-white transition-all"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 bg-white transition-all"
                     value={formData.faculty} onChange={handleChange}
                   >
                     <option value="">Select faculty</option>
@@ -225,7 +211,7 @@ const RegisterPage = () => {
                 </div>
                 <input
                   id="password" name="password" type={showPassword ? 'text' : 'password'} required
-                  className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-all"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 transition-all"
                   placeholder="Create a password (min 8 chars, 1 letter + 1 number)"
                   value={formData.password} onChange={handleChange}
                 />
@@ -245,7 +231,7 @@ const RegisterPage = () => {
                 </div>
                 <input
                   id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} required
-                  className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-all"
+                  className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 transition-all"
                   placeholder="Confirm your password"
                   value={formData.confirmPassword} onChange={handleChange}
                 />
@@ -259,7 +245,7 @@ const RegisterPage = () => {
 
             <button
               type="submit" disabled={loading}
-              className="w-full flex justify-center py-3 px-6 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full flex justify-center py-3 px-6 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -276,17 +262,18 @@ const RegisterPage = () => {
           </form>
 
           {/* Benefits */}
-          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
-            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
+          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700/60">
+            <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800/50">
               <div className="flex items-start space-x-3">
-                <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                <div className="text-xs text-blue-800 dark:text-blue-300 space-y-0.5">
-                  <p className="font-semibold text-blue-900 dark:text-blue-200 mb-1">University Email Required</p>
-                  <p>✓ @students.wits.ac.za (Wits University)</p>
-                  <p>✓ @student.uj.ac.za (University of Johannesburg)</p>
+                <CheckCircle className="w-4 h-4 text-indigo-600 dark:text-indigo-400 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-indigo-800 dark:text-indigo-300 space-y-0.5">
+                  <p className="font-semibold text-indigo-900 dark:text-indigo-200 mb-1">Open to All Students</p>
+                  <p>✓ University emails (@students.wits.ac.za, @student.uj.ac.za)</p>
+                  <p>✓ Any email address (Gmail, Outlook, etc.)</p>
                 </div>
               </div>
             </div>
+          </div>
           </div>
         </div>
       </div>

@@ -52,7 +52,7 @@ const DashboardPage = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
 
       {/* Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-900 text-white">
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-violet-900 text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center space-x-3">
             <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
@@ -169,7 +169,7 @@ const DashboardPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { icon: MessageSquare, iconBg: 'bg-blue-50', iconColor: 'text-blue-600', value: userStats.reviewsCount, label: 'Reviews Written' },
-                { icon: Star, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', value: userStats.avgRating > 0 ? userStats.avgRating : '—', label: 'Avg Rating Given' },
+                { icon: Star, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', value: userStats.avgRating > 0 ? userStats.avgRating : 'N/A', label: 'Avg Rating Given' },
                 { icon: ThumbsUp, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-600', value: userStats.helpfulVotes, label: 'Helpful Votes' },
               ].map(({ icon: Icon, iconBg, iconColor, value, label }) => (
                 <div key={label} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4">
@@ -178,7 +178,7 @@ const DashboardPage = () => {
                       <Icon className={`w-4 h-4 ${iconColor}`} />
                     </div>
                     <div>
-                      <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? '—' : value}</p>
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">{loading ? 'N/A' : value}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{label}</p>
                     </div>
                   </div>

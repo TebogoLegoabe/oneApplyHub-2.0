@@ -5,7 +5,7 @@ import { authAPI } from '../services/api';
 import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 
-const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
+const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -67,13 +67,16 @@ const ResetPasswordPage = () => {
       <div className={PAGE_WRAPPER}>
         <AuthBackground />
         <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-          <div className="bg-white dark:bg-gray-800 py-10 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
+          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm text-center">
+            <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+            <div className="py-10 px-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-8 h-8 text-emerald-500" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Password Reset Successful!</h2>
             <p className="text-gray-600 dark:text-gray-300 mb-3">Your password has been updated successfully.</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Redirecting to login page...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -93,7 +96,9 @@ const ResetPasswordPage = () => {
           <p className="text-sm text-gray-600 dark:text-gray-400">Enter your new password below</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="py-8 px-8">
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex mb-6">
               <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
@@ -165,7 +170,7 @@ const ResetPasswordPage = () => {
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -181,10 +186,11 @@ const ResetPasswordPage = () => {
           <div className="mt-6 text-center">
             <Link
               to="/login"
-              className="font-medium text-blue-700 hover:text-blue-800 transition-colors text-sm"
+              className="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition-colors text-sm"
             >
               Back to Login
             </Link>
+          </div>
           </div>
         </div>
       </div>

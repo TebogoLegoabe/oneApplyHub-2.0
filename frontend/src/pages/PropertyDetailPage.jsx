@@ -29,7 +29,7 @@ const PropertyDetailPage = () => {
     const text = [property.contact_info, property.address].filter(Boolean).join(' | ');
     navigator.clipboard.writeText(text).then(
       () => showToast('Contact details copied to clipboard!'),
-      () => showToast('Could not copy — please copy manually above.'),
+      () => showToast('Could not copy. Please copy manually above.'),
     );
   };
 

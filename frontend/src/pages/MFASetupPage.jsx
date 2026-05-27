@@ -63,7 +63,7 @@ const MFASetupPage = () => {
       await refreshUser();
       setStep(STEPS.BACKUP);
     } catch (e) {
-      setError(e.response?.data?.error || 'Invalid code — try again');
+      setError(e.response?.data?.error || 'Invalid code, please try again');
     } finally {
       setLoading(false);
     }
@@ -264,7 +264,7 @@ const MFASetupPage = () => {
                     <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Save your backup codes now</p>
                     <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
                       These codes let you sign in if you lose your phone. Each code can only be used once.
-                      Store them somewhere safe — you won't see them again.
+                      Store them somewhere safe. You won't see them again.
                     </p>
                   </div>
                 </div>
@@ -301,7 +301,7 @@ const MFASetupPage = () => {
                   className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="w-4 h-4" />
-                  MFA Enabled — Go to Dashboard
+                  MFA Enabled. Go to Dashboard
                 </button>
               </div>
             )}

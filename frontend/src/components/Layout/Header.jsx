@@ -59,7 +59,7 @@ const Header = () => {
 
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group" onClick={closeMobileMenu}>
-            <img src={logoImg} alt="oneApplyHub logo" className="h-12 w-12 object-contain" />
+            <img src={logoImg} alt="oneApplyHub logo" className="h-16 w-16 object-contain" />
             <div className="flex flex-col leading-none">
               <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">oneApplyHub</span>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">All Your Options. One Platform.</span>

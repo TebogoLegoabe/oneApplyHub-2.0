@@ -5,7 +5,7 @@ import { authAPI } from '../services/api';
 import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 
-const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
+const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('');
@@ -33,7 +33,9 @@ const ForgotPasswordPage = () => {
       <div className={PAGE_WRAPPER}>
         <AuthBackground />
         <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
-          <div className="bg-white dark:bg-gray-800 py-10 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700 text-center">
+          <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm text-center">
+            <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+            <div className="py-10 px-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-8 h-8 text-emerald-500" />
             </div>
@@ -46,11 +48,12 @@ const ForgotPasswordPage = () => {
             </p>
             <Link
               to="/login"
-              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold"
+              className="inline-flex items-center bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-violet-700 transition-all duration-300 font-semibold"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Login
             </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -72,22 +75,24 @@ const ForgotPasswordPage = () => {
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 py-8 px-8 shadow-xl rounded-2xl border border-gray-100 dark:border-gray-700">
+        <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden backdrop-blur-sm">
+          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex">
                 <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
-                <p className="ml-3 text-sm text-red-800 font-medium">{error}</p>
+                <p className="ml-3 text-sm text-red-800 dark:text-red-300 font-medium">{error}</p>
               </div>
             )}
 
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                University Email Address
+                Email Address
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 text-blue-500" />
+                  <Mail className="h-4 w-4 text-indigo-400" />
                 </div>
                 <input
                   id="email"
@@ -95,8 +100,8 @@ const ForgotPasswordPage = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm text-gray-900 transition-all"
-                  placeholder="1234567@students.wits.ac.za"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm text-gray-900 transition-all"
+                  placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -106,7 +111,7 @@ const ForgotPasswordPage = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -122,11 +127,12 @@ const ForgotPasswordPage = () => {
           <div className="mt-6 text-center">
             <Link
               to="/login"
-              className="font-medium text-blue-700 hover:text-blue-800 transition-colors flex items-center justify-center group"
+              className="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition-colors flex items-center justify-center group"
             >
               <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
               Back to Login
             </Link>
+          </div>
           </div>
         </div>
       </div>

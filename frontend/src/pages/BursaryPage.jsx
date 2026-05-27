@@ -159,11 +159,11 @@ const BursaryPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="bg-gradient-to-r from-blue-700 to-blue-800 text-white">
+      <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-1">SA Bursaries & Scholarships</h1>
           <p className="text-sm text-blue-100 max-w-xl mx-auto">
-            Real South African bursaries categorized by field of study — from government grants to corporate sponsorships.
+            Real South African bursaries categorized by field of study, from government grants to corporate sponsorships.
           </p>
         </div>
       </section>
@@ -282,7 +282,7 @@ const BursaryPage = () => {
           <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">Application Tips</h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { icon: Award, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', title: 'Apply to Several', text: 'Apply to multiple bursaries simultaneously — many are not mutually exclusive. Cast a wide net.' },
+              { icon: Award, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', title: 'Apply to Several', text: 'Apply to multiple bursaries simultaneously. Many are not mutually exclusive, so cast a wide net.' },
               { icon: GraduationCap, color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', title: 'Certified Transcripts Ready', text: 'Have certified copies of your academic record, ID, and proof of registration ready before you start.' },
               { icon: Building, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400', title: 'Meet Corporate Deadlines', text: 'Corporate bursaries close in April–September for the following year. Start researching mid-year.' },
             ].map(({ icon: Icon, color, title, text }) => (
@@ -299,7 +299,7 @@ const BursaryPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl p-6 text-white text-center">
+        <div className="mt-6 bg-gradient-to-r from-blue-600 via-indigo-700 to-violet-800 rounded-2xl p-6 text-white text-center">
           <h3 className="text-lg font-bold mb-2">Start Your Student Application</h3>
           <p className="text-blue-100 text-sm mb-4">Apply for accommodation while your bursary application is in progress.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

@@ -26,11 +26,11 @@ const Footer = () => (
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2.5 mb-4">
-            <img src={logoImg} alt="oneApplyHub logo" className="h-9 w-9 object-contain" />
+            <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />
             <span className="font-extrabold text-lg tracking-tight text-white">oneApplyHub</span>
           </div>
           <p className="text-gray-500 text-xs leading-relaxed mb-5">
-            Connecting South African students with verified accommodation, bursaries, and opportunities — all in one place.
+            Connecting South African students with verified accommodation, bursaries, and opportunities. All in one place.
           </p>
           <div className="space-y-2 text-xs text-gray-400">
             <a href="mailto:info@oneapplyhub.co.za" className="flex items-center gap-2 hover:text-blue-400 transition-colors group">

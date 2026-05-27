@@ -150,7 +150,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
 
-      <section className="relative py-14 md:py-20 text-white overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800">
+      <section className="relative py-14 md:py-20 text-white overflow-hidden bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800">
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-16 -left-16 w-80 h-80 bg-white/5 rounded-full animate-pulse" style={{ animationDuration: '4s' }} />
           <div className="absolute top-1/3 right-0 w-96 h-96 bg-blue-500/20 rounded-full animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
@@ -241,12 +241,12 @@ const HomePage = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {STAT_CONFIGS.map(({ icon: Icon, key, label }) => {
-              let value = '—';
+              let value = 'N/A';
               if (stats) {
                 const raw = stats[key];
-                if (key === 'avg_rating') value = raw != null ? `${raw}★` : '—';
-                else if (key === 'reviews') value = raw != null ? `${raw}` : '—';
-                else value = raw != null ? `${raw}+` : '—';
+                if (key === 'avg_rating') value = raw != null ? `${raw}★` : 'N/A';
+                else if (key === 'reviews') value = raw != null ? `${raw}` : 'N/A';
+                else value = raw != null ? `${raw}+` : 'N/A';
               }
               return (
                 <div
@@ -353,7 +353,7 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="py-10 bg-gradient-to-r from-blue-600 to-blue-800 text-white relative overflow-hidden">
+      <section className="py-10 bg-gradient-to-r from-blue-600 via-indigo-700 to-violet-800 text-white relative overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 right-1/4 w-64 h-64 bg-white/5 rounded-full animate-pulse" style={{ animationDuration: '5s' }} />
         </div>

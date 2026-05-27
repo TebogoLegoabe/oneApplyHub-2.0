@@ -207,7 +207,7 @@ const Overview = ({ stats, onNav }) => {
             <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${iconCls[color]}`}>
               <Icon className="w-5 h-5" />
             </div>
-            <p className="text-3xl font-bold text-gray-900">{value ?? '—'}</p>
+            <p className="text-3xl font-bold text-gray-900">{value ?? 'N/A'}</p>
             <p className="text-sm font-semibold text-gray-700 mt-1">{label}</p>
             <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
           </button>
@@ -633,7 +633,7 @@ const UsersTab = ({ onToast }) => {
                         : <Badge color="gray">Student</Badge>}
                     </td>
                     <td className="px-4 py-3 hidden lg:table-cell text-gray-500">
-                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}
+                      {u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A'}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
