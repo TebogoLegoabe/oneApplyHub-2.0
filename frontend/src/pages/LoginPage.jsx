@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, ShieldCheck } from 'lucide-react';
-import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -157,9 +156,6 @@ const LoginPage = () => {
         </div>
 
         <div className="text-center mb-8">
-          <div className="flex justify-center mb-5">
-            <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />
-          </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">Welcome back</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">Sign in to your oneApplyHub account</p>
         </div>
