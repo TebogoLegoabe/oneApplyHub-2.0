@@ -23,7 +23,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import MFASetupPage from './pages/MFASetupPage';
 
-const noShellRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/admin'];
+const noShellRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/admin', '/dashboard'];
 
 const AppLayout = () => {
   const location = useLocation();

@@ -261,6 +261,93 @@ def mark_helpful(review_id):
     return jsonify({'helpful_count': review.helpful_count}), 200
 
 
+@reviews_bp.route('/dashboard', methods=['GET'])
+@jwt_required()
+def get_dashboard_stats():
+    from sqlalchemy import func
+
+    total_properties = Property.query.filter_by(approved=True).count()
+    total_reviews = Review.query.filter_by(approved=True).count()
+
+    avg_q = db.session.query(func.avg(Review.overall_rating)).filter(
+        Review.approved == True  # noqa: E712
+    ).scalar()
+    avg_rating = round(float(avg_q), 1) if avg_q else 0.0
+
+    rec_count = Review.query.filter_by(approved=True, recommend=True).count()
+    recommend_pct = round(rec_count / total_reviews * 100) if total_reviews else 0
+
+    # Rating distribution 1-5
+    rating_distribution = [
+        {'stars': s, 'label': f'{s}★', 'count': Review.query.filter(
+            Review.approved == True, Review.overall_rating == s  # noqa: E712
+        ).count()}
+        for s in range(1, 6)
+    ]
+
+    # Top 8 properties by review count (with avg rating)
+    rows = (
+        db.session.query(
+            Property.id,
+            Property.name,
+            func.count(Review.id).label('review_count'),
+            func.avg(Review.overall_rating).label('avg_rating'),
+        )
+        .join(Review, Review.property_id == Property.id)
+        .filter(Property.approved == True)   # noqa: E712
+        .filter(Review.approved == True)     # noqa: E712
+        .group_by(Property.id, Property.name)
+        .order_by(func.count(Review.id).desc())
+        .limit(8)
+        .all()
+    )
+    top_properties = [
+        {
+            'id': r.id,
+            'name': r.name[:28] + ('…' if len(r.name) > 28 else ''),
+            'review_count': r.review_count,
+            'avg_rating': round(float(r.avg_rating), 1) if r.avg_rating else 0.0,
+        }
+        for r in rows
+    ]
+
+    # 6 most recent approved reviews
+    recent_q = (
+        db.session.query(Review, Property, User)
+        .join(Property, Review.property_id == Property.id)
+        .join(User, Review.user_id == User.id)
+        .filter(Review.approved == True, Property.approved == True)  # noqa: E712
+        .order_by(Review.created_at.desc())
+        .limit(6)
+        .all()
+    )
+    recent_reviews = [
+        {
+            'id': r.id,
+            'property_id': prop.id,
+            'property_name': prop.name,
+            'overall_rating': r.overall_rating,
+            'review_text': r.review_text[:130] + ('…' if len(r.review_text) > 130 else ''),
+            'recommend': r.recommend,
+            'author': 'Anonymous' if r.anonymous else u.name,
+            'created_at': r.created_at.isoformat() if r.created_at else None,
+        }
+        for r, prop, u in recent_q
+    ]
+
+    return jsonify({
+        'overview': {
+            'total_properties': total_properties,
+            'total_reviews': total_reviews,
+            'avg_rating': avg_rating,
+            'recommend_pct': recommend_pct,
+        },
+        'rating_distribution': rating_distribution,
+        'top_properties': top_properties,
+        'recent_reviews': recent_reviews,
+    }), 200
+
+
 @reviews_bp.route('/user/stats', methods=['GET'])
 @jwt_required()
 def get_user_review_stats():

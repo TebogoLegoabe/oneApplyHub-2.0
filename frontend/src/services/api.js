@@ -83,6 +83,7 @@ export const reviewsAPI = {
     api.post(`/reviews/property/${propertyId}`, reviewData),
   markHelpful: (reviewId) => api.post(`/reviews/${reviewId}/helpful`),
   getUserStats: () => api.get('/reviews/user/stats'),
+  getDashboardStats: () => api.get('/reviews/dashboard'),
 };
 
 // Admin API
