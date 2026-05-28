@@ -27,6 +27,7 @@ def admin_required(fn):
 @admin_bp.route('/stats', methods=['GET'])
 @admin_required
 def get_stats():
+    from app.models.application import Application
     return jsonify({
         'total_users': User.query.count(),
         'verified_users': User.query.filter_by(verified=True).count(),
@@ -36,6 +37,11 @@ def get_stats():
         'total_reviews': Review.query.count(),
         'pending_reviews': Review.query.filter_by(approved=False).count(),
         'approved_reviews': Review.query.filter_by(approved=True).count(),
+        'total_applications': Application.query.count(),
+        'pending_applications': Application.query.filter_by(status='pending').count(),
+        'under_review_applications': Application.query.filter_by(status='under_review').count(),
+        'approved_applications': Application.query.filter_by(status='approved').count(),
+        'rejected_applications': Application.query.filter_by(status='rejected').count(),
     }), 200
 
 
@@ -207,17 +213,31 @@ def list_users():
 @admin_required
 def update_user(user_id):
     current_admin_id = int(get_jwt_identity())
+    current_admin = db.session.get(User, current_admin_id)
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
     data = request.get_json(silent=True) or {}
+
     if 'verified' in data:
         user.verified = bool(data['verified'])
+
     if 'is_admin' in data:
         if user_id == current_admin_id:
             return jsonify({'error': 'You cannot change your own admin status'}), 400
+        if not current_admin.is_super_admin:
+            return jsonify({'error': 'Only super admins can grant or revoke admin status'}), 403
         user.is_admin = bool(data['is_admin'])
+
+    if 'is_super_admin' in data:
+        if user_id == current_admin_id:
+            return jsonify({'error': 'You cannot change your own super admin status'}), 400
+        if not current_admin.is_super_admin:
+            return jsonify({'error': 'Only super admins can grant or revoke super admin status'}), 403
+        user.is_super_admin = bool(data['is_super_admin'])
+        if user.is_super_admin:
+            user.is_admin = True  # super admin implies admin
 
     try:
         db.session.commit()
@@ -233,12 +253,18 @@ def update_user(user_id):
 @admin_required
 def delete_user(user_id):
     current_admin_id = int(get_jwt_identity())
+    current_admin = db.session.get(User, current_admin_id)
+
     if user_id == current_admin_id:
         return jsonify({'error': 'You cannot delete your own account'}), 400
 
     user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
+
+    # Regular admins cannot delete other admins or super admins
+    if not current_admin.is_super_admin and (user.is_admin or user.is_super_admin):
+        return jsonify({'error': 'Only super admins can delete admin accounts'}), 403
 
     try:
         db.session.delete(user)
@@ -335,3 +361,68 @@ def delete_review(review_id):
         return jsonify({'error': 'Failed to delete review'}), 500
 
     return jsonify({'message': 'Review deleted'}), 200
+
+
+# ── Applications ────────────────────────────────────────────────────────────
+
+@admin_bp.route('/applications', methods=['GET'])
+@admin_required
+def list_applications():
+    from app.models.application import Application
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+    status = request.args.get('status', 'all')
+
+    query = db.session.query(Application, User).join(User, Application.user_id == User.id)
+    if status != 'all':
+        query = query.filter(Application.status == status)
+
+    results = query.order_by(Application.submitted_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+
+    applications = []
+    for app, user in results.items:
+        d = app.to_dict()
+        d['applicant_email'] = user.email
+        d['applicant_name'] = user.name
+        applications.append(d)
+
+    return jsonify({
+        'applications': applications,
+        'total': results.total,
+        'pages': results.pages,
+        'current_page': page,
+    }), 200
+
+
+@admin_bp.route('/applications/<int:app_id>/status', methods=['PATCH'])
+@admin_required
+def update_application_status(app_id):
+    from app.models.application import Application
+    from app.utils import utcnow
+
+    application = db.session.get(Application, app_id)
+    if not application:
+        return jsonify({'error': 'Application not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    new_status = data.get('status')
+
+    valid_statuses = ['pending', 'under_review', 'approved', 'rejected']
+    if new_status not in valid_statuses:
+        return jsonify({'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
+
+    application.status = new_status
+    if 'admin_notes' in data:
+        application.admin_notes = data['admin_notes']
+    application.updated_at = utcnow()
+
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to update application %s', app_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update application'}), 500
+
+    return jsonify({'application': application.to_dict()}), 200

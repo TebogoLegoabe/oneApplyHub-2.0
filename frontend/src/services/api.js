@@ -86,6 +86,12 @@ export const reviewsAPI = {
   getDashboardStats: () => api.get('/reviews/dashboard'),
 };
 
+// Applications API
+export const applicationsAPI = {
+  submit: (formData) => api.post('/applications', formData),
+  getMyApplication: () => api.get('/applications/my'),
+};
+
 // Admin API
 export const adminAPI = {
   getStats: () => api.get('/admin/stats'),
@@ -103,6 +109,9 @@ export const adminAPI = {
   getReviews: (params = {}) => api.get('/admin/reviews', { params }),
   approveReview: (id, approved) => api.patch(`/admin/reviews/${id}/approve`, { approved }),
   deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
+  // Applications
+  getApplications: (params = {}) => api.get('/admin/applications', { params }),
+  updateApplicationStatus: (id, data) => api.patch(`/admin/applications/${id}/status`, data),
 };
 
 export default api;

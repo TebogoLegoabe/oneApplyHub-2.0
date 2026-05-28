@@ -160,7 +160,7 @@ const BursaryPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
+        <div className="px-4 sm:px-6 lg:px-8 py-8 text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-1">SA Bursaries & Scholarships</h1>
           <p className="text-sm text-blue-100 max-w-xl mx-auto">
             Real South African bursaries categorized by field of study, from government grants to corporate sponsorships.
@@ -168,7 +168,7 @@ const BursaryPage = () => {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
           {[
             { value: filtered.length, label: 'Bursaries Found', color: 'text-blue-600' },

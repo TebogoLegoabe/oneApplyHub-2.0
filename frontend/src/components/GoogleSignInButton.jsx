@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -9,18 +9,16 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Renders Google's real GIS button as a transparent overlay on top of a custom-styled
-// visual button. The user's click hits Google's button directly, so no programmatic
-// click-forwarding is needed and popup blockers cannot interfere.
 const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue with Google' }) => {
   const containerRef = useRef(null);
   const overlayRef = useRef(null);
+  const initializedRef = useRef(false);
 
-  // Keep the callback pointing at the latest onSuccess without re-initializing Google.
   const onSuccessRef = useRef(onSuccess);
   useEffect(() => { onSuccessRef.current = onSuccess; });
 
-  useEffect(() => {
+  // Use useLayoutEffect so the container has its final dimensions before we call renderButton.
+  useLayoutEffect(() => {
     const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
     if (!clientId) {
       onError?.('Google sign-in is not configured. Please use email and password.');
@@ -28,7 +26,7 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
     }
 
     const init = () => {
-      if (!overlayRef.current) return;
+      if (!overlayRef.current || !containerRef.current) return;
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: ({ credential }) => onSuccessRef.current(credential),
@@ -36,8 +34,9 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
       window.google.accounts.id.renderButton(overlayRef.current, {
         theme: 'outline',
         size: 'large',
-        width: containerRef.current?.offsetWidth || 400,
+        width: containerRef.current.getBoundingClientRect().width || 400,
       });
+      initializedRef.current = true;
     };
 
     if (window.google?.accounts) {
@@ -54,9 +53,8 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    // `group` lets the visual layer react to hover on the transparent overlay above it.
     <div ref={containerRef} className="relative w-full mb-6 group">
-      {/* Visual-only layer — pointer-events: none so clicks pass through to the overlay */}
+      {/* Visual layer — pointer-events: none so clicks pass through to the Google iframe */}
       <div
         className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold group-hover:bg-gray-50 dark:group-hover:bg-gray-700 group-hover:border-gray-300 transition-all"
         style={{ pointerEvents: 'none', opacity: loading ? 0.5 : 1 }}
@@ -70,14 +68,14 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
         {label}
       </div>
 
-      {/* Google's real rendered button — transparent overlay that receives actual clicks */}
+      {/* Google's real rendered button — transparent overlay that receives actual clicks.
+          No overflow: hidden here — clipping the iframe can swallow pointer events. */}
       <div
         ref={overlayRef}
         style={{
           position: 'absolute',
-          top: 0, left: 0, right: 0, bottom: 0,
+          top: 0, left: 0, width: '100%', height: '100%',
           opacity: 0,
-          overflow: 'hidden',
           pointerEvents: loading ? 'none' : 'auto',
           cursor: loading ? 'not-allowed' : 'pointer',
         }}

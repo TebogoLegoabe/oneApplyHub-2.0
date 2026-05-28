@@ -4,7 +4,7 @@ import {
   User, Upload, FileText, CreditCard, Users, GraduationCap, MapPin,
   Phone, DollarSign, AlertCircle, CheckCircle, X, Shield, ArrowLeft, ArrowRight,
 } from 'lucide-react';
-import { propertiesAPI } from '../services/api';
+import { propertiesAPI, applicationsAPI } from '../services/api';
 import { validateSAID, formatDOBFromID } from '../utils/validateSAID';
 
 const STEPS = [
@@ -163,6 +163,13 @@ const FileUploadComponent = ({ label, file, error, onUpload, required = false })
   </div>
 );
 
+const STATUS_META = {
+  pending:      { label: 'Pending Review',  color: 'text-amber-600',  bg: 'bg-amber-50 border-amber-200',  dot: 'bg-amber-500'  },
+  under_review: { label: 'Under Review',    color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-200',    dot: 'bg-blue-500'   },
+  approved:     { label: 'Approved',        color: 'text-emerald-600',bg: 'bg-emerald-50 border-emerald-200',dot:'bg-emerald-500'},
+  rejected:     { label: 'Rejected',        color: 'text-red-600',    bg: 'bg-red-50 border-red-200',      dot: 'bg-red-500'    },
+};
+
 const StudentApplicationPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
@@ -174,17 +181,22 @@ const StudentApplicationPage = () => {
   const [idValidation, setIdValidation] = useState(null);
   const [parentIdValidation, setParentIdValidation] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [existingApplication, setExistingApplication] = useState(undefined); // undefined = checking
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const init = async () => {
       try {
-        const response = await propertiesAPI.getProperties({ per_page: 50 });
-        setProperties(response.data.properties || []);
+        const [propRes, appRes] = await Promise.all([
+          propertiesAPI.getProperties({ per_page: 50 }),
+          applicationsAPI.getMyApplication(),
+        ]);
+        setProperties(propRes.data.properties || []);
+        setExistingApplication(appRes.data.application); // null or object
       } catch {
-        // silently fail — list defaults to empty
+        setExistingApplication(null);
       }
     };
-    fetchProperties();
+    init();
   }, []);
 
   const handleInputChange = (field, value) => {
@@ -327,10 +339,15 @@ const StudentApplicationPage = () => {
     }
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const res = await applicationsAPI.submit(formData);
+      setExistingApplication(res.data.application);
       setSubmitStatus('success');
-    } catch {
-      setSubmitStatus('error');
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setExistingApplication(err.response.data.application);
+      } else {
+        setSubmitStatus('error');
+      }
     } finally {
       setLoading(false);
     }
@@ -780,6 +797,127 @@ const StudentApplicationPage = () => {
     }
   };
 
+  // Still checking for existing application
+  if (existingApplication === undefined) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
+      </div>
+    );
+  }
+
+  // Show status tracker if an application already exists
+  if (existingApplication) {
+    const app = existingApplication;
+    const meta = STATUS_META[app.status] || STATUS_META.pending;
+    const TIMELINE = ['pending', 'under_review', 'approved'];
+    const isRejected = app.status === 'rejected';
+    const stepIndex = TIMELINE.indexOf(app.status);
+
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-8">
+          <div className="px-4 sm:px-6 lg:px-8">
+            <h1 className="text-2xl font-bold">My Application</h1>
+            <p className="text-blue-100 mt-1 text-sm">Track the status of your accommodation application.</p>
+          </div>
+        </div>
+
+        <div className="px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+          {/* Status card */}
+          <div className={`border rounded-2xl p-6 ${meta.bg}`}>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Application Reference</p>
+                <p className="font-mono font-bold text-gray-900 dark:text-white text-lg">{app.reference}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Submitted {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
+                </p>
+              </div>
+              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${meta.bg} self-start sm:self-auto`}>
+                <span className={`w-2.5 h-2.5 rounded-full ${meta.dot} animate-pulse`} />
+                <span className={`text-sm font-bold ${meta.color}`}>{meta.label}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress timeline */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-5">Application Progress</h3>
+            {isRejected ? (
+              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <X className="w-5 h-5 text-red-600 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-red-700 dark:text-red-400">Application Not Approved</p>
+                  <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">Please contact the accommodation office for more information.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                {TIMELINE.map((s, i) => {
+                  const done = i <= stepIndex;
+                  const active = i === stepIndex;
+                  const m = STATUS_META[s];
+                  return (
+                    <div key={s} className="flex items-center flex-1">
+                      <div className="flex flex-col items-center flex-1">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${done ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'}`}>
+                          {done ? <CheckCircle className="w-4 h-4 text-white" /> : <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />}
+                        </div>
+                        <p className={`text-[10px] mt-1.5 font-semibold text-center leading-tight ${active ? 'text-indigo-600' : done ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>
+                          {m.label}
+                        </p>
+                      </div>
+                      {i < TIMELINE.length - 1 && (
+                        <div className={`h-0.5 flex-1 mb-5 ${i < stepIndex ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Admin notes */}
+          {app.admin_notes && (
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2">Message from Admin</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{app.admin_notes}</p>
+            </div>
+          )}
+
+          {/* Submitted details */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Submitted Details</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              {[
+                ['Full Name', `${app.first_name} ${app.last_name}`],
+                ['University', app.university?.toUpperCase() || '—'],
+                ['Student Number', app.student_number || '—'],
+                ['Status Last Updated', app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-ZA') : '—'],
+              ].map(([label, value]) => (
+                <div key={label}>
+                  <p className="text-xs text-gray-400 mb-0.5">{label}</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (submitStatus === 'success') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
@@ -789,9 +927,11 @@ const StudentApplicationPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Application Submitted!</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-2">Your accommodation application has been submitted successfully.</p>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-            Reference: <span className="font-mono font-semibold">APP-{Date.now().toString().slice(-8)}</span>
-          </p>
+          {existingApplication && (
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+              Reference: <span className="font-mono font-semibold">{existingApplication.reference}</span>
+            </p>
+          )}
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">You will receive a confirmation email shortly.</p>
           <button
             onClick={() => navigate('/dashboard')}
@@ -807,13 +947,13 @@ const StudentApplicationPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold">Student Accommodation Application</h1>
           <p className="text-blue-100 mt-2">Complete each step to submit your application.</p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="hidden md:flex items-center justify-between mb-5">
             {STEPS.map((step, index) => {

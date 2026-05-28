@@ -25,7 +25,7 @@ const LoginPage = () => {
     const result = await googleLogin(credential);
     setGoogleLoading(false);
     if (result.success) {
-      navigate('/dashboard', { replace: true });
+      navigate(result.user?.is_admin ? '/admin' : '/dashboard', { replace: true });
     } else {
       setError(result.error || 'Google sign-in failed');
     }
@@ -46,7 +46,7 @@ const LoginPage = () => {
         setMfaToken(result.mfa_token);
         setMfaRequired(true);
       } else if (result.success) {
-        navigate('/dashboard', { replace: true });
+        navigate(result.user?.is_admin ? '/admin' : '/dashboard', { replace: true });
       } else {
         setError(result.error);
       }
@@ -64,7 +64,7 @@ const LoginPage = () => {
     const result = await verifyMFALogin(mfaToken, mfaCode);
     setLoading(false);
     if (result.success) {
-      navigate('/dashboard', { replace: true });
+      navigate(result.user?.is_admin ? '/admin' : '/dashboard', { replace: true });
     } else {
       setError(result.error);
       if (result.error?.includes('expired') || result.error?.includes('session')) {

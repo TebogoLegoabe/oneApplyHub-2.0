@@ -65,7 +65,7 @@ const PropertiesPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-1">Find Your Accommodation</h1>
           <p className="text-sm text-blue-100 max-w-xl">
             Browse verified student properties near Wits and UJ. Filter by university, type, and price range.
@@ -73,7 +73,7 @@ const PropertiesPage = () => {
         </div>
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-5">
@@ -163,7 +163,7 @@ const PropertiesPage = () => {
 
         {/* Properties Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
                 <div className="h-40 bg-gray-200" />
@@ -176,7 +176,7 @@ const PropertiesPage = () => {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {properties.map((property) => {
               const amenities = parseAmenities(property.amenities);
               return (

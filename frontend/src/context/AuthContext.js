@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true, mfa_required: true, mfa_token };
       }
       _storeSession(access_token, userData);
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Login failed' };
     }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       const response = await mfaAPI.verifyLogin(mfa_token, code);
       const { access_token, user: userData } = response.data;
       _storeSession(access_token, userData);
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Invalid code' };
     }
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.googleVerify(idToken);
       const { access_token, user: userData } = response.data;
       _storeSession(access_token, userData);
-      return { success: true };
+      return { success: true, user: userData };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Google sign-in failed' };
     }
@@ -120,6 +120,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    window.google?.accounts?.id?.disableAutoSelect();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);

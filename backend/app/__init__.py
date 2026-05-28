@@ -57,16 +57,19 @@ def create_app():
     limiter.init_app(app)
 
     from app.models import User, Property, Review, PropertyImage, HelpfulVote  # noqa: F401
+    from app.models.application import Application  # noqa: F401
 
     from app.routes.auth import auth_bp
     from app.routes.properties import properties_bp
     from app.routes.reviews import reviews_bp
     from app.routes.admin import admin_bp
+    from app.routes.applications import applications_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(properties_bp, url_prefix='/api/properties')
     app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
+    app.register_blueprint(applications_bp, url_prefix='/api/applications')
 
     @app.route('/')
     def health():
