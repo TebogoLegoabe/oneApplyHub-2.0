@@ -52,7 +52,7 @@ export const authAPI = {
   resetPassword: (data) => api.post('/auth/reset-password', data),
   sendVerificationCode: (email) => api.post('/auth/send-verification', { email }),
   verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
-  googleVerify: (idToken) => api.post('/auth/google/verify', { id_token: idToken }),
+  googleVerify: (token) => api.post('/auth/google/verify', { access_token: token }),
 };
 
 // MFA API

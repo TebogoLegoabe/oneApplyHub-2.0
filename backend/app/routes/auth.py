@@ -222,35 +222,54 @@ def verify_email():
 @auth_bp.route('/google/verify', methods=['POST'])
 @limiter.limit('10 per minute')
 def google_verify():
-    data = request.get_json(silent=True) or {}
-    id_token_str = data.get('id_token') or data.get('credential')
-
-    if not id_token_str:
-        return jsonify({'error': 'Google ID token is required'}), 400
-
+    import requests as http_requests
     from flask import current_app
+
+    data = request.get_json(silent=True) or {}
     google_client_id = current_app.config.get('GOOGLE_CLIENT_ID')
     if not google_client_id:
         return jsonify({'error': 'Google OAuth is not configured on this server'}), 501
 
-    try:
-        from google.oauth2 import id_token as google_id_token
-        from google.auth.transport import requests as google_requests
-        idinfo = google_id_token.verify_oauth2_token(
-            id_token_str,
-            google_requests.Request(),
-            google_client_id,
-        )
-    except ValueError as exc:
-        logger.warning('Google token invalid: %s', exc)
-        return jsonify({'error': 'Invalid Google token — please try signing in again'}), 401
-    except Exception as exc:
-        logger.exception('Google token verification error: %s', exc)
-        return jsonify({'error': 'Could not verify Google token — server error'}), 500
+    access_token = data.get('access_token')
+    id_token_str = data.get('id_token') or data.get('credential')
 
-    google_id = idinfo['sub']
+    if access_token:
+        # New flow: verify access token via Google's userinfo endpoint
+        try:
+            resp = http_requests.get(
+                'https://www.googleapis.com/oauth2/v3/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=5,
+            )
+            if not resp.ok:
+                return jsonify({'error': 'Invalid Google token — please try signing in again'}), 401
+            idinfo = resp.json()
+        except Exception as exc:
+            logger.exception('Google userinfo request failed: %s', exc)
+            return jsonify({'error': 'Could not verify Google token — server error'}), 500
+    elif id_token_str:
+        # Legacy flow: verify ID token
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            idinfo = google_id_token.verify_oauth2_token(
+                id_token_str, google_requests.Request(), google_client_id,
+            )
+        except ValueError as exc:
+            logger.warning('Google token invalid: %s', exc)
+            return jsonify({'error': 'Invalid Google token — please try signing in again'}), 401
+        except Exception as exc:
+            logger.exception('Google token verification error: %s', exc)
+            return jsonify({'error': 'Could not verify Google token — server error'}), 500
+    else:
+        return jsonify({'error': 'Google token is required'}), 400
+
+    google_id = idinfo.get('sub')
     g_email = idinfo.get('email', '').lower()
     g_name = idinfo.get('name') or g_email.split('@')[0]
+
+    if not google_id or not g_email:
+        return jsonify({'error': 'Could not retrieve account info from Google'}), 401
 
     user = User.query.filter_by(google_id=google_id).first()
     if not user:

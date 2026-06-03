@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -10,78 +10,62 @@ const GoogleIcon = () => (
 );
 
 const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue with Google' }) => {
-  const containerRef = useRef(null);
-  const overlayRef = useRef(null);
-  const initializedRef = useRef(false);
-
+  const [ready, setReady] = useState(false);
+  const clientRef = useRef(null);
   const onSuccessRef = useRef(onSuccess);
   useEffect(() => { onSuccessRef.current = onSuccess; });
 
-  // Use useLayoutEffect so the container has its final dimensions before we call renderButton.
-  useLayoutEffect(() => {
-    const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
     if (!clientId) {
-      onError?.('Google sign-in is not configured. Please use email and password.');
+      onError?.('Google sign-in is not configured.');
       return;
     }
 
-    const init = () => {
-      if (!overlayRef.current || !containerRef.current) return;
-      window.google.accounts.id.initialize({
+    const build = () => {
+      // initTokenClient opens a real popup every time — no iframe state issues.
+      clientRef.current = window.google.accounts.oauth2.initTokenClient({
         client_id: clientId,
-        callback: ({ credential }) => onSuccessRef.current(credential),
+        scope: 'openid email profile',
+        callback: async (resp) => {
+          if (resp.error) { onError?.(resp.error); return; }
+          onSuccessRef.current(resp.access_token);
+        },
       });
-      window.google.accounts.id.renderButton(overlayRef.current, {
-        theme: 'outline',
-        size: 'large',
-        width: containerRef.current.getBoundingClientRect().width || 400,
-      });
-      initializedRef.current = true;
+      setReady(true);
     };
 
-    if (window.google?.accounts) {
-      init();
+    if (window.google?.accounts?.oauth2) {
+      build();
     } else {
-      const interval = setInterval(() => {
-        if (window.google?.accounts) {
-          clearInterval(interval);
-          init();
-        }
+      const t = setInterval(() => {
+        if (window.google?.accounts?.oauth2) { clearInterval(t); build(); }
       }, 100);
-      return () => clearInterval(interval);
+      return () => clearInterval(t);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return (
-    <div ref={containerRef} className="relative w-full mb-6 group">
-      {/* Visual layer — pointer-events: none so clicks pass through to the Google iframe */}
-      <div
-        className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold group-hover:bg-gray-50 dark:group-hover:bg-gray-700 group-hover:border-gray-300 transition-all"
-        style={{ pointerEvents: 'none', opacity: loading ? 0.5 : 1 }}
-        aria-hidden="true"
-      >
-        {loading ? (
-          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
-        ) : (
-          <GoogleIcon />
-        )}
-        {label}
-      </div>
+  const handleClick = () => {
+    if (!clientRef.current) return;
+    // prompt: 'select_account' forces the account picker every single time.
+    clientRef.current.requestAccessToken({ prompt: 'select_account' });
+  };
 
-      {/* Google's real rendered button — transparent overlay that receives actual clicks.
-          No overflow: hidden here — clipping the iframe can swallow pointer events. */}
-      <div
-        ref={overlayRef}
-        style={{
-          position: 'absolute',
-          top: 0, left: 0, width: '100%', height: '100%',
-          opacity: 0,
-          pointerEvents: loading ? 'none' : 'auto',
-          cursor: loading ? 'not-allowed' : 'pointer',
-        }}
-        aria-label={label}
-      />
-    </div>
+  return (
+    <button
+      type="button"
+      onClick={handleClick}
+      disabled={loading || !ready}
+      className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+    >
+      {loading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
+      ) : (
+        <GoogleIcon />
+      )}
+      {label}
+    </button>
   );
 };
 
