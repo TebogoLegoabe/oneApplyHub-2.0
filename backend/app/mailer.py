@@ -7,14 +7,11 @@ from app import mail
 
 logger = logging.getLogger(__name__)
 
+FROM_ADDRESS = 'oneApplyHub <noreply@oneapplyhub.co.za>'
+
 
 def _is_mail_configured() -> bool:
     return bool(current_app.config.get('MAIL_USERNAME') and current_app.config.get('MAIL_PASSWORD'))
-
-
-def _dev_warn(label: str, to: str, info: str) -> None:
-    logger.warning('\n%s\n  EMAIL NOT CONFIGURED — DEV MODE %s\n  To: %s\n  %s\n%s',
-                   '=' * 60, label, to, info, '=' * 60)
 
 
 def _wrap(title: str, body: str) -> str:
@@ -31,10 +28,24 @@ def _wrap(title: str, body: str) -> str:
     """
 
 
-def send_verification_email(to: str, code: str) -> bool:
+def _send(to: str, subject: str, html: str) -> bool:
     if not _is_mail_configured():
-        _dev_warn('OTP', to, f'Code: {code}')
+        logger.warning('Mail not configured — email not sent to %s | %s', to, subject)
         return False
+    try:
+        mail.send(Message(
+            subject=subject,
+            sender=FROM_ADDRESS,
+            recipients=[to],
+            html=html,
+        ))
+        return True
+    except Exception:
+        logger.exception('Failed to send email to %s', to)
+        return False
+
+
+def send_verification_email(to: str, code: str) -> bool:
     body = f"""
         <p style="color:#475569;font-size:14px;">Enter the code below to verify your university email and activate your account:</p>
         <div style="background:#f1f5f9;border-radius:8px;padding:20px;text-align:center;margin:20px 0;">
@@ -42,22 +53,10 @@ def send_verification_email(to: str, code: str) -> bool:
         </div>
         <p style="color:#94a3b8;font-size:12px;margin-bottom:0;">This code expires in <strong>15 minutes</strong>. If you did not register for oneApplyHub, please ignore this email.</p>
     """
-    try:
-        mail.send(Message(
-            subject='Your oneApplyHub Verification Code',
-            recipients=[to],
-            html=_wrap('Verify your email address', body),
-        ))
-        return True
-    except Exception:
-        logger.exception('Failed to send verification email to %s', to)
-        return False
+    return _send(to, 'Your oneApplyHub Verification Code', _wrap('Verify your email address', body))
 
 
 def send_password_reset_email(to: str, reset_url: str) -> bool:
-    if not _is_mail_configured():
-        _dev_warn('RESET LINK', to, f'URL: {reset_url}')
-        return False
     body = f"""
         <p style="color:#475569;font-size:14px;">We received a request to reset your password. Click the button below to choose a new one:</p>
         <div style="text-align:center;margin:24px 0;">
@@ -65,13 +64,4 @@ def send_password_reset_email(to: str, reset_url: str) -> bool:
         </div>
         <p style="color:#94a3b8;font-size:12px;margin-bottom:0;">This link expires in <strong>1 hour</strong>. If you did not request a password reset, please ignore this email.</p>
     """
-    try:
-        mail.send(Message(
-            subject='Reset your oneApplyHub password',
-            recipients=[to],
-            html=_wrap('Password Reset Request', body),
-        ))
-        return True
-    except Exception:
-        logger.exception('Failed to send password reset email to %s', to)
-        return False
+    return _send(to, 'Reset your oneApplyHub password', _wrap('Password Reset Request', body))
