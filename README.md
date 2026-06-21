@@ -131,7 +131,10 @@ Tracks which user marked which review as helpful, to prevent duplicate votes.
    # e.g. when venv creation is interrupted by OneDrive sync or antivirus)
    python -m pip install -r requirements.txt
 
-   # Create your .env file (see Environment Variables below)
+   # Create your .env file from the template (see Environment Variables below)
+   cp .env.example .env        # Git Bash / macOS / Linux
+   # copy .env.example .env    # Windows cmd.exe
+   # Copy-Item .env.example .env  # Windows PowerShell
 
    # Create the database tables from the current models, then tell
    # Alembic you're already at the latest migration. (`flask db upgrade`
@@ -148,7 +151,36 @@ Tracks which user marked which review as helpful, to prevent duplicate votes.
 
    # Install dependencies
    npm install
+
+   # Optional - only needed for the "Sign in with Google" button
+   cp .env.example .env        # Git Bash / macOS / Linux
+   # copy .env.example .env    # Windows cmd.exe
+   # Copy-Item .env.example .env  # Windows PowerShell
    ```
+
+### 🔑 Environment Variables
+
+Both apps read configuration from a `.env` file that is **not committed to git**
+(it's covered by `.gitignore`). Each app ships a `.env.example` template —
+copy it to `.env` as shown above, then fill in any values you need.
+
+#### Backend ([backend/.env.example](backend/.env.example))
+
+| Variable | Required? | Notes |
+| --- | --- | --- |
+| `FLASK_ENV` | Yes | Set to `development` for local work. Anything else (or unset) makes the app **fail to start** unless `SECRET_KEY`/`JWT_SECRET_KEY` are set — that's the intended production safety check in [config.py](backend/config.py). |
+| `SECRET_KEY`, `JWT_SECRET_KEY` | Only when `FLASK_ENV` is not `development` | Generate with `python -c "import secrets; print(secrets.token_hex(32))"`. In dev, leaving these blank just logs a warning and uses an insecure default. |
+| `DATABASE_URL` | No | Defaults to a local SQLite file at `backend/studentstay.db`. Set this for Postgres/Railway. |
+| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` | No | Only needed to actually send verification/reset emails. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Only needed for Google OAuth sign-in. |
+| `FRONTEND_URL` | No | Used to build links in verification/reset emails. |
+| `REDIS_URL` | No | Rate-limit storage backend; defaults to in-memory (fine for a single dev process). |
+
+#### Frontend ([frontend/.env.example](frontend/.env.example))
+
+| Variable | Required? | Notes |
+| --- | --- | --- |
+| `REACT_APP_GOOGLE_CLIENT_ID` | No | Only needed for the "Sign in with Google" button. Get one from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials). |
 
 ### 🏃‍♂️ Running the Application
 
