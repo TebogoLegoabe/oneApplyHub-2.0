@@ -34,26 +34,6 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 - Application status workflow: `pending → under_review → approved/rejected`
 - Students can view their own submission and its status
 
-### 🛡️ **Admin Dashboard**
-
-- Platform-wide stats (users, properties, reviews, applications)
-- Approve/reject/edit/delete properties
-- Moderate and delete reviews
-- Manage users (verify, promote/demote admin & super admin, delete)
-- Review and update student application statuses
-
-### 📱 **Responsive Design**
-
-- Mobile-first responsive design with a collapsible sidebar
-- Touch-friendly interface
-- Works seamlessly across all devices
-
-### 🎯 **University-Specific Features**
-
-- Tailored for Wits and UJ students
-- University-specific filtering and content
-- Academic year and faculty information integration
-
 ## 🛠️ Tech Stack
 
 ### **Frontend** ([frontend/package.json](frontend/package.json))
@@ -65,32 +45,6 @@ A comprehensive web platform designed specifically for **Wits and UJ students** 
 - **Lucide React** - Icon set
 - **Tailwind CSS** - Utility-first CSS framework
 - **Context API** (`AuthContext`, `ThemeContext`) - Global state management
-
-### **Backend** ([backend/requirements.txt](backend/requirements.txt))
-
-| Package                                                                                                  | Purpose                                                   |
-| -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Flask                                                                                                    | Core web framework                                        |
-| Flask-SQLAlchemy                                                                                         | ORM / database models                                     |
-| Flask-Migrate                                                                                            | Alembic-based schema migrations                           |
-| Flask-JWT-Extended                                                                                       | JWT issuing/validation for authenticated routes           |
-| Flask-CORS                                                                                               | Cross-origin resource sharing                             |
-| Flask-Limiter                                                                                            | Per-route rate limiting (in-memory or Redis-backed)       |
-| Flask-Mail                                                                                               | Transactional email (verification codes, password resets) |
-| SQLAlchemy                                                                                               | SQL toolkit underlying the ORM                            |
-| google-auth                                                                                              | Verifies Google OAuth ID tokens                           |
-| requests                                                                                                 | HTTP calls to Google's userinfo endpoint                  |
-| pyotp                                                                                                    | TOTP generation/verification for MFA                      |
-| qrcode[pil]                                                                                              | Generates MFA setup QR codes                              |
-| psycopg2-binary                                                                                          | PostgreSQL driver (production database)                   |
-| python-dotenv                                                                                            | Loads `.env` files in development                         |
-| gunicorn                                                                                                 | Production WSGI server                                    |
-| PyJWT, itsdangerous, Werkzeug, Jinja2, MarkupSafe, click, blinker, colorama, greenlet, typing_extensions | Flask/Werkzeug dependency stack                           |
-
-### **Database**
-
-- **SQLite** for local development
-- **PostgreSQL** in production (Railway), via `DATABASE_URL`
 
 ## 🗄️ Database Models
 
@@ -136,18 +90,6 @@ A student's review of a property.
 
 Tracks which user marked which review as helpful, to prevent duplicate votes.
 
-- `review_id` (FK, cascade delete), `user_id` (FK, cascade delete)
-- Constraint: unique `(review_id, user_id)` pair
-
-### `Application` ([application.py](backend/app/models/application.py))
-
-A student's accommodation application.
-
-- `user_id` (FK, unique — one application per user), auto-generated `reference` (e.g. `APP-XXXXXXXX`)
-- Indexed fields: `first_name`, `last_name`, `university`, `student_number`
-- `form_data` — full submitted form, stored as JSON
-- Workflow: `status` (`pending` → `under_review` → `approved`/`rejected`), `admin_notes`
-
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -184,7 +126,10 @@ A student's accommodation application.
    source venv/bin/activate       # macOS / Linux
 
    # Install dependencies
-   pip install -r requirements.txt
+   # (use "python -m pip" rather than a bare "pip" — guarantees the install
+   # target is the active venv even if its pip launcher script is missing,
+   # e.g. when venv creation is interrupted by OneDrive sync or antivirus)
+   python -m pip install -r requirements.txt
 
    # Create your .env file (see Environment Variables below)
 
@@ -194,12 +139,6 @@ A student's accommodation application.
    # only contains incremental changes on top of an already-existing schema.)
    python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
    flask db stamp head
-
-   # Create an admin user (optional, interactive prompt)
-   python create_admin.py
-
-   # Add sample data (optional)
-   python add_sample_properties.py
    ```
 
 3. **Frontend Setup**
@@ -234,65 +173,6 @@ A student's accommodation application.
 3. **Access the Application**
    - Open your browser and navigate to `http://localhost:3000`
    - The app proxies API requests to the Flask backend
-
-## 📚 API Endpoints
-
-### **Authentication** (`/api/auth`)
-
-- `POST /api/auth/register` - Register with a university email
-- `POST /api/auth/login` - Login (returns an access token, or an MFA challenge)
-- `GET /api/auth/profile` - Get the current user's profile
-- `POST /api/auth/send-verification` - Resend the email verification code
-- `POST /api/auth/verify-email` - Verify email with the OTP code
-- `POST /api/auth/google/verify` - Sign in with Google (access token or ID token)
-- `POST /api/auth/forgot-password` - Request a password reset email
-- `POST /api/auth/reset-password` - Reset password with a reset token
-- `POST /api/auth/mfa/verify-login` - Complete login with a TOTP/backup code
-- `POST /api/auth/mfa/setup` - Generate a TOTP secret + QR code
-- `POST /api/auth/mfa/enable` - Confirm TOTP code and enable MFA (returns backup codes)
-- `POST /api/auth/mfa/disable` - Disable MFA
-
-### **Properties** (`/api/properties`)
-
-- `GET /api/properties` - List approved properties (filter by university, type, price, search; paginated)
-- `GET /api/properties/:id` - Get a specific approved property
-
-### **Reviews** (`/api/reviews`)
-
-- `GET /api/reviews` - List approved reviews (filter by university, min rating, search; paginated)
-- `GET /api/reviews/property/:id` - Get approved reviews for a specific property
-- `POST /api/reviews/property/:id` - Submit a review (verified users only)
-- `POST /api/reviews/:id/helpful` - Mark a review as helpful
-- `GET /api/reviews/dashboard` - Aggregate stats for the student dashboard (auth required)
-- `GET /api/reviews/user/stats` - Current user's own review stats (auth required)
-
-### **Applications** (`/api/applications`)
-
-- `POST /api/applications` - Submit a student accommodation application
-- `GET /api/applications/my` - Get the current user's application
-
-### **Admin** (`/api/admin`) — requires `is_admin`
-
-- `GET /api/admin/stats` - Platform-wide counts
-- `GET /api/admin/properties` - List properties (filter by status; paginated)
-- `POST /api/admin/properties` - Create a property
-- `PUT /api/admin/properties/:id` - Update a property
-- `PATCH /api/admin/properties/:id/approve` - Toggle property approval
-- `DELETE /api/admin/properties/:id` - Delete a property (and its reviews/images)
-- `GET /api/admin/users` - List users (filter by university/verified; paginated)
-- `PATCH /api/admin/users/:id` - Verify a user, or grant/revoke admin/super-admin (super admin only for role changes)
-- `DELETE /api/admin/users/:id` - Delete a user
-- `GET /api/admin/reviews` - List reviews (filter by status; paginated)
-- `PATCH /api/admin/reviews/:id/approve` - Toggle review approval
-- `DELETE /api/admin/reviews/:id` - Delete a review
-- `GET /api/admin/applications` - List student applications (filter by status; paginated)
-- `PATCH /api/admin/applications/:id/status` - Update an application's status/notes
-
-### **Misc**
-
-- `GET /` - Health check
-- `GET /api/health` - Health check including DB connectivity
-- `GET /api/stats` - Public platform stats (approved properties/reviews, verified students)
 
 ## 🗂️ Project Structure
 
@@ -354,46 +234,6 @@ oneApplyHub-2.0/
     ├── public/
     └── package.json
 ```
-
-## 🔐 Environment Variables
-
-Create a `.env` file in the `backend` directory:
-
-```env
-# Core
-SECRET_KEY=your-secret-key-here
-JWT_SECRET_KEY=your-jwt-secret-key
-FLASK_ENV=development
-DATABASE_URL=sqlite:///studentstay.db
-
-# Flask-Mail (verification codes, password resets)
-MAIL_SERVER=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USE_TLS=true
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-MAIL_DEFAULT_SENDER=noreply@oneapplyhub.co.za
-
-# Google OAuth (optional — Google sign-in is disabled if unset)
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-# Rate limiting (optional — falls back to in-memory storage)
-REDIS_URL=redis://localhost:6379
-
-# Frontend origin (added to CORS allow-list and used in reset-password links)
-FRONTEND_URL=http://localhost:3000
-```
-
-In production, `SECRET_KEY` and `JWT_SECRET_KEY` are required — the app refuses to start without them when `FLASK_ENV` is not `development`.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## 📝 License
 
