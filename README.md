@@ -135,14 +135,13 @@ Tracks which user marked which review as helpful, to prevent duplicate votes.
    cp .env.example .env        # Git Bash / macOS / Linux
    # copy .env.example .env    # Windows cmd.exe
    # Copy-Item .env.example .env  # Windows PowerShell
-
-   # Create the database tables from the current models, then tell
-   # Alembic you're already at the latest migration. (`flask db upgrade`
-   # alone won't work on a brand-new database — the migration history
-   # only contains incremental changes on top of an already-existing schema.)
-   python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
-   flask db stamp head
    ```
+
+   The database (a local SQLite file by default) doesn't need any manual setup —
+   the first time you run `python run.py` (see **Running the Application** below)
+   it automatically creates all tables and stamps Alembic at `head`. This only
+   happens once; on every later run it detects the tables already exist and skips
+   straight to serving requests.
 
 3. **Frontend Setup**
 
@@ -191,7 +190,9 @@ copy it to `.env` as shown above, then fill in any values you need.
    python run.py
    ```
 
-   The Flask API will run on `http://localhost:5000`
+   The Flask API will run on `http://localhost:5000`. On a brand-new database
+   you'll see `No tables found - creating database schema for the first time...`
+   in the console — that's expected on the very first run only.
 
 2. **Start the Frontend Development Server on another terminal**
 
@@ -205,6 +206,23 @@ copy it to `.env` as shown above, then fill in any values you need.
 3. **Access the Application**
    - Open your browser and navigate to `http://localhost:3000`
    - The app proxies API requests to the Flask backend
+   - The database starts empty — optionally seed sample properties with
+     `cd backend && python seed.py` (see [seed.py](backend/seed.py) for options)
+
+### 🩹 Troubleshooting
+
+**`sqlite3.OperationalError: no such table: property` (or `user`, `review`, etc.)**
+
+This means the backend started against a database with no schema yet. It's
+handled automatically by `python run.py` (see above), so this should only
+happen if you started Flask another way (e.g. `flask run`, gunicorn locally,
+or `flask shell`) before any tables existed. Fix it once with:
+
+```bash
+cd backend
+python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
+flask db stamp head
+```
 
 ## 🗂️ Project Structure
 
