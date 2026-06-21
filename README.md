@@ -171,20 +171,35 @@ A student's accommodation application.
    cd backend
 
    # Create virtual environment
+   # (use python3/pip3 below instead if your system has no plain "python" alias — common on macOS/Linux)
    python -m venv venv
 
    # Activate virtual environment
-   # On Windows:
+   # Windows (cmd.exe):
    venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
+   # Windows (PowerShell):
+   venv\Scripts\Activate.ps1
+   # Windows (Git Bash) / macOS / Linux:
+   source venv/Scripts/activate   # Git Bash on Windows
+   source venv/bin/activate       # macOS / Linux
 
    # Install dependencies
    pip install -r requirements.txt
 
-   # Apply database migrations
-   flask db upgrade
+   # Create your .env file (see Environment Variables below)
 
+   # Create the database tables from the current models, then tell
+   # Alembic you're already at the latest migration. (`flask db upgrade`
+   # alone won't work on a brand-new database — the migration history
+   # only contains incremental changes on top of an already-existing schema.)
+   python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
+   flask db stamp head
+
+   # Create an admin user (optional, interactive prompt)
+   python create_admin.py
+
+   # Add sample data (optional)
+   python add_sample_properties.py
    ```
 
 3. **Frontend Setup**
