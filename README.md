@@ -90,139 +90,141 @@ A student's review of a property.
 
 Tracks which user marked which review as helpful, to prevent duplicate votes.
 
-## 🚀 Getting Started
+---
 
-### Prerequisites
+## 🚀 Local Development Setup
 
-- **Python 3.8+**
-- **Node.js 16+** and **npm**
-- **Git**
+> **Prerequisites:** Python 3.8+, Node.js 16+, Git
 
-### 📦 Installation
+### Quick Start (All Platforms)
 
-1. **Clone the repository**
+**1. Clone the repo**
 
-   ```bash
-   git clone https://github.com/TebogoLegoabe/oneApplyHub-2.0.git
-   cd oneApplyHub-2.0
-   ```
+```bash
+git clone https://github.com/TebogoLegoabe/oneApplyHub-2.0.git
+cd oneApplyHub-2.0
+```
 
-2. **Backend Setup**
-
-   ```bash
-   cd backend
-
-   # Create virtual environment
-   # (use python3/pip3 below instead if your system has no plain "python" alias — common on macOS/Linux)
-   python -m venv venv
-
-   # Activate virtual environment
-   # Windows (cmd.exe):
-   venv\Scripts\activate
-   # Windows (PowerShell):
-   venv\Scripts\Activate.ps1
-   # Windows (Git Bash) / macOS / Linux:
-   source venv/Scripts/activate   # Git Bash on Windows
-   source venv/bin/activate       # macOS / Linux
-
-   # Install dependencies
-   # (use "python -m pip" rather than a bare "pip" — guarantees the install
-   # target is the active venv even if its pip launcher script is missing,
-   # e.g. when venv creation is interrupted by OneDrive sync or antivirus)
-   python -m pip install -r requirements.txt
-
-   # Create your .env file from the template (see Environment Variables below)
-   cp .env.example .env        # Git Bash / macOS / Linux
-   # copy .env.example .env    # Windows cmd.exe
-   # Copy-Item .env.example .env  # Windows PowerShell
-   ```
-
-   The database (a local SQLite file by default) doesn't need any manual setup —
-   the first time you run `python run.py` (see **Running the Application** below)
-   it automatically creates all tables and stamps Alembic at `head`. This only
-   happens once; on every later run it detects the tables already exist and skips
-   straight to serving requests.
-
-3. **Frontend Setup**
-
-   ```bash
-   cd ../frontend
-
-   # Install dependencies
-   npm install
-
-   # Optional - only needed for the "Sign in with Google" button
-   cp .env.example .env        # Git Bash / macOS / Linux
-   # copy .env.example .env    # Windows cmd.exe
-   # Copy-Item .env.example .env  # Windows PowerShell
-   ```
-
-### 🔑 Environment Variables
-
-Both apps read configuration from a `.env` file that is **not committed to git**
-(it's covered by `.gitignore`). Each app ships a `.env.example` template —
-copy it to `.env` as shown above, then fill in any values you need.
-
-#### Backend ([backend/.env.example](backend/.env.example))
-
-| Variable | Required? | Notes |
-| --- | --- | --- |
-| `FLASK_ENV` | Yes | Set to `development` for local work. Anything else (or unset) makes the app **fail to start** unless `SECRET_KEY`/`JWT_SECRET_KEY` are set — that's the intended production safety check in [config.py](backend/config.py). |
-| `SECRET_KEY`, `JWT_SECRET_KEY` | Only when `FLASK_ENV` is not `development` | Generate with `python -c "import secrets; print(secrets.token_hex(32))"`. In dev, leaving these blank just logs a warning and uses an insecure default. |
-| `DATABASE_URL` | No | Defaults to a local SQLite file at `backend/studentstay.db`. Set this for Postgres/Railway. |
-| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USE_TLS`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_DEFAULT_SENDER` | No | Only needed to actually send verification/reset emails. |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | No | Only needed for Google OAuth sign-in. |
-| `FRONTEND_URL` | No | Used to build links in verification/reset emails. |
-| `REDIS_URL` | No | Rate-limit storage backend; defaults to in-memory (fine for a single dev process). |
-
-#### Frontend ([frontend/.env.example](frontend/.env.example))
-
-| Variable | Required? | Notes |
-| --- | --- | --- |
-| `REACT_APP_GOOGLE_CLIENT_ID` | No | Only needed for the "Sign in with Google" button. Get one from the [Google Cloud Console](https://console.cloud.google.com/apis/credentials). |
-
-### 🏃‍♂️ Running the Application
-
-1. **Start the Backend Server**
-
-   ```bash
-   cd backend
-   python run.py
-   ```
-
-   The Flask API will run on `http://localhost:5000`. On a brand-new database
-   you'll see `No tables found - creating database schema for the first time...`
-   in the console — that's expected on the very first run only.
-
-2. **Start the Frontend Development Server on another terminal**
-
-   ```bash
-   cd frontend
-   npm start
-   ```
-
-   The React app will run on `http://localhost:3000`
-
-3. **Access the Application**
-   - Open your browser and navigate to `http://localhost:3000`
-   - The app proxies API requests to the Flask backend
-   - The database starts empty — optionally seed sample properties with
-     `cd backend && python seed.py` (see [seed.py](backend/seed.py) for options)
-
-### 🩹 Troubleshooting
-
-**`sqlite3.OperationalError: no such table: property` (or `user`, `review`, etc.)**
-
-This means the backend started against a database with no schema yet. It's
-handled automatically by `python run.py` (see above), so this should only
-happen if you started Flask another way (e.g. `flask run`, gunicorn locally,
-or `flask shell`) before any tables existed. Fix it once with:
+**2. Backend**
 
 ```bash
 cd backend
-python -c "from app import create_app, db; app = create_app(); app.app_context().push(); db.create_all()"
-flask db stamp head
+
+# Create and activate virtual environment
+python -m venv venv
+
+# Mac/Linux:
+source venv/bin/activate
+# Windows Command Prompt:
+venv\Scripts\activate
+# Windows PowerShell:
+venv\Scripts\Activate.ps1
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set up environment variables (DB URL is pre-configured)
+cp .env.example .env        # Mac/Linux
+copy .env.example .env      # Windows cmd
+Copy-Item .env.example .env # Windows PowerShell
+
+# Start the backend
+python run.py
 ```
+
+API runs at **http://localhost:5000** — health check: http://localhost:5000/api/health
+
+**3. Frontend** (new terminal)
+
+```bash
+cd frontend
+
+npm install
+
+cp .env.example .env        # Mac/Linux
+copy .env.example .env      # Windows cmd
+Copy-Item .env.example .env # Windows PowerShell
+
+npm start
+```
+
+App opens at **http://localhost:3000**
+
+---
+
+### Database
+
+The project uses a **shared Railway PostgreSQL database**. The connection URL is
+pre-filled in `backend/.env.example` — just copy it to `.env` and you're connected.
+
+No local database installation needed.
+
+> ⚠️ The team shares one database. Avoid destructive operations and use clearly
+> labelled test data (e.g. "Test User — John") so everyone knows what's real.
+
+---
+
+### Create a Local Admin Account
+
+```bash
+cd backend
+python create_admin.py
+```
+
+Follow the prompts. Admin dashboard is at http://localhost:3000/admin
+
+---
+
+### Troubleshooting
+
+**`(venv)` not showing / module not found**
+Virtual environment isn't activated. Run the `activate` command for your OS above.
+
+**Port already in use**
+
+```bash
+# Mac/Linux
+lsof -ti:5000 | xargs kill   # kill backend port
+lsof -ti:3000 | xargs kill   # kill frontend port
+
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+```
+
+**Database connection error**
+Make sure you're connected to the internet — the database is hosted on Railway.
+Check that `DATABASE_URL` in `backend/.env` matches `backend/.env.example` exactly.
+
+**Windows PowerShell: Activate.ps1 blocked**
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**`npm install` fails**
+
+```bash
+npm cache clean --force
+npm install
+```
+
+---
+
+### Useful Dev Commands
+
+```bash
+# Pull latest changes
+git pull origin main
+
+# Apply new database migrations (after pulling changes with DB updates)
+cd backend && flask db upgrade
+
+# Seed properties if the DB looks empty
+cd backend && python seed.py
+```
+
+---
 
 ## 🗂️ Project Structure
 
