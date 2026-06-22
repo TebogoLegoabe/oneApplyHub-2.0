@@ -115,6 +115,8 @@ python -m venv venv
 
 # Mac/Linux:
 source venv/bin/activate
+# Bash
+source venv/Scripts/activate
 # Windows Command Prompt:
 venv\Scripts\activate
 # Windows PowerShell:
