@@ -154,8 +154,11 @@ App opens at **http://localhost:3000**
 
 ### Database
 
-The project uses a **shared Railway PostgreSQL database**. The connection URL is
-pre-filled in `backend/.env.example` — just copy it to `.env` and you're connected.
+The project uses a **shared Railway PostgreSQL database**. `backend/.env.example`
+only has a placeholder for `DATABASE_URL` (the real value is a secret and isn't
+committed) — get the actual connection string from the Railway dashboard
+(Postgres service → Variables → `DATABASE_URL`) or ask a teammate, then paste it
+into your own `backend/.env`.
 
 No local database installation needed.
 
