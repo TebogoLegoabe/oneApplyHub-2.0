@@ -25,20 +25,27 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import MFASetupPage from './pages/MFASetupPage';
 
-// Routes where the full homepage shell (Header + Footer) shows
-const HOME_ROUTE = '/';
+const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
+const APP_ROUTES = ['/dashboard', '/application', '/mfa-setup'];
 
-// Routes that have no sidebar (unauthenticated / full-screen pages)
-const NO_SIDEBAR_ROUTES = [
-  '/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email',
-];
+const isPublicRoute = (pathname) => (
+  pathname === '/' ||
+  pathname === '/properties' ||
+  pathname.startsWith('/properties/') ||
+  pathname === '/reviews' ||
+  pathname === '/bursaries'
+);
+
+const isAppRoute = (pathname) => APP_ROUTES.some((route) => pathname === route);
 
 const AppLayout = () => {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const isHome = location.pathname === HOME_ROUTE;
-  const isAdmin = location.pathname.startsWith('/admin');
-  const showSidebar = !NO_SIDEBAR_ROUTES.includes(location.pathname) && !isAdmin;
+  const pathname = location.pathname;
+  const isAdmin = pathname.startsWith('/admin');
+  const isAuth = AUTH_ROUTES.includes(pathname);
+  const showSidebar = isAppRoute(pathname);
+  const showPublicShell = isPublicRoute(pathname) && !isAdmin && !isAuth;
 
   const routes = (
     <Routes>
@@ -75,10 +82,9 @@ const AppLayout = () => {
     </Routes>
   );
 
-  // Homepage: full Header + content + Footer
-  if (isHome) {
+  if (showPublicShell) {
     return (
-      <div className="flex flex-col min-h-screen">
+      <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-950">
         <Header />
         <main className="flex-1">{routes}</main>
         <Footer />
@@ -86,22 +92,20 @@ const AppLayout = () => {
     );
   }
 
-  // App pages: persistent sidebar + content
   if (showSidebar) {
     return (
-      <div className="flex min-h-screen bg-gray-100 dark:bg-gray-950">
+      <div className="flex min-h-screen bg-slate-100 dark:bg-slate-950">
         <AppSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div className="flex-1 min-w-0 flex flex-col">
-          {/* Mobile top bar — hidden on lg+ where sidebar is always visible */}
-          <div className="lg:hidden sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700/60 px-4 h-14 flex items-center gap-3">
+          <div className="lg:hidden sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-b border-slate-200 dark:border-slate-800 px-4 h-14 flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-xl text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="font-bold text-gray-900 dark:text-white text-sm tracking-tight">oneApplyHub</span>
+            <span className="font-black text-slate-900 dark:text-white text-sm tracking-tight">oneApplyHub</span>
           </div>
           <div className="flex-1">{routes}</div>
         </div>
@@ -109,8 +113,7 @@ const AppLayout = () => {
     );
   }
 
-  // Auth pages + admin: no shell, full-screen
-  return <div className="min-h-screen">{routes}</div>;
+  return <div className="min-h-screen bg-gray-50 dark:bg-gray-950">{routes}</div>;
 };
 
 function App() {
