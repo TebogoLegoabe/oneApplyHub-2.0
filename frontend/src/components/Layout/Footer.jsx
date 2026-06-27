@@ -1,126 +1,132 @@
 import { Link } from 'react-router-dom';
-import { CheckCircle, Mail, Phone, MapPin, GraduationCap } from 'lucide-react';
+import { ArrowRight, CheckCircle, Mail, MapPin, GraduationCap, Home, Star, Award } from 'lucide-react';
 import logoImg from '../../assets/OneHubLogo.png';
 
-const QUICK_LINKS = [
-  { to: '/properties', label: 'Browse Properties' },
-  { to: '/reviews', label: 'Student Reviews' },
-  { to: '/bursaries', label: 'OpportunitiesHub' },
-  { to: '/application', label: 'Apply Now' },
-  { to: '/register', label: 'Create Account' },
+const FOOTER_GROUPS = [
+  {
+    title: 'Platform',
+    links: [
+      { to: '/properties', label: 'Browse Properties' },
+      { to: '/reviews', label: 'Student Reviews' },
+      { to: '/bursaries', label: 'Opportunities Hub' },
+      { to: '/application', label: 'Apply Now' },
+    ],
+  },
+  {
+    title: 'Account',
+    links: [
+      { to: '/login', label: 'Login' },
+      { to: '/register', label: 'Create Account' },
+      { to: '/dashboard', label: 'Dashboard' },
+    ],
+  },
 ];
 
-const UNIVERSITIES = [
-  'University of the Witwatersrand (Wits)',
-  'University of Johannesburg (UJ)',
+const HIGHLIGHTS = [
+  { icon: Home, label: 'Verified accommodation' },
+  { icon: Star, label: 'Student reviews' },
+  { icon: Award, label: 'Bursary opportunities' },
 ];
 
 const Footer = () => (
-  <footer className="bg-[#0a0f1e] text-white">
-    <div className="h-0.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400" />
+  <footer className="relative overflow-hidden bg-slate-950 text-white">
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute -top-24 left-10 h-72 w-72 rounded-full bg-blue-600/20 blur-3xl" />
+      <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl" />
+    </div>
 
-
-<div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
-
-        {/* Brand */}
-        <div>
-          <div className="flex items-center gap-2.5 mb-4">
-            <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />
-            <span className="font-extrabold text-lg tracking-tight text-white">oneApplyHub</span>
+    <div className="relative border-y border-white/10 bg-white/[0.03]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-300 mb-2">Student first platform</p>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight">Find accommodation, compare reviews, and apply with confidence.</h2>
           </div>
-          <p className="text-gray-500 text-xs leading-relaxed mb-5">
-            Connecting South African students with verified accommodation, bursaries, and opportunities. All in one place.
-          </p>
-          <div className="space-y-2 text-xs text-gray-400">
-            <a href="mailto:info@oneapplyhub.co.za" className="flex items-center gap-2 hover:text-blue-400 transition-colors group">
-              <Mail className="w-3.5 h-3.5 text-blue-500/70 group-hover:text-blue-400 flex-shrink-0" />
-              info@oneapplyhub.co.za
-            </a>
-            <a href="tel:+27640682586" className="flex items-center gap-2 hover:text-blue-400 transition-colors group">
-              <Phone className="w-3.5 h-3.5 text-blue-500/70 group-hover:text-blue-400 flex-shrink-0" />
-              +27 64 068 2586
-            </a>
-            <a href="tel:+27714227470" className="flex items-center gap-2 hover:text-blue-400 transition-colors group">
-              <Phone className="w-3.5 h-3.5 text-blue-500/70 group-hover:text-blue-400 flex-shrink-0" />
-              +27 71 422 7470
-            </a>
-            <div className="flex items-center gap-2 text-gray-600">
-              <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
-              Johannesburg, South Africa
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Quick Links</h3>
-          <ul className="space-y-2.5">
-            {QUICK_LINKS.map(({ to, label }) => (
-              <li key={to}>
-                <Link
-                  to={to}
-                  className="text-gray-500 hover:text-white transition-colors text-xs flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 rounded-full bg-blue-600/40 group-hover:bg-blue-400 transition-colors flex-shrink-0" />
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Universities */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Supported Universities</h3>
-          <ul className="space-y-3 mb-5">
-            {UNIVERSITIES.map((name) => (
-              <li key={name} className="flex items-start gap-2">
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-                <span className="text-gray-500 text-xs leading-snug">{name}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-950/30 border border-emerald-900/40">
-            <CheckCircle className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-gray-500 leading-relaxed">
-              All listed properties are verified for student safety and affordability.
-            </p>
-          </div>
-        </div>
-
-        {/* Newsletter */}
-        <div>
-          <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-4">Stay Updated</h3>
-          <p className="text-gray-500 text-xs mb-4 leading-relaxed">
-            Get notified about new properties, bursary deadlines, and student opportunities.
-          </p>
-          <form onSubmit={(e) => e.preventDefault()} className="space-y-2">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="w-full bg-white/5 border border-white/10 hover:border-white/20 focus:border-blue-500 text-white text-xs px-3.5 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 placeholder-gray-600 transition-colors"
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-3 py-2.5 rounded-xl transition-colors"
-            >
-              Subscribe
-            </button>
-          </form>
+          <Link
+            to="/properties"
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-bold text-blue-700 hover:bg-blue-50 transition-colors shadow-xl shadow-blue-950/20"
+          >
+            Browse properties
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </div>
 
-    {/* Bottom bar */}
-    <div className="border-t border-white/5">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col md:flex-row items-center justify-between text-xs text-gray-600 gap-2">
+    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.25fr_0.75fr_0.75fr_1fr]">
+        <div>
+          <Link to="/" className="inline-flex items-center gap-3 mb-4">
+            <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 object-contain" />
+            <div>
+              <p className="text-xl font-black tracking-tight">oneApplyHub</p>
+              <p className="text-xs text-slate-400">All Your Options. One Platform.</p>
+            </div>
+          </Link>
+          <p className="max-w-sm text-sm leading-6 text-slate-400">
+            A focused platform helping South African students discover verified accommodation, student reviews, and opportunities in one place.
+          </p>
+
+          <div className="mt-6 grid gap-2">
+            {HIGHLIGHTS.map(({ icon: Icon, label }) => (
+              <div key={label} className="flex items-center gap-2 text-sm text-slate-300">
+                <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-blue-500/10 text-blue-300 border border-blue-400/10">
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                {label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {FOOTER_GROUPS.map((group) => (
+          <div key={group.title}>
+            <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-4">{group.title}</h3>
+            <ul className="space-y-3">
+              {group.links.map(({ to, label }) => (
+                <li key={to}>
+                  <Link to={to} className="text-sm text-slate-400 hover:text-white transition-colors">
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500 mb-4">Contact</h3>
+          <div className="space-y-3 text-sm text-slate-400">
+            <a href="mailto:info@oneapplyhub.co.za" className="flex items-center gap-3 hover:text-white transition-colors">
+              <Mail className="h-4 w-4 text-blue-300" />
+              info@oneapplyhub.co.za
+            </a>
+            <div className="flex items-center gap-3">
+              <MapPin className="h-4 w-4 text-blue-300" />
+              Johannesburg, South Africa
+            </div>
+            <div className="flex items-start gap-3 rounded-2xl border border-emerald-400/10 bg-emerald-400/5 p-3">
+              <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-emerald-300" />
+              <p className="text-xs leading-5 text-slate-400">
+                Built for Wits and UJ students, with room to expand to more campuses.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div className="relative border-t border-white/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500">
           <p>&copy; {new Date().getFullYear()} oneApplyHub. Made for students, by students.</p>
-          <div className="flex items-center space-x-5">
-            <button className="hover:text-gray-400 transition-colors">Privacy Policy</button>
-            <button className="hover:text-gray-400 transition-colors">Terms of Service</button>
-            <Link to="/login" className="hover:text-gray-400 transition-colors">Contact Us</Link>
+          <div className="flex items-center gap-5">
+            <button className="hover:text-slate-300 transition-colors">Privacy</button>
+            <button className="hover:text-slate-300 transition-colors">Terms</button>
+            <div className="flex items-center gap-1.5 text-slate-400">
+              <GraduationCap className="h-3.5 w-3.5" />
+              Student accommodation made simple
+            </div>
           </div>
         </div>
       </div>
