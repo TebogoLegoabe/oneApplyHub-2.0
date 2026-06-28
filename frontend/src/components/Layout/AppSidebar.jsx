@@ -46,7 +46,6 @@ const AppSidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Mobile backdrop */}
       <div
         className={`fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity duration-300 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
@@ -61,8 +60,6 @@ const AppSidebar = ({ isOpen, onClose }) => {
         transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-
-        {/* Mobile header row inside drawer */}
         <div className="lg:hidden flex items-center justify-between px-4 py-3 border-b border-white/10">
           <span className="text-white font-bold text-sm tracking-tight">oneApplyHub</span>
           <button
@@ -73,7 +70,6 @@ const AppSidebar = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* User profile */}
         <div className="px-4 pt-5 pb-4 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
@@ -90,28 +86,20 @@ const AppSidebar = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <div className="mt-3">
-            {user?.verified ? (
-              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white/[0.05] border border-white/[0.07]">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
-                <span className="text-[11px] text-slate-300 font-medium">Verified Student</span>
-              </div>
-            ) : (
-              <div>
-                {verifyMsg && <p className="text-[10px] text-red-400 mb-1.5">{verifyMsg}</p>}
-                <button
-                  onClick={handleSendVerification}
-                  disabled={verifyLoading}
-                  className="w-full text-[11px] font-semibold py-1.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
-                >
-                  {verifyLoading ? 'Sending…' : 'Verify Email'}
-                </button>
-              </div>
-            )}
-          </div>
+          {!user?.verified && (
+            <div className="mt-3">
+              {verifyMsg && <p className="text-[10px] text-red-400 mb-1.5">{verifyMsg}</p>}
+              <button
+                onClick={handleSendVerification}
+                disabled={verifyLoading}
+                className="w-full text-[11px] font-semibold py-1.5 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 transition-colors disabled:opacity-50"
+              >
+                {verifyLoading ? 'Sending…' : 'Verify Email'}
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-0.5">
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 pb-2">
             Navigation
@@ -164,7 +152,6 @@ const AppSidebar = ({ isOpen, onClose }) => {
           </div>
         </nav>
 
-        {/* Bottom: theme + logout */}
         <div className="p-3 border-t border-white/10 space-y-1">
           <button
             onClick={toggleTheme}
