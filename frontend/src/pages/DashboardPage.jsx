@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import {
   Building, Star, MessageSquare, Calendar, ThumbsUp,
   FileText, ArrowRight, TrendingUp, Users, CheckCircle,
-  Shield, Award, Search, BadgeCheck, Clock,
+  Award, Search, Clock,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -129,36 +129,17 @@ const DashboardPage = () => {
         </div>
 
         <div className="relative mx-auto max-w-7xl">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur">
-                <Clock className="h-3.5 w-3.5" />
-                {today}
-              </div>
-              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
-                Welcome back, {firstName}
-              </h1>
-              <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100">
-                Track accommodation insights, review activity, and your next steps from one clean student dashboard.
-              </p>
+          <div className="max-w-3xl">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur">
+              <Clock className="h-3.5 w-3.5" />
+              {today}
             </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:w-[28rem]">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <div className="flex items-center gap-2 text-sm font-bold">
-                  {user?.verified ? <BadgeCheck className="h-4 w-4 text-emerald-300" /> : <Shield className="h-4 w-4 text-amber-300" />}
-                  {user?.verified ? 'Verified Student' : 'Email not verified'}
-                </div>
-                <p className="mt-1 truncate text-xs text-blue-100">{user?.email}</p>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                <div className="flex items-center gap-2 text-sm font-bold">
-                  <Shield className="h-4 w-4 text-blue-300" />
-                  MFA {user?.mfa_enabled ? 'enabled' : 'available'}
-                </div>
-                <p className="mt-1 text-xs text-blue-100">Secure your account settings</p>
-              </div>
-            </div>
+            <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+              Welcome back, {firstName}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-blue-100">
+              Track accommodation insights, review activity, and your next steps from one clean dashboard.
+            </p>
           </div>
         </div>
       </div>
@@ -198,7 +179,7 @@ const DashboardPage = () => {
             to="/properties"
             icon={Search}
             title="Find accommodation"
-            description="Browse verified listings and compare prices, ratings, and locations."
+            description="Browse listings and compare prices, ratings, and locations."
             tone="bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"
           />
           <QuickAction
@@ -212,7 +193,7 @@ const DashboardPage = () => {
             to="/bursaries"
             icon={Award}
             title="Explore opportunities"
-            description="Find bursaries and student opportunities from the opportunities hub."
+            description="Find bursaries and student opportunities."
             tone="bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300"
           />
         </div>
