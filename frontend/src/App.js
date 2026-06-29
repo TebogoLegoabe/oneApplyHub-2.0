@@ -15,7 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
-import CreateReviewPage from './pages/CreateReviewPage';
+import CreateReviewPage from './pages/CreateReviewPageFinal';
 import ReviewsPage from './pages/ReviewsPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
