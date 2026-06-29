@@ -4,8 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Link } from 'react-router-dom';
 import {
   Building, Star, MessageSquare, Calendar, ThumbsUp,
-  FileText, ArrowRight, TrendingUp, Users, CheckCircle,
-  Award, Search, Clock,
+  FileText, ArrowRight, TrendingUp, Users, CheckCircle, Clock,
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -39,38 +38,20 @@ const PropertyTooltip = ({ active, payload }) => {
 };
 
 const StatCard = ({ icon: Icon, label, value, sub, tone, loading }) => (
-  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-    <div className="flex items-center justify-between gap-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
-        <p className="mt-2 text-2xl font-black text-slate-950 dark:text-white">
+  <div className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-4">
+    <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
+        <p className="mt-1.5 text-2xl font-black text-slate-950 dark:text-white">
           {loading ? <span className="inline-block h-7 w-14 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" /> : value}
         </p>
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{sub}</p>
+        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{sub}</p>
       </div>
-      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${tone}`}>
+      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${tone}`}>
         <Icon className="h-5 w-5" />
       </div>
     </div>
   </div>
-);
-
-const QuickAction = ({ to, icon: Icon, title, description }) => (
-  <Link
-    to={to}
-    className="group flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900"
-  >
-    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300">
-      <Icon className="h-5 w-5" />
-    </div>
-    <div className="min-w-0 flex-1">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-bold text-slate-950 dark:text-white">{title}</h3>
-        <ArrowRight className="h-4 w-4 text-slate-300 transition-all group-hover:translate-x-1 group-hover:text-blue-500" />
-      </div>
-      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{description}</p>
-    </div>
-  </Link>
 );
 
 const DashboardPage = () => {
@@ -139,47 +120,26 @@ const DashboardPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                <Clock className="h-3.5 w-3.5" />
-                {today}
-              </div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                 Welcome back, {firstName}
               </h1>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                Review platform activity, track accommodation insights, and continue your next steps from one workspace.
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
+                Track accommodation insights, reviews, and your next steps.
               </p>
             </div>
-
-            <div className="grid gap-3 sm:grid-cols-3 lg:w-[35rem]">
-              <QuickAction
-                to="/properties"
-                icon={Search}
-                title="Find a place"
-                description="Browse listings"
-              />
-              <QuickAction
-                to="/application"
-                icon={FileText}
-                title="Application"
-                description="Track progress"
-              />
-              <QuickAction
-                to="/bursaries"
-                icon={Award}
-                title="Opportunities"
-                description="View options"
-              />
+            <div className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+              <Clock className="h-3.5 w-3.5" />
+              <span className="whitespace-nowrap">{today}</span>
             </div>
           </div>
         </div>
 
         {error && (
-          <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
             <button onClick={fetchData} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700">
               Retry
@@ -187,21 +147,21 @@ const DashboardPage = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {stats.map((stat) => (
             <StatCard key={stat.label} {...stat} loading={loading} />
           ))}
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-5">
-          <div className="xl:col-span-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-5 flex items-center justify-between gap-3">
-              <div>
+        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-5">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-3">
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-blue-500" />
-                  <h3 className="text-sm font-bold text-slate-950 dark:text-white">Most reviewed properties</h3>
+                  <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Most reviewed properties</h3>
                 </div>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Properties with the highest student feedback volume.</p>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Properties with the highest feedback volume.</p>
               </div>
               <Link to="/properties" className="hidden rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 sm:inline-flex">
                 Browse
@@ -209,51 +169,51 @@ const DashboardPage = () => {
             </div>
 
             {loading ? (
-              <div className="h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+              <div className="h-56 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 sm:h-64" />
             ) : !data?.top_properties?.length ? (
-              <div className="flex h-64 flex-col items-center justify-center text-center">
+              <div className="flex h-56 flex-col items-center justify-center text-center sm:h-64">
                 <Building className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700" />
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">No review data yet</p>
                 <p className="mt-1 text-xs text-slate-400">Insights will appear once reviews are approved.</p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={data.top_properties} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
                   <XAxis type="number" tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" width={120} tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="name" width={110} tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<PropertyTooltip />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)' }} />
-                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={22} fill="#2563eb" />
+                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#2563eb" />
                 </BarChart>
               </ResponsiveContainer>
             )}
           </div>
 
-          <div className="xl:col-span-2 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-5 flex items-center gap-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
+            <div className="mb-4 flex items-center gap-2">
               <Star className="h-4 w-4 text-amber-400" />
-              <div>
-                <h3 className="text-sm font-bold text-slate-950 dark:text-white">Rating distribution</h3>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Breakdown of approved review scores.</p>
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Rating distribution</h3>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Approved review scores.</p>
               </div>
             </div>
 
             {loading ? (
-              <div className="h-64 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />
+              <div className="h-56 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800 sm:h-64" />
             ) : !hasRatingData ? (
-              <div className="flex h-64 flex-col items-center justify-center text-center">
+              <div className="flex h-56 flex-col items-center justify-center text-center sm:h-64">
                 <Star className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700" />
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-200">No ratings yet</p>
                 <p className="mt-1 text-xs text-slate-400">Rating stats will appear after reviews are approved.</p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={data.rating_distribution} margin={{ top: 4, right: 4, left: -24, bottom: 0 }} barCategoryGap="30%">
                   <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
                   <XAxis dataKey="label" tick={{ fill: axisColor, fontSize: 12 }} tickLine={false} axisLine={false} />
                   <YAxis tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <Tooltip content={<RatingTooltip />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)' }} />
-                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={44}>
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={40}>
                     {data.rating_distribution.map((_, i) => <Cell key={i} fill={STAR_COLORS[i]} />)}
                   </Bar>
                 </BarChart>
@@ -262,44 +222,44 @@ const DashboardPage = () => {
           </div>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-blue-500" />
-              <div>
-                <h3 className="text-sm font-bold text-slate-950 dark:text-white">Recent reviews</h3>
-                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Latest approved feedback from students.</p>
+        <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+            <div className="flex min-w-0 items-center gap-2">
+              <Users className="h-4 w-4 shrink-0 text-blue-500" />
+              <div className="min-w-0">
+                <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Recent reviews</h3>
+                <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Latest approved feedback.</p>
               </div>
             </div>
-            <Link to="/reviews" className="inline-flex items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+            <Link to="/reviews" className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
               See all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
 
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
-              {[...Array(6)].map((_, i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />)}
+            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {[...Array(6)].map((_, i) => <div key={i} className="h-32 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" />)}
             </div>
           ) : !data?.recent_reviews?.length ? (
-            <div className="flex flex-col items-center py-14 text-center">
-              <MessageSquare className="mb-3 h-10 w-10 text-slate-300 dark:text-slate-700" />
+            <div className="flex flex-col items-center py-10 text-center">
+              <MessageSquare className="mb-3 h-9 w-9 text-slate-300 dark:text-slate-700" />
               <p className="mb-1 text-sm font-bold text-slate-700 dark:text-slate-200">No reviews yet</p>
               <p className="mb-5 max-w-xs text-xs text-slate-400">
-                Be the first to share your accommodation experience with fellow students.
+                Be the first to share your accommodation experience.
               </p>
               <Link to="/properties" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-700">
                 Browse Properties <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.recent_reviews.map((review) => (
-                <div key={review.id} className="rounded-2xl border border-slate-100 p-4 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-blue-900">
+                <div key={review.id} className="rounded-2xl border border-slate-100 p-3.5 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-blue-900">
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <Link to={`/properties/${review.property_id}`} className="line-clamp-1 text-sm font-bold leading-snug text-blue-600 hover:text-blue-700 dark:text-blue-400">
                       {review.property_name}
                     </Link>
-                    <div className="flex flex-shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 dark:bg-amber-500/10">
+                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 dark:bg-amber-500/10">
                       <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
                       <span className="text-xs font-black text-slate-700 dark:text-slate-200">{review.overall_rating}</span>
                     </div>
@@ -323,15 +283,15 @@ const DashboardPage = () => {
           )}
         </div>
 
-        <div className="mt-6 rounded-3xl bg-slate-950 p-5 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h3 className="text-base font-bold">Share your accommodation experience</h3>
-              <p className="mt-1 max-w-2xl text-sm text-slate-300">
+        <div className="mt-4 rounded-2xl bg-slate-950 p-4 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold">Share your accommodation experience</h3>
+              <p className="mt-1 max-w-2xl text-xs text-slate-300 sm:text-sm">
                 Your review helps other students make better accommodation decisions.
               </p>
             </div>
-            <Link to="/properties" className="inline-flex flex-shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-bold text-slate-950 hover:bg-slate-100">
+            <Link to="/properties" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">
               <FileText className="h-4 w-4" />Write a Review
             </Link>
           </div>
