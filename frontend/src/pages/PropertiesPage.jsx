@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Filter, MapPin, Star } from 'lucide-react';
+import { Search, Filter, MapPin, Star, Home } from 'lucide-react';
 import { propertiesAPI } from '../services/api';
 import { parseAmenities, renderAmenityIcon } from '../constants/amenities';
 
@@ -60,31 +60,35 @@ const PropertiesPage = () => {
   };
 
   const inputClass =
-    'w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm bg-white';
+    'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
-        <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">Find Your Accommodation</h1>
-          <p className="text-sm text-blue-100 max-w-xl">
-            Browse verified student properties near Wits and UJ. Filter by university, type, and price range.
-          </p>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
+          <div className="min-w-0">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+              <Home className="h-3.5 w-3.5" />
+              Browse properties
+            </div>
+            <h1 className="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+              Find accommodation
+            </h1>
+            <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
+              Compare student accommodation by campus, type, price, reviews, and NSFAS availability.
+            </p>
+          </div>
         </div>
-      </section>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-
-        {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-5">
-          <form onSubmit={handleSearch} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-2 relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <form onSubmit={handleSearch} className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+              <div className="relative lg:col-span-2">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Search by name or location..."
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm"
+                  placeholder="Search by name or location"
+                  className={`${inputClass} pl-9`}
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                 />
@@ -94,7 +98,7 @@ const PropertiesPage = () => {
                 value={filters.university}
                 onChange={(e) => handleFilterChange('university', e.target.value)}
               >
-                <option value="all">All Universities</option>
+                <option value="all">All universities</option>
                 <option value="wits">Wits</option>
                 <option value="uj">UJ</option>
               </select>
@@ -103,36 +107,38 @@ const PropertiesPage = () => {
                 value={filters.type}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
               >
-                <option value="all">All Types</option>
+                <option value="all">All types</option>
                 <option value="residence">Residence</option>
                 <option value="apartment">Apartment</option>
                 <option value="house">House</option>
               </select>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 items-end">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Price Range (per month)</label>
-                <div className="flex gap-3">
-                  <input
-                    type="number"
-                    placeholder="Min price"
-                    className={inputClass}
-                    value={filters.minPrice}
-                    onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max price"
-                    className={inputClass}
-                    value={filters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                  />
-                </div>
-              </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto_auto] sm:items-end">
+              <input
+                type="number"
+                placeholder="Min price"
+                className={inputClass}
+                value={filters.minPrice}
+                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+              />
+              <input
+                type="number"
+                placeholder="Max price"
+                className={inputClass}
+                value={filters.maxPrice}
+                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setFilters(INITIAL_FILTERS)}
+                className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+              >
+                Clear
+              </button>
               <button
                 type="submit"
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
+                className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700"
               >
                 Search
               </button>
@@ -140,166 +146,147 @@ const PropertiesPage = () => {
           </form>
         </div>
 
-        {/* Error */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center justify-between">
-            <p className="text-red-800 text-sm">{error}</p>
-            <button onClick={fetchProperties} className="text-red-600 hover:text-red-700 font-semibold text-sm ml-4 flex-shrink-0">
+          <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/30 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
+            <button onClick={fetchProperties} className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white hover:bg-red-700">
               Retry
             </button>
           </div>
         )}
 
-        {/* Results Header */}
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {loading ? 'Loading...' : `${properties.length} properties found`}
-          </h2>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Filter className="w-4 h-4" />
-            Page {filters.page} of {totalPages}
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-base font-black text-slate-950 dark:text-white sm:text-lg">
+              {loading ? 'Loading properties' : `${properties.length} propert${properties.length === 1 ? 'y' : 'ies'} found`}
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Page {filters.page} of {totalPages}</p>
+          </div>
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <Filter className="h-4 w-4" />
+            Filtered results
           </div>
         </div>
 
-        {/* Properties Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
-                <div className="h-40 bg-gray-200" />
-                <div className="p-5 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
-                  <div className="h-4 bg-gray-200 rounded w-full" />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+                <div className="h-32 animate-pulse bg-slate-200 dark:bg-slate-800" />
+                <div className="space-y-3 p-4">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-3 w-full animate-pulse rounded bg-slate-200 dark:bg-slate-800" />
+                  <div className="h-9 w-full animate-pulse rounded-xl bg-slate-200 dark:bg-slate-800" />
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        ) : properties.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {properties.map((property) => {
               const amenities = parseAmenities(property.amenities);
+              const reviewCount = property.review_count || 0;
               return (
-                <div
-                  key={property.id}
-                  className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all duration-300 group"
-                >
-                  {/* Image */}
-                  <div className="h-40 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center relative">
-                    <span className="text-white/80 font-medium text-sm">Photos Coming Soon</span>
-                    <div className="absolute top-3 left-3 flex gap-2">
-                      <span className="bg-white text-blue-700 px-3 py-1 rounded-full text-xs font-bold">
-                        {property.university.toUpperCase()}
+                <article key={property.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900">
+                  <div className="relative h-32 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-800 sm:h-36">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-white/50">Photos coming soon</span>
+                    </div>
+                    <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black uppercase text-blue-700 shadow-sm">
+                        {property.university}
                       </span>
                       {property.nsfas_accredited && (
-                        <span className="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                          NSFAS
-                        </span>
+                        <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-black text-white shadow-sm">NSFAS</span>
                       )}
                     </div>
-                    <div className="absolute top-3 right-3">
-                      <span className="bg-black/50 text-white px-3 py-1 rounded-full text-xs font-semibold capitalize">
+                    <div className="absolute right-3 top-3">
+                      <span className="rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-bold capitalize text-white backdrop-blur">
                         {property.property_type}
                       </span>
                     </div>
                   </div>
 
-                  {/* Body */}
-                  <div className="p-5">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5 group-hover:text-blue-700 transition-colors">
-                      {property.name}
-                    </h3>
-
-                    <div className="flex items-center text-gray-500 mb-3">
-                      <MapPin className="w-4 h-4 mr-1.5 flex-shrink-0 text-blue-500" />
-                      <span className="text-sm truncate">{property.address}</span>
+                  <div className="flex flex-1 flex-col p-4">
+                    <div className="mb-2 flex items-start justify-between gap-3">
+                      <h3 className="line-clamp-2 text-sm font-black leading-snug text-slate-950 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">
+                        {property.name}
+                      </h3>
+                      <div className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 dark:bg-amber-500/10">
+                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                        <span className="text-xs font-black text-slate-700 dark:text-slate-200">{property.average_rating || 'New'}</span>
+                      </div>
                     </div>
 
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed">
-                      {property.description}
-                    </p>
+                    <div className="mb-3 flex items-center text-slate-500 dark:text-slate-400">
+                      <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-blue-500" />
+                      <span className="truncate text-xs">{property.address}</span>
+                    </div>
 
-                    {/* Amenities */}
+                    <p className="mb-3 line-clamp-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{property.description}</p>
+
                     {amenities.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {amenities.slice(0, 3).map((amenity, i) => (
-                          <div key={i} className="flex items-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2.5 py-1 rounded-lg text-xs">
+                      <div className="mb-4 flex flex-wrap gap-1.5">
+                        {amenities.slice(0, 2).map((amenity, i) => (
+                          <div key={i} className="flex items-center rounded-lg bg-slate-100 px-2 py-1 text-[11px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                             {renderAmenityIcon(amenity)}
-                            <span className="ml-1.5">{amenity}</span>
+                            <span className="ml-1.5 truncate">{amenity}</span>
                           </div>
                         ))}
-                        {amenities.length > 3 && (
-                          <span className="text-xs text-gray-400 px-2 py-1">
-                            +{amenities.length - 3} more
-                          </span>
+                        {amenities.length > 2 && (
+                          <span className="rounded-lg bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-400 dark:bg-slate-800/60">+{amenities.length - 2}</span>
                         )}
                       </div>
                     )}
 
-                    {/* Price & Rating */}
-                    <div className="flex items-end justify-between mb-4">
-                      <div>
-                        <span className="text-lg font-bold text-blue-600">
-                          R{property.price_min.toLocaleString()} – R{property.price_max.toLocaleString()}
-                        </span>
-                        <span className="text-gray-500 text-sm block">per month</span>
+                    <div className="mt-auto border-t border-slate-100 pt-3 dark:border-slate-800">
+                      <div className="mb-3 flex items-end justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-base font-black text-blue-600 dark:text-blue-400">
+                            R{property.price_min.toLocaleString()} to R{property.price_max.toLocaleString()}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">per month</p>
+                        </div>
+                        <p className="shrink-0 text-[11px] font-semibold text-slate-400">{reviewCount} review{reviewCount === 1 ? '' : 's'}</p>
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current mr-1" />
-                        <span className="font-semibold text-gray-800">{property.average_rating || 'New'}</span>
-                        <span className="text-gray-400 ml-1">({property.review_count})</span>
-                      </div>
-                    </div>
 
-                    <Link
-                      to={`/properties/${property.id}`}
-                      className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm text-center block"
-                    >
-                      View Details
-                    </Link>
+                      <Link to={`/properties/${property.id}`} className="block rounded-xl bg-blue-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-blue-700">
+                        View details
+                      </Link>
+                    </div>
                   </div>
-                </div>
+                </article>
               );
             })}
           </div>
-        )}
-
-        {/* No Results */}
-        {!loading && properties.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">No properties found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your search criteria or filters.</p>
-            <button
-              onClick={() => setFilters(INITIAL_FILTERS)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm"
-            >
-              Clear all filters
+        ) : (
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <Search className="mx-auto mb-4 h-9 w-9 text-slate-400" />
+            <h3 className="text-base font-black text-slate-950 dark:text-white">No properties found</h3>
+            <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try changing your search, price range, university, or property type.</p>
+            <button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+              Clear filters
             </button>
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-3 mt-8">
+          <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <button
               onClick={() => handleFilterChange('page', filters.page - 1)}
               disabled={filters.page <= 1}
-              className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
             >
-              ← Prev
+              Previous
             </button>
-            <span className="text-sm text-gray-600 font-medium">
-              Page {filters.page} of {totalPages}
-            </span>
+            <span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Page {filters.page} of {totalPages}</span>
             <button
               onClick={() => handleFilterChange('page', filters.page + 1)}
               disabled={filters.page >= totalPages}
-              className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto"
             >
-              Next →
+              Next
             </button>
           </div>
         )}
