@@ -1,174 +1,44 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  User, Upload, FileText, CreditCard, Users, GraduationCap, MapPin,
-  Phone, DollarSign, AlertCircle, CheckCircle, X, Shield, ArrowLeft, ArrowRight,
-} from 'lucide-react';
+import { User, Upload, FileText, Users, GraduationCap, MapPin, DollarSign, AlertCircle, CheckCircle, X, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import { propertiesAPI, applicationsAPI } from '../services/api';
-import { validateSAID, formatDOBFromID } from '../utils/validateSAID';
+import { validateSAID } from '../utils/validateSAID';
 
 const STEPS = [
-  { id: 1, title: 'Personal Info', icon: User },
-  { id: 2, title: 'Academic', icon: GraduationCap },
-  { id: 3, title: 'Financial', icon: DollarSign },
-  { id: 4, title: 'Accommodation', icon: MapPin },
-  { id: 5, title: 'Parent/Guardian', icon: Users },
-  { id: 6, title: 'Documents', icon: Upload },
-  { id: 7, title: 'Review', icon: CheckCircle },
+  { id: 1, title: 'Personal', icon: User },
+  { id: 2, title: 'Studies & funding', icon: GraduationCap },
+  { id: 3, title: 'Accommodation', icon: MapPin },
+  { id: 4, title: 'Guardian', icon: Users },
+  { id: 5, title: 'Documents', icon: Upload },
+  { id: 6, title: 'Review', icon: CheckCircle },
 ];
 
 const INITIAL_FORM_DATA = {
-  firstName: '',
-  lastName: '',
-  idNumber: '',
-  dateOfBirth: '',
-  gender: '',
-  nationality: 'South African',
-  phoneNumber: '',
-  email: '',
-  emergencyContactName: '',
-  emergencyContactPhone: '',
-  emergencyContactRelation: '',
-  university: '',
-  studentNumber: '',
-  faculty: '',
-  yearOfStudy: '',
-  degreeProgram: '',
-  expectedGraduation: '',
-  financialAid: '',
-  nsfasApplicant: false,
-  parentGuardianIncome: '',
-  bankName: '',
-  accountNumber: '',
-  selectedResidences: [],
-  roomType: '',
-  specialRequirements: '',
-  dietaryRequirements: '',
-  parentGuardianName: '',
-  parentGuardianIdNumber: '',
-  parentGuardianPhone: '',
-  parentGuardianEmail: '',
-  parentGuardianAddress: '',
-  documents: {
-    studentCard: null,
-    studentId: null,
-    parentGuardianId: null,
-    proofOfRegistration: null,
-    bankStatement: null,
-    nsfasLetter: null,
-    medicalCertificate: null,
-  },
+  firstName: '', lastName: '', idNumber: '', dateOfBirth: '', gender: '', nationality: 'South African', phoneNumber: '', email: '',
+  emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '',
+  university: '', studentNumber: '', faculty: '', yearOfStudy: '', degreeProgram: '', expectedGraduation: '',
+  financialAid: '', nsfasApplicant: false, parentGuardianIncome: '', bankName: '', accountNumber: '',
+  selectedResidences: [], roomType: '', specialRequirements: '', dietaryRequirements: '',
+  parentGuardianName: '', parentGuardianIdNumber: '', parentGuardianPhone: '', parentGuardianEmail: '', parentGuardianAddress: '',
+  documents: { studentCard: null, studentId: null, parentGuardianId: null, proofOfRegistration: null, bankStatement: null, nsfasLetter: null, medicalCertificate: null },
 };
-
-// ---------------------------------------------------------------------------
-// Sub-components defined OUTSIDE the page component to prevent focus loss
-// ---------------------------------------------------------------------------
-const InputField = ({ label, value, onChange, type = 'text', required, placeholder, error, ...props }) => (
-  <div>
-    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      type={type}
-      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 text-sm ${
-        error ? 'border-red-300 bg-red-50' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white'
-      }`}
-      value={value || ''}
-      onChange={onChange}
-      placeholder={placeholder}
-      {...props}
-    />
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-  </div>
-);
-
-const SAIDInput = ({ label, value, onChange, validationResult, error, required }) => (
-  <div>
-    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <input
-      type="text"
-      maxLength={13}
-      className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-gray-900 font-mono tracking-wider text-sm ${
-        error ? 'border-red-300 bg-red-50' : validationResult?.isValid ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white'
-      }`}
-      value={value}
-      onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
-      placeholder="e.g. 0001015009087"
-    />
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-    {validationResult && !error && (
-      <div className={`mt-2 p-3 rounded-xl text-sm ${validationResult.isValid ? 'bg-emerald-50 border border-emerald-200' : 'bg-red-50 border border-red-200'}`}>
-        {validationResult.isValid ? (
-          <div className="space-y-1">
-            <div className="flex items-center text-emerald-700 font-medium">
-              <CheckCircle className="w-4 h-4 mr-1.5" /> Valid SA ID Number
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-emerald-600 text-xs">
-              <span>DOB: {formatDOBFromID(validationResult.dateOfBirth)}</span>
-              <span>Age: {validationResult.age}</span>
-              <span>Gender: {validationResult.gender}</span>
-              <span>{validationResult.citizenship}</span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center text-red-700">
-            <AlertCircle className="w-4 h-4 mr-1.5" /> {validationResult.error}
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-);
-
-const FileUploadComponent = ({ label, file, error, onUpload, required = false }) => (
-  <div>
-    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">
-      {label} {required && <span className="text-red-500">*</span>}
-    </label>
-    <div className={`border-2 border-dashed rounded-xl p-5 text-center transition-colors cursor-pointer ${
-      error ? 'border-red-300 bg-red-50' : file ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 dark:border-gray-600 hover:border-blue-400 bg-gray-50 dark:bg-gray-700'
-    }`}>
-      <input
-        type="file"
-        accept=".pdf,.jpg,.jpeg,.png"
-        onChange={(e) => onUpload(e.target.files[0])}
-        className="hidden"
-        id={label}
-      />
-      <label htmlFor={label} className="cursor-pointer">
-        {file ? (
-          <div className="flex items-center justify-center space-x-2 text-emerald-700">
-            <CheckCircle className="w-5 h-5" />
-            <span className="font-medium text-sm">{file.name}</span>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); onUpload(null); }}
-              className="ml-2 text-gray-400 hover:text-red-500"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-1.5">
-            <Upload className="w-7 h-7 text-gray-400 mx-auto" />
-            <p className="text-sm text-gray-600 dark:text-gray-300">Click to upload</p>
-            <p className="text-xs text-gray-400">PDF, JPG, PNG (max 5MB)</p>
-          </div>
-        )}
-      </label>
-    </div>
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-  </div>
-);
 
 const STATUS_META = {
-  pending:      { label: 'Pending Review',  color: 'text-amber-600',  bg: 'bg-amber-50 border-amber-200',  dot: 'bg-amber-500'  },
-  under_review: { label: 'Under Review',    color: 'text-blue-600',   bg: 'bg-blue-50 border-blue-200',    dot: 'bg-blue-500'   },
-  approved:     { label: 'Approved',        color: 'text-emerald-600',bg: 'bg-emerald-50 border-emerald-200',dot:'bg-emerald-500'},
-  rejected:     { label: 'Rejected',        color: 'text-red-600',    bg: 'bg-red-50 border-red-200',      dot: 'bg-red-500'    },
+  pending: { label: 'Pending review', tone: 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-500/10 dark:text-amber-300' },
+  under_review: { label: 'Under review', tone: 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900 dark:bg-blue-500/10 dark:text-blue-300' },
+  approved: { label: 'Approved', tone: 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-300' },
+  rejected: { label: 'Rejected', tone: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-500/10 dark:text-red-300' },
 };
+
+const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+
+const Field = ({ label, error, children }) => <div><label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">{label}</label>{children}{error && <p className="mt-1 text-xs font-medium text-red-600">{error}</p>}</div>;
+const TextInput = ({ label, value, onChange, error, type = 'text', placeholder }) => <Field label={label} error={error}><input className={`${inputClass} ${error ? 'border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/30' : ''}`} type={type} value={value || ''} placeholder={placeholder} onChange={onChange} /></Field>;
+const SelectInput = ({ label, value, onChange, error, children }) => <Field label={label} error={error}><select className={`${inputClass} ${error ? 'border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-950/30' : ''}`} value={value || ''} onChange={onChange}>{children}</select></Field>;
+
+const FileInput = ({ label, file, error, onUpload }) => <Field label={label} error={error}><div className={`rounded-2xl border border-dashed p-4 text-center ${file ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-500/10' : error ? 'border-red-300 bg-red-50' : 'border-slate-300 bg-slate-50 dark:border-slate-700 dark:bg-slate-900'}`}><input id={label} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={(e) => onUpload(e.target.files[0])} /><label htmlFor={label} className="cursor-pointer">{file ? <span className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 dark:text-emerald-300"><CheckCircle className="h-4 w-4" />{file.name}<button type="button" onClick={(e) => { e.preventDefault(); onUpload(null); }}><X className="h-4 w-4 text-slate-400" /></button></span> : <span className="block text-sm font-semibold text-slate-600 dark:text-slate-300"><Upload className="mx-auto mb-2 h-6 w-6 text-slate-400" />Click to upload<br /><small className="font-normal text-slate-400">PDF, JPG, PNG up to 5MB</small></span>}</label></div></Field>;
+
+const Header = ({ title, text, icon: Icon }) => <div className="mb-5 flex items-start gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><Icon className="h-5 w-5" /></div><div><h3 className="text-base font-black text-slate-950 dark:text-white">{title}</h3><p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{text}</p></div></div>;
 
 const StudentApplicationPage = () => {
   const navigate = useNavigate();
@@ -178,859 +48,65 @@ const StudentApplicationPage = () => {
   const [loading, setLoading] = useState(false);
   const [submitStatus, setSubmitStatus] = useState(null);
   const [stepErrors, setStepErrors] = useState({});
-  const [idValidation, setIdValidation] = useState(null);
-  const [parentIdValidation, setParentIdValidation] = useState(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [existingApplication, setExistingApplication] = useState(undefined); // undefined = checking
+  const [existingApplication, setExistingApplication] = useState(undefined);
 
   useEffect(() => {
     const init = async () => {
       try {
-        const [propRes, appRes] = await Promise.all([
-          propertiesAPI.getProperties({ per_page: 50 }),
-          applicationsAPI.getMyApplication(),
-        ]);
+        const [propRes, appRes] = await Promise.all([propertiesAPI.getProperties({ per_page: 50 }), applicationsAPI.getMyApplication()]);
         setProperties(propRes.data.properties || []);
-        setExistingApplication(appRes.data.application); // null or object
-      } catch {
-        setExistingApplication(null);
-      }
+        setExistingApplication(appRes.data.application);
+      } catch { setExistingApplication(null); }
     };
     init();
   }, []);
 
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (stepErrors[field]) {
-      setStepErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+  const update = (field, value) => { setFormData((p) => ({ ...p, [field]: value })); if (stepErrors[field]) setStepErrors((p) => { const n = { ...p }; delete n[field]; return n; }); };
+  const updateDoc = (key, file) => { if (file && file.size > 5 * 1024 * 1024) return setStepErrors((p) => ({ ...p, [key]: 'File size must be under 5MB' })); setFormData((p) => ({ ...p, documents: { ...p.documents, [key]: file } })); };
+  const selectResidence = (id) => setFormData((p) => p.selectedResidences.includes(id) ? { ...p, selectedResidences: p.selectedResidences.filter((x) => x !== id) } : p.selectedResidences.length < 3 ? { ...p, selectedResidences: [...p.selectedResidences, id] } : p);
+
+  const validate = () => {
+    const e = {};
+    if (currentStep === 1) {
+      if (!formData.firstName.trim()) e.firstName = 'Required';
+      if (!formData.lastName.trim()) e.lastName = 'Required';
+      if (!formData.email.trim()) e.email = 'Required';
+      if (!formData.idNumber.trim()) e.idNumber = 'Required'; else if (!validateSAID(formData.idNumber).isValid) e.idNumber = validateSAID(formData.idNumber).error;
+      if (!formData.phoneNumber.trim()) e.phoneNumber = 'Required';
     }
+    if (currentStep === 2) { if (!formData.university) e.university = 'Required'; if (!formData.studentNumber.trim()) e.studentNumber = 'Required'; if (!formData.faculty) e.faculty = 'Required'; if (!formData.yearOfStudy) e.yearOfStudy = 'Required'; if (!formData.financialAid) e.financialAid = 'Required'; }
+    if (currentStep === 3) { if (!formData.selectedResidences.length) e.selectedResidences = 'Select at least one residence'; if (!formData.roomType) e.roomType = 'Required'; }
+    if (currentStep === 4) { if (!formData.parentGuardianName.trim()) e.parentGuardianName = 'Required'; if (!formData.parentGuardianIdNumber.trim()) e.parentGuardianIdNumber = 'Required'; if (!formData.parentGuardianPhone.trim()) e.parentGuardianPhone = 'Required'; }
+    if (currentStep === 5) { if (!formData.documents.studentCard) e.studentCard = 'Required'; if (!formData.documents.studentId) e.studentId = 'Required'; if (!formData.documents.proofOfRegistration) e.proofOfRegistration = 'Required'; }
+    setStepErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleIdChange = (value) => {
-    handleInputChange('idNumber', value);
-    if (value.replace(/\s/g, '').length === 13) {
-      const result = validateSAID(value);
-      setIdValidation(result);
-      if (result.isValid && result.dateOfBirth) {
-        const dob = result.dateOfBirth;
-        const formatted = `${dob.getFullYear()}-${String(dob.getMonth() + 1).padStart(2, '0')}-${String(dob.getDate()).padStart(2, '0')}`;
-        handleInputChange('dateOfBirth', formatted);
-        handleInputChange('gender', result.gender.toLowerCase());
-      }
-    } else {
-      setIdValidation(null);
-    }
+  const next = () => { if (validate()) { setCurrentStep((p) => Math.min(p + 1, STEPS.length)); window.scrollTo({ top: 0, behavior: 'smooth' }); } };
+  const back = () => { setCurrentStep((p) => Math.max(p - 1, 1)); setStepErrors({}); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const submit = async () => { if (!termsAccepted) return setStepErrors({ terms: 'You must accept the terms and conditions' }); setLoading(true); try { const r = await applicationsAPI.submit(formData); setExistingApplication(r.data.application); setSubmitStatus('success'); } catch (err) { if (err.response?.status === 409) setExistingApplication(err.response.data.application); else setSubmitStatus('error'); } finally { setLoading(false); } };
+
+  const renderStep = () => {
+    if (currentStep === 1) return <><Header icon={User} title="Personal information" text="Enter your details as they appear on your ID document." /><div className="grid grid-cols-1 gap-4 md:grid-cols-2"><TextInput label="First name" value={formData.firstName} onChange={(e) => update('firstName', e.target.value)} error={stepErrors.firstName} /><TextInput label="Last name" value={formData.lastName} onChange={(e) => update('lastName', e.target.value)} error={stepErrors.lastName} /><TextInput label="SA ID number" value={formData.idNumber} onChange={(e) => update('idNumber', e.target.value.replace(/\D/g, ''))} error={stepErrors.idNumber} /><TextInput label="Email" type="email" value={formData.email} onChange={(e) => update('email', e.target.value)} error={stepErrors.email} /><TextInput label="Phone number" value={formData.phoneNumber} onChange={(e) => update('phoneNumber', e.target.value)} error={stepErrors.phoneNumber} /><TextInput label="Nationality" value={formData.nationality} onChange={(e) => update('nationality', e.target.value)} /></div><div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3"><TextInput label="Emergency contact" value={formData.emergencyContactName} onChange={(e) => update('emergencyContactName', e.target.value)} /><TextInput label="Emergency phone" value={formData.emergencyContactPhone} onChange={(e) => update('emergencyContactPhone', e.target.value)} /><TextInput label="Relationship" value={formData.emergencyContactRelation} onChange={(e) => update('emergencyContactRelation', e.target.value)} /></div></>;
+    if (currentStep === 2) return <><Header icon={GraduationCap} title="Studies and funding" text="Tell us about your studies and funding source." /><div className="grid grid-cols-1 gap-4 md:grid-cols-2"><SelectInput label="University" value={formData.university} onChange={(e) => update('university', e.target.value)} error={stepErrors.university}><option value="">Select university</option><option value="wits">Wits</option><option value="uj">UJ</option></SelectInput><TextInput label="Student number" value={formData.studentNumber} onChange={(e) => update('studentNumber', e.target.value)} error={stepErrors.studentNumber} /><SelectInput label="Faculty" value={formData.faculty} onChange={(e) => update('faculty', e.target.value)} error={stepErrors.faculty}><option value="">Select faculty</option><option value="engineering">Engineering</option><option value="commerce">Commerce</option><option value="law">Law</option><option value="science">Science</option><option value="humanities">Humanities</option><option value="health-sciences">Health Sciences</option></SelectInput><SelectInput label="Year of study" value={formData.yearOfStudy} onChange={(e) => update('yearOfStudy', e.target.value)} error={stepErrors.yearOfStudy}><option value="">Select year</option><option value="1st-year">1st Year</option><option value="2nd-year">2nd Year</option><option value="3rd-year">3rd Year</option><option value="4th-year">4th Year</option><option value="honours">Honours</option><option value="masters">Masters</option></SelectInput><TextInput label="Degree programme" value={formData.degreeProgram} onChange={(e) => update('degreeProgram', e.target.value)} /><SelectInput label="Financial aid" value={formData.financialAid} onChange={(e) => update('financialAid', e.target.value)} error={stepErrors.financialAid}><option value="">Select source</option><option value="nsfas">NSFAS</option><option value="bursary">Bursary</option><option value="loan">Student loan</option><option value="self-funded">Self funded</option><option value="parent-funded">Parent funded</option></SelectInput></div><label className="mt-4 flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-500/10"><input type="checkbox" checked={formData.nsfasApplicant} onChange={(e) => update('nsfasApplicant', e.target.checked)} className="mt-1" /><span className="text-sm text-slate-700 dark:text-slate-300"><b>NSFAS recipient or applicant</b><br />Tick this if you receive or applied for NSFAS funding.</span></label></>;
+    if (currentStep === 3) return <><Header icon={MapPin} title="Accommodation preferences" text="Choose up to three residences and your preferred room type." />{stepErrors.selectedResidences && <p className="mb-3 text-xs font-bold text-red-600">{stepErrors.selectedResidences}</p>}<div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">{properties.map((p) => { const active = formData.selectedResidences.includes(p.id); return <button type="button" key={p.id} onClick={() => selectResidence(p.id)} className={`rounded-2xl border p-4 text-left transition ${active ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10' : 'border-slate-200 bg-white hover:border-blue-300 dark:border-slate-800 dark:bg-slate-900'}`}><div className="flex justify-between gap-3"><div><p className="text-sm font-black text-slate-950 dark:text-white">{p.name}</p><p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{p.address}</p></div>{active && <CheckCircle className="h-5 w-5 text-blue-600" />}</div><p className="mt-3 text-xs font-bold text-blue-600">R{p.price_min?.toLocaleString()} to R{p.price_max?.toLocaleString()}</p></button>; })}</div><div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2"><SelectInput label="Room type" value={formData.roomType} onChange={(e) => update('roomType', e.target.value)} error={stepErrors.roomType}><option value="">Select type</option><option value="single">Single room</option><option value="shared">Shared room</option><option value="studio">Studio</option></SelectInput><TextInput label="Special requirements" value={formData.specialRequirements} onChange={(e) => update('specialRequirements', e.target.value)} /></div></>;
+    if (currentStep === 4) return <><Header icon={Users} title="Parent or guardian" text="Provide guardian details for verification." /><div className="grid grid-cols-1 gap-4 md:grid-cols-2"><TextInput label="Guardian name" value={formData.parentGuardianName} onChange={(e) => update('parentGuardianName', e.target.value)} error={stepErrors.parentGuardianName} /><TextInput label="Guardian ID number" value={formData.parentGuardianIdNumber} onChange={(e) => update('parentGuardianIdNumber', e.target.value.replace(/\D/g, ''))} error={stepErrors.parentGuardianIdNumber} /><TextInput label="Guardian phone" value={formData.parentGuardianPhone} onChange={(e) => update('parentGuardianPhone', e.target.value)} error={stepErrors.parentGuardianPhone} /><TextInput label="Guardian email" type="email" value={formData.parentGuardianEmail} onChange={(e) => update('parentGuardianEmail', e.target.value)} /></div><div className="mt-4"><TextInput label="Guardian address" value={formData.parentGuardianAddress} onChange={(e) => update('parentGuardianAddress', e.target.value)} /></div></>;
+    if (currentStep === 5) return <><Header icon={Upload} title="Documents" text="Upload the required files. Optional documents can support your application." /><div className="grid grid-cols-1 gap-4 md:grid-cols-2"><FileInput label="Student card" file={formData.documents.studentCard} error={stepErrors.studentCard} onUpload={(f) => updateDoc('studentCard', f)} /><FileInput label="Student ID document" file={formData.documents.studentId} error={stepErrors.studentId} onUpload={(f) => updateDoc('studentId', f)} /><FileInput label="Proof of registration" file={formData.documents.proofOfRegistration} error={stepErrors.proofOfRegistration} onUpload={(f) => updateDoc('proofOfRegistration', f)} /><FileInput label="Parent or guardian ID" file={formData.documents.parentGuardianId} onUpload={(f) => updateDoc('parentGuardianId', f)} /><FileInput label="Bank statement" file={formData.documents.bankStatement} onUpload={(f) => updateDoc('bankStatement', f)} /><FileInput label="NSFAS letter" file={formData.documents.nsfasLetter} onUpload={(f) => updateDoc('nsfasLetter', f)} /></div></>;
+    return <><Header icon={CheckCircle} title="Review and submit" text="Check your details before submitting." /><div className="grid grid-cols-1 gap-3 md:grid-cols-2"><div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="text-xs text-slate-500">Applicant</p><p className="font-black text-slate-950 dark:text-white">{formData.firstName} {formData.lastName}</p><p className="text-xs text-slate-500">{formData.email}</p></div><div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="text-xs text-slate-500">University</p><p className="font-black text-slate-950 dark:text-white">{formData.university?.toUpperCase() || 'Not selected'}</p><p className="text-xs text-slate-500">{formData.studentNumber}</p></div><div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="text-xs text-slate-500">Residences selected</p><p className="font-black text-slate-950 dark:text-white">{formData.selectedResidences.length}</p></div><div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="text-xs text-slate-500">Funding</p><p className="font-black capitalize text-slate-950 dark:text-white">{formData.financialAid || 'Not selected'}</p></div></div><label className={`mt-4 flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${termsAccepted ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10' : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900'}`}><input type="checkbox" checked={termsAccepted} onChange={(e) => setTermsAccepted(e.target.checked)} className="mt-1" /><span className="text-sm text-slate-700 dark:text-slate-300">I confirm that all information is accurate and agree to the terms and conditions.</span></label>{stepErrors.terms && <p className="mt-1 text-xs font-bold text-red-600">{stepErrors.terms}</p>}</>;
   };
 
-  const handleParentIdChange = (value) => {
-    handleInputChange('parentGuardianIdNumber', value);
-    if (value.replace(/\s/g, '').length === 13) {
-      setParentIdValidation(validateSAID(value));
-    } else {
-      setParentIdValidation(null);
-    }
-  };
-
-  const handleFileUpload = (documentType, file) => {
-    if (file && file.size > 5 * 1024 * 1024) {
-      setStepErrors((prev) => ({ ...prev, [documentType]: 'File size must be under 5MB' }));
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      documents: { ...prev.documents, [documentType]: file },
-    }));
-    setStepErrors((prev) => {
-      const next = { ...prev };
-      delete next[documentType];
-      return next;
-    });
-  };
-
-  const handleResidenceSelection = (propertyId) => {
-    setFormData((prev) => {
-      const current = prev.selectedResidences;
-      if (current.includes(propertyId)) {
-        return { ...prev, selectedResidences: current.filter((id) => id !== propertyId) };
-      }
-      if (current.length < 3) {
-        return { ...prev, selectedResidences: [...current, propertyId] };
-      }
-      return prev;
-    });
-  };
-
-  const validateStep = (step) => {
-    const errors = {};
-    switch (step) {
-      case 1: {
-        if (!formData.firstName.trim()) errors.firstName = 'First name is required';
-        if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
-        if (!formData.idNumber.trim()) {
-          errors.idNumber = 'ID number is required';
-        } else {
-          const idResult = validateSAID(formData.idNumber);
-          if (!idResult.isValid) errors.idNumber = idResult.error;
-        }
-        if (!formData.email.trim()) errors.email = 'Email is required';
-        if (!formData.phoneNumber.trim()) {
-          errors.phoneNumber = 'Phone number is required';
-        } else if (!/^(\+27|0)\d{9}$/.test(formData.phoneNumber.replace(/\s/g, ''))) {
-          errors.phoneNumber = 'Enter a valid SA phone number (e.g. 0812345678)';
-        }
-        break;
-      }
-      case 2:
-        if (!formData.university) errors.university = 'University is required';
-        if (!formData.studentNumber.trim()) errors.studentNumber = 'Student number is required';
-        if (!formData.faculty) errors.faculty = 'Faculty is required';
-        if (!formData.yearOfStudy) errors.yearOfStudy = 'Year of study is required';
-        break;
-      case 3:
-        if (!formData.financialAid) errors.financialAid = 'Financial aid source is required';
-        break;
-      case 4:
-        if (formData.selectedResidences.length === 0) errors.selectedResidences = 'Select at least 1 residence';
-        if (!formData.roomType) errors.roomType = 'Room type is required';
-        break;
-      case 5:
-        if (!formData.parentGuardianName.trim()) errors.parentGuardianName = 'Parent/Guardian name is required';
-        if (!formData.parentGuardianIdNumber.trim()) {
-          errors.parentGuardianIdNumber = 'ID number is required';
-        } else {
-          const parentResult = validateSAID(formData.parentGuardianIdNumber);
-          if (!parentResult.isValid) errors.parentGuardianIdNumber = parentResult.error;
-        }
-        if (!formData.parentGuardianPhone.trim()) errors.parentGuardianPhone = 'Phone number is required';
-        break;
-      case 6:
-        if (!formData.documents.studentCard) errors.studentCard = 'Student card is required';
-        if (!formData.documents.studentId) errors.studentId = 'Student ID document is required';
-        if (!formData.documents.proofOfRegistration) errors.proofOfRegistration = 'Proof of registration is required';
-        break;
-      default:
-        break;
-    }
-    setStepErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, 7));
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    setStepErrors({});
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleSubmit = async () => {
-    if (!termsAccepted) {
-      setStepErrors({ terms: 'You must accept the terms and conditions' });
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await applicationsAPI.submit(formData);
-      setExistingApplication(res.data.application);
-      setSubmitStatus('success');
-    } catch (err) {
-      if (err.response?.status === 409) {
-        setExistingApplication(err.response.data.application);
-      } else {
-        setSubmitStatus('error');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderStepContent = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Personal Information</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Please provide your personal details as they appear on your ID document.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <InputField label="First Name" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)} required placeholder="Enter first name" error={stepErrors.firstName} />
-              <InputField label="Last Name" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)} required placeholder="Enter last name" error={stepErrors.lastName} />
-              <SAIDInput
-                label="SA ID Number"
-                value={formData.idNumber}
-                onChange={handleIdChange}
-                validationResult={idValidation}
-                error={stepErrors.idNumber}
-                required
-              />
-              <InputField label="Date of Birth" value={formData.dateOfBirth} onChange={(e) => handleInputChange('dateOfBirth', e.target.value)} type="date" />
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Gender</label>
-                <select
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                  value={formData.gender}
-                  onChange={(e) => handleInputChange('gender', e.target.value)}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                  <option value="prefer-not-to-say">Prefer not to say</option>
-                </select>
-              </div>
-              <InputField label="Nationality" value={formData.nationality} onChange={(e) => handleInputChange('nationality', e.target.value)} placeholder="e.g. South African" />
-              <InputField label="Phone Number" value={formData.phoneNumber} onChange={(e) => handleInputChange('phoneNumber', e.target.value)} type="tel" required placeholder="e.g. 0812345678" error={stepErrors.phoneNumber} />
-              <InputField label="Email Address" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} type="email" required placeholder="your@email.com" error={stepErrors.email} />
-            </div>
-            <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
-              <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <Phone className="w-4 h-4 mr-2 text-blue-500" /> Emergency Contact
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <InputField label="Contact Name" value={formData.emergencyContactName} onChange={(e) => handleInputChange('emergencyContactName', e.target.value)} placeholder="Full name" />
-                <InputField label="Contact Phone" value={formData.emergencyContactPhone} onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)} type="tel" placeholder="Phone number" />
-                <InputField label="Relationship" value={formData.emergencyContactRelation} onChange={(e) => handleInputChange('emergencyContactRelation', e.target.value)} placeholder="e.g. Parent" />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Academic Information</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Tell us about your studies.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">University <span className="text-red-500">*</span></label>
-                <select
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${stepErrors.university ? 'border-red-300' : 'border-gray-200 dark:border-gray-600'}`}
-                  value={formData.university}
-                  onChange={(e) => handleInputChange('university', e.target.value)}
-                >
-                  <option value="">Select University</option>
-                  <option value="wits">University of the Witwatersrand</option>
-                  <option value="uj">University of Johannesburg</option>
-                </select>
-                {stepErrors.university && <p className="mt-1 text-sm text-red-600">{stepErrors.university}</p>}
-              </div>
-              <InputField label="Student Number" value={formData.studentNumber} onChange={(e) => handleInputChange('studentNumber', e.target.value)} required placeholder="e.g. 2307134" error={stepErrors.studentNumber} />
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Faculty <span className="text-red-500">*</span></label>
-                <select
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${stepErrors.faculty ? 'border-red-300' : 'border-gray-200 dark:border-gray-600'}`}
-                  value={formData.faculty}
-                  onChange={(e) => handleInputChange('faculty', e.target.value)}
-                >
-                  <option value="">Select Faculty</option>
-                  <option value="engineering">Engineering</option>
-                  <option value="commerce">Commerce</option>
-                  <option value="law">Law</option>
-                  <option value="health-sciences">Health Sciences</option>
-                  <option value="humanities">Humanities</option>
-                  <option value="science">Science</option>
-                  <option value="education">Education</option>
-                  <option value="management">Management</option>
-                  <option value="art-design">Art & Design</option>
-                </select>
-                {stepErrors.faculty && <p className="mt-1 text-sm text-red-600">{stepErrors.faculty}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Year of Study <span className="text-red-500">*</span></label>
-                <select
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${stepErrors.yearOfStudy ? 'border-red-300' : 'border-gray-200 dark:border-gray-600'}`}
-                  value={formData.yearOfStudy}
-                  onChange={(e) => handleInputChange('yearOfStudy', e.target.value)}
-                >
-                  <option value="">Select Year</option>
-                  <option value="1st-year">1st Year</option>
-                  <option value="2nd-year">2nd Year</option>
-                  <option value="3rd-year">3rd Year</option>
-                  <option value="4th-year">4th Year</option>
-                  <option value="honours">Honours</option>
-                  <option value="masters">Masters</option>
-                  <option value="phd">PhD</option>
-                </select>
-                {stepErrors.yearOfStudy && <p className="mt-1 text-sm text-red-600">{stepErrors.yearOfStudy}</p>}
-              </div>
-              <InputField label="Degree Program" value={formData.degreeProgram} onChange={(e) => handleInputChange('degreeProgram', e.target.value)} placeholder="e.g. Bachelor of Engineering" />
-              <InputField label="Expected Graduation" value={formData.expectedGraduation} onChange={(e) => handleInputChange('expectedGraduation', e.target.value)} type="date" />
-            </div>
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Financial Information</h3>
-              <p className="text-sm text-gray-500">Help us understand your funding situation.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Financial Aid Source <span className="text-red-500">*</span></label>
-                <select
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${stepErrors.financialAid ? 'border-red-300' : 'border-gray-200 dark:border-gray-600'}`}
-                  value={formData.financialAid}
-                  onChange={(e) => handleInputChange('financialAid', e.target.value)}
-                >
-                  <option value="">Select Source</option>
-                  <option value="nsfas">NSFAS</option>
-                  <option value="bursary">Bursary</option>
-                  <option value="loan">Student Loan</option>
-                  <option value="self-funded">Self Funded</option>
-                  <option value="parent-funded">Parent/Guardian Funded</option>
-                  <option value="other">Other</option>
-                </select>
-                {stepErrors.financialAid && <p className="mt-1 text-sm text-red-600">{stepErrors.financialAid}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Parent/Guardian Annual Income</label>
-                <select
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                  value={formData.parentGuardianIncome}
-                  onChange={(e) => handleInputChange('parentGuardianIncome', e.target.value)}
-                >
-                  <option value="">Select Income Range</option>
-                  <option value="0-50000">R0 – R50,000</option>
-                  <option value="50000-100000">R50,000 – R100,000</option>
-                  <option value="100000-200000">R100,000 – R200,000</option>
-                  <option value="200000-350000">R200,000 – R350,000</option>
-                  <option value="350000+">R350,000+</option>
-                </select>
-              </div>
-            </div>
-
-            <label className="flex items-center space-x-3 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.nsfasApplicant}
-                onChange={(e) => handleInputChange('nsfasApplicant', e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-              <div>
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">NSFAS Recipient / Applicant</span>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tick if you receive or have applied for NSFAS funding</p>
-              </div>
-            </label>
-
-            <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
-              <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-                <CreditCard className="w-4 h-4 mr-2 text-blue-500" /> Banking Details
-                <span className="ml-2 text-sm font-normal text-gray-400">(Optional)</span>
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <InputField label="Bank Name" value={formData.bankName} onChange={(e) => handleInputChange('bankName', e.target.value)} placeholder="e.g. FNB" />
-                <InputField label="Account Number" value={formData.accountNumber} onChange={(e) => handleInputChange('accountNumber', e.target.value)} placeholder="Account number" />
-              </div>
-            </div>
-          </div>
-        );
-
-      case 4:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Accommodation Preferences</h3>
-              <p className="text-sm text-gray-500">Select up to 3 preferred residences in order of priority.</p>
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
-                  Preferred Residences <span className="text-red-500">*</span>
-                  <span className="ml-2 text-blue-600">({formData.selectedResidences.length}/3 selected)</span>
-                </label>
-              </div>
-              {stepErrors.selectedResidences && <p className="mb-2 text-sm text-red-600">{stepErrors.selectedResidences}</p>}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto pr-1">
-                {properties.map((property) => {
-                  const isSelected = formData.selectedResidences.includes(property.id);
-                  const selectionIndex = formData.selectedResidences.indexOf(property.id);
-                  return (
-                    <div
-                      key={property.id}
-                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                        isSelected ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 bg-white dark:bg-gray-700'
-                      }`}
-                      onClick={() => handleResidenceSelection(property.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 dark:text-white text-sm truncate">{property.name}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">{property.address}</p>
-                          <p className="text-sm font-semibold text-blue-600 mt-1.5">
-                            R{property.price_min?.toLocaleString()} – R{property.price_max?.toLocaleString()}/mo
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold ml-2 flex-shrink-0">
-                            {selectionIndex + 1}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-                {properties.length === 0 && (
-                  <div className="col-span-full text-center py-8 text-gray-500 dark:text-gray-400">
-                    <MapPin className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                    <p className="text-sm">No properties available at the moment.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Room Type Preference <span className="text-red-500">*</span></label>
-                <select
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm ${stepErrors.roomType ? 'border-red-300' : 'border-gray-200 dark:border-gray-600'}`}
-                  value={formData.roomType}
-                  onChange={(e) => handleInputChange('roomType', e.target.value)}
-                >
-                  <option value="">Select Room Type</option>
-                  <option value="single">Single Room</option>
-                  <option value="shared">Shared Room</option>
-                  <option value="apartment">Apartment Style</option>
-                  <option value="no-preference">No Preference</option>
-                </select>
-                {stepErrors.roomType && <p className="mt-1 text-sm text-red-600">{stepErrors.roomType}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Dietary Requirements</label>
-                <select
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                  value={formData.dietaryRequirements}
-                  onChange={(e) => handleInputChange('dietaryRequirements', e.target.value)}
-                >
-                  <option value="">No Special Requirements</option>
-                  <option value="vegetarian">Vegetarian</option>
-                  <option value="vegan">Vegan</option>
-                  <option value="halal">Halal</option>
-                  <option value="kosher">Kosher</option>
-                  <option value="gluten-free">Gluten Free</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Special Requirements or Disabilities</label>
-              <textarea
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm resize-none"
-                rows={3}
-                value={formData.specialRequirements}
-                onChange={(e) => handleInputChange('specialRequirements', e.target.value)}
-                placeholder="Please describe any special accommodations needed..."
-              />
-            </div>
-          </div>
-        );
-
-      case 5:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Parent/Guardian Information</h3>
-              <p className="text-sm text-gray-500">Provide details for your parent or legal guardian.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <InputField label="Full Name" value={formData.parentGuardianName} onChange={(e) => handleInputChange('parentGuardianName', e.target.value)} required placeholder="Full name" error={stepErrors.parentGuardianName} />
-              <SAIDInput
-                label="SA ID Number"
-                value={formData.parentGuardianIdNumber}
-                onChange={handleParentIdChange}
-                validationResult={parentIdValidation}
-                error={stepErrors.parentGuardianIdNumber}
-                required
-              />
-              <InputField label="Phone Number" value={formData.parentGuardianPhone} onChange={(e) => handleInputChange('parentGuardianPhone', e.target.value)} type="tel" required placeholder="e.g. 0812345678" error={stepErrors.parentGuardianPhone} />
-              <InputField label="Email Address" value={formData.parentGuardianEmail} onChange={(e) => handleInputChange('parentGuardianEmail', e.target.value)} type="email" placeholder="email@example.com" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1.5">Home Address</label>
-              <textarea
-                className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm resize-none"
-                rows={3}
-                value={formData.parentGuardianAddress}
-                onChange={(e) => handleInputChange('parentGuardianAddress', e.target.value)}
-                placeholder="Full residential address"
-              />
-            </div>
-          </div>
-        );
-
-      case 6:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Document Upload</h3>
-              <p className="text-sm text-gray-500">Upload the required documents. All documents must be clear and legible.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <FileUploadComponent label="Student Card" file={formData.documents.studentCard} error={stepErrors.studentCard} onUpload={(f) => handleFileUpload('studentCard', f)} required />
-              <FileUploadComponent label="Student ID Document" file={formData.documents.studentId} error={stepErrors.studentId} onUpload={(f) => handleFileUpload('studentId', f)} required />
-              <FileUploadComponent label="Parent/Guardian ID" file={formData.documents.parentGuardianId} error={stepErrors.parentGuardianId} onUpload={(f) => handleFileUpload('parentGuardianId', f)} />
-              <FileUploadComponent label="Proof of Registration" file={formData.documents.proofOfRegistration} error={stepErrors.proofOfRegistration} onUpload={(f) => handleFileUpload('proofOfRegistration', f)} required />
-              <FileUploadComponent label="Bank Statement (Last 3 months)" file={formData.documents.bankStatement} error={stepErrors.bankStatement} onUpload={(f) => handleFileUpload('bankStatement', f)} />
-              {formData.nsfasApplicant && <FileUploadComponent label="NSFAS Approval Letter" file={formData.documents.nsfasLetter} error={stepErrors.nsfasLetter} onUpload={(f) => handleFileUpload('nsfasLetter', f)} />}
-              <FileUploadComponent label="Medical Certificate (if applicable)" file={formData.documents.medicalCertificate} error={stepErrors.medicalCertificate} onUpload={(f) => handleFileUpload('medicalCertificate', f)} />
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 flex items-start">
-              <Shield className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div className="text-sm text-blue-800 dark:text-blue-300">
-                <p className="font-semibold mb-1">Document Requirements</p>
-                <ul className="list-disc list-inside space-y-0.5 text-blue-700 dark:text-blue-400">
-                  <li>Accepted formats: PDF, JPG, PNG</li>
-                  <li>Maximum file size: 5MB per document</li>
-                  <li>Documents must be current and valid</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 7:
-        return (
-          <div className="space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">Review & Submit</h3>
-              <p className="text-sm text-gray-500">Please verify all information before submitting your application.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <User className="w-4 h-4 mr-2 text-blue-500" /> Personal Information
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{formData.firstName} {formData.lastName}</p>
-                <p className="text-sm text-gray-600">ID: {formData.idNumber}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{formData.email}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{formData.phoneNumber}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <GraduationCap className="w-4 h-4 mr-2 text-blue-500" /> Academic Information
-                </h4>
-                <p className="text-sm text-gray-600">
-                  {formData.university === 'wits' ? 'Wits' : formData.university === 'uj' ? 'UJ' : formData.university}
-                </p>
-                <p className="text-sm text-gray-600">Student #: {formData.studentNumber}</p>
-                <p className="text-sm text-gray-600 capitalize">{formData.faculty} – {formData.yearOfStudy}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <DollarSign className="w-4 h-4 mr-2 text-blue-500" /> Financial Information
-                </h4>
-                <p className="text-sm text-gray-600 capitalize">Source: {formData.financialAid}</p>
-                {formData.nsfasApplicant && <p className="text-sm text-emerald-600 font-semibold">NSFAS Applicant</p>}
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <MapPin className="w-4 h-4 mr-2 text-blue-500" /> Selected Residences
-                </h4>
-                {formData.selectedResidences.map((id, index) => {
-                  const property = properties.find((p) => p.id === id);
-                  return <p key={id} className="text-sm text-gray-600">{index + 1}. {property?.name || 'Unknown'}</p>;
-                })}
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <Users className="w-4 h-4 mr-2 text-blue-500" /> Parent/Guardian
-                </h4>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{formData.parentGuardianName}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">{formData.parentGuardianPhone}</p>
-              </div>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-xl p-5 space-y-2">
-                <h4 className="font-semibold text-gray-900 dark:text-white flex items-center text-sm">
-                  <FileText className="w-4 h-4 mr-2 text-blue-500" /> Documents
-                </h4>
-                <p className="text-sm text-gray-600">
-                  {Object.values(formData.documents).filter(Boolean).length} / {Object.keys(formData.documents).length} uploaded
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 flex items-start">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div className="text-sm text-amber-800 dark:text-amber-300">
-                <p className="font-semibold mb-1">Before Submitting</p>
-                <ul className="list-disc list-inside space-y-0.5 text-amber-700 dark:text-amber-400">
-                  <li>Ensure all information is accurate and complete</li>
-                  <li>Verify all required documents have been uploaded</li>
-                  <li>Applications cannot be modified after submission</li>
-                </ul>
-              </div>
-            </div>
-
-            <label className={`flex items-start space-x-3 p-4 rounded-xl cursor-pointer border-2 transition-colors ${
-              termsAccepted ? 'bg-emerald-50 border-emerald-200' : stepErrors.terms ? 'bg-red-50 border-red-200' : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-            }`}>
-              <input
-                type="checkbox"
-                checked={termsAccepted}
-                onChange={(e) => {
-                  setTermsAccepted(e.target.checked);
-                  if (stepErrors.terms) setStepErrors((prev) => { const n = { ...prev }; delete n.terms; return n; });
-                }}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300 mt-0.5"
-              />
-              <span className="text-sm text-gray-700 dark:text-gray-200">
-                I confirm that all information provided is accurate and I agree to the terms and conditions of oneApplyHub.
-              </span>
-            </label>
-            {stepErrors.terms && <p className="text-sm text-red-600">{stepErrors.terms}</p>}
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
-
-  // Still checking for existing application
-  if (existingApplication === undefined) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
-      </div>
-    );
-  }
-
-  // Show status tracker if an application already exists
+  if (existingApplication === undefined) return <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950"><div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600" /></div>;
   if (existingApplication) {
     const app = existingApplication;
     const meta = STATUS_META[app.status] || STATUS_META.pending;
-    const TIMELINE = ['pending', 'under_review', 'approved'];
-    const isRejected = app.status === 'rejected';
-    const stepIndex = TIMELINE.indexOf(app.status);
-
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-8">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold">My Application</h1>
-            <p className="text-blue-100 mt-1 text-sm">Track the status of your accommodation application.</p>
-          </div>
-        </div>
-
-        <div className="px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-
-          {/* Status card */}
-          <div className={`border rounded-2xl p-6 ${meta.bg}`}>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Application Reference</p>
-                <p className="font-mono font-bold text-gray-900 dark:text-white text-lg">{app.reference}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Submitted {app.submitted_at ? new Date(app.submitted_at).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
-                </p>
-              </div>
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border ${meta.bg} self-start sm:self-auto`}>
-                <span className={`w-2.5 h-2.5 rounded-full ${meta.dot} animate-pulse`} />
-                <span className={`text-sm font-bold ${meta.color}`}>{meta.label}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress timeline */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-5">Application Progress</h3>
-            {isRejected ? (
-              <div className="flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                <X className="w-5 h-5 text-red-600 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-red-700 dark:text-red-400">Application Not Approved</p>
-                  <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">Please contact the accommodation office for more information.</p>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                {TIMELINE.map((s, i) => {
-                  const done = i <= stepIndex;
-                  const active = i === stepIndex;
-                  const m = STATUS_META[s];
-                  return (
-                    <div key={s} className="flex items-center flex-1">
-                      <div className="flex flex-col items-center flex-1">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${done ? 'border-indigo-600 bg-indigo-600' : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800'}`}>
-                          {done ? <CheckCircle className="w-4 h-4 text-white" /> : <span className="w-2 h-2 rounded-full bg-gray-300 dark:bg-gray-600" />}
-                        </div>
-                        <p className={`text-[10px] mt-1.5 font-semibold text-center leading-tight ${active ? 'text-indigo-600' : done ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400'}`}>
-                          {m.label}
-                        </p>
-                      </div>
-                      {i < TIMELINE.length - 1 && (
-                        <div className={`h-0.5 flex-1 mb-5 ${i < stepIndex ? 'bg-indigo-600' : 'bg-gray-200 dark:bg-gray-700'}`} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Admin notes */}
-          {app.admin_notes && (
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2">Message from Admin</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">{app.admin_notes}</p>
-            </div>
-          )}
-
-          {/* Submitted details */}
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-            <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-4">Submitted Details</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              {[
-                ['Full Name', `${app.first_name} ${app.last_name}`],
-                ['University', app.university?.toUpperCase() || '—'],
-                ['Student Number', app.student_number || '—'],
-                ['Status Last Updated', app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-ZA') : '—'],
-              ].map(([label, value]) => (
-                <div key={label}>
-                  <p className="text-xs text-gray-400 mb-0.5">{label}</p>
-                  <p className="font-semibold text-gray-900 dark:text-white">{value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors"
-            >
-              Go to Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-slate-50 dark:bg-slate-950"><div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6"><div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4"><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"><FileText className="h-3.5 w-3.5" />My application</div><h1 className="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">Application status</h1><p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Track your accommodation application.</p></div><div className={`mb-4 rounded-2xl border p-4 shadow-sm ${meta.tone}`}><p className="text-xs font-bold uppercase tracking-wide opacity-75">Application reference</p><p className="mt-1 font-mono text-lg font-black text-slate-950 dark:text-white">{app.reference}</p><div className="mt-3 inline-flex rounded-xl border bg-white/60 px-3 py-2 text-sm font-black dark:bg-slate-950/30">{meta.label}</div></div>{app.admin_notes && <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><h3 className="mb-2 text-sm font-black text-slate-950 dark:text-white">Message from admin</h3><p className="text-sm text-slate-600 dark:text-slate-300">{app.admin_notes}</p></div>}<div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><h3 className="mb-4 text-sm font-black text-slate-950 dark:text-white">Submitted details</h3><div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">{[['Full name', `${app.first_name} ${app.last_name}`], ['University', app.university?.toUpperCase() || '—'], ['Student number', app.student_number || '—'], ['Status last updated', app.updated_at ? new Date(app.updated_at).toLocaleDateString('en-ZA') : '—']].map(([l, v]) => <div key={l}><p className="text-xs text-slate-400">{l}</p><p className="font-black text-slate-950 dark:text-white">{v}</p></div>)}</div></div><button onClick={() => navigate('/dashboard')} className="mt-4 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">Go to dashboard</button></div></div>;
   }
+  if (submitStatus === 'success') return <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 dark:bg-slate-950"><div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><CheckCircle className="mx-auto mb-5 h-14 w-14 text-emerald-600" /><h2 className="text-xl font-black text-slate-950 dark:text-white">Application submitted</h2><p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Your application was submitted successfully.</p><button onClick={() => navigate('/dashboard')} className="mt-6 w-full rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white hover:bg-blue-700">Go to dashboard</button></div></div>;
 
-  if (submitStatus === 'success') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-10 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-8 h-8 text-emerald-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Application Submitted!</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-2">Your accommodation application has been submitted successfully.</p>
-          {existingApplication && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-              Reference: <span className="font-mono font-semibold">{existingApplication.reference}</span>
-            </p>
-          )}
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">You will receive a confirmation email shortly.</p>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold"
-          >
-            Go to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-10">
-        <div className="px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold">Student Accommodation Application</h1>
-          <p className="text-blue-100 mt-2">Complete each step to submit your application.</p>
-        </div>
-      </div>
-
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <div className="hidden md:flex items-center justify-between mb-5">
-            {STEPS.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
-              return (
-                <>
-                  <div key={step.id} className="flex flex-col items-center">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center border-2 transition-all ${
-                      isCompleted ? 'bg-emerald-500 border-emerald-500 text-white'
-                        : isActive ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200'
-                        : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-400 dark:text-gray-500'
-                    }`}>
-                      {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                    </div>
-                    <span className={`text-xs mt-2 text-center font-medium ${
-                      isActive ? 'text-blue-600' : isCompleted ? 'text-emerald-600' : 'text-gray-400'
-                    }`}>
-                      {step.title}
-                    </span>
-                  </div>
-                  {index < STEPS.length - 1 && (
-                    <div className={`flex-1 h-0.5 mx-2 rounded ${currentStep > step.id ? 'bg-emerald-400' : 'bg-gray-200'}`} />
-                  )}
-                </>
-              );
-            })}
-          </div>
-          <div className="md:hidden flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Step {currentStep} of {STEPS.length}</span>
-            <span className="text-sm font-semibold text-blue-600">{STEPS[currentStep - 1].title}</span>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
-            />
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 md:p-8 mb-8">
-          {renderStepContent()}
-        </div>
-
-        <div className="flex justify-between">
-          <button
-            onClick={prevStep}
-            disabled={currentStep === 1}
-            className="flex items-center px-6 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors font-medium text-sm"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Previous
-          </button>
-          {currentStep === 7 ? (
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="flex items-center px-8 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-semibold shadow-lg shadow-emerald-200 text-sm"
-            >
-              {loading ? (
-                <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" /> Submitting...</>
-              ) : (
-                <><CheckCircle className="w-4 h-4 mr-2" /> Submit Application</>
-              )}
-            </button>
-          ) : (
-            <button
-              onClick={nextStep}
-              className="flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
-            >
-              Next Step <ArrowRight className="w-4 h-4 ml-2" />
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+  const progress = Math.round(((currentStep - 1) / (STEPS.length - 1)) * 100);
+  const Icon = STEPS[currentStep - 1].icon;
+  return <div className="min-h-screen bg-slate-50 dark:bg-slate-950"><div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6"><div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"><FileText className="h-3.5 w-3.5" />My application</div><h1 className="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">Accommodation application</h1><p className="mt-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">Complete each section and submit your application for review.</p></div><div className="inline-flex w-fit items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs font-black text-slate-600 dark:bg-slate-800 dark:text-slate-300"><Icon className="h-4 w-4" />Step {currentStep} of {STEPS.length}</div></div></div><div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="mb-3 flex items-center justify-between"><p className="text-sm font-black text-slate-950 dark:text-white">{STEPS[currentStep - 1].title}</p><p className="text-xs font-bold text-slate-500">{progress}% complete</p></div><div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800"><div className="h-2 rounded-full bg-blue-600 transition-all" style={{ width: `${progress}%` }} /></div><div className="mt-4 hidden grid-cols-6 gap-2 md:grid">{STEPS.map((s) => { const StepIcon = s.icon; const active = currentStep === s.id; const done = currentStep > s.id; return <div key={s.id} className={`rounded-xl border p-2 text-center ${active ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10' : done ? 'border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10' : 'border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950'}`}><StepIcon className={`mx-auto h-4 w-4 ${active ? 'text-blue-600' : done ? 'text-emerald-600' : 'text-slate-400'}`} /><p className="mt-1 truncate text-[10px] font-bold text-slate-500">{s.title}</p></div>; })}</div></div>{submitStatus === 'error' && <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">Something went wrong. Please try again.</div>}<div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">{renderStep()}</div><div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-between"><button onClick={back} disabled={currentStep === 1} className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"><ArrowLeft className="mr-2 h-4 w-4" />Previous</button>{currentStep === STEPS.length ? <button onClick={submit} disabled={loading} className="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50">{loading ? 'Submitting...' : 'Submit application'}</button> : <button onClick={next} className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-blue-700">Next step<ArrowRight className="ml-2 h-4 w-4" /></button>}</div><div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="flex gap-3"><ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" /><div><p className="text-sm font-black text-slate-950 dark:text-white">Application checklist</p><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">Keep your student card, ID, proof of registration, and funding documents ready before submitting.</p></div></div></div></div></div>;
 };
 
 export default StudentApplicationPage;
