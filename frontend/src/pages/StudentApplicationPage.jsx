@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Upload, FileText, Users, GraduationCap, MapPin, DollarSign, AlertCircle, CheckCircle, X, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
+import { User, Upload, FileText, Users, GraduationCap, MapPin, CheckCircle, X, ArrowLeft, ArrowRight, ShieldCheck } from 'lucide-react';
 import { propertiesAPI, applicationsAPI } from '../services/api';
 import { validateSAID } from '../utils/validateSAID';
 
