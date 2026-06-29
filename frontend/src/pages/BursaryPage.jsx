@@ -5,7 +5,7 @@ import {
   Search, Filter, ExternalLink, BookOpen, Award, Clock,
   CheckCircle, AlertCircle, Building, Cpu, HeartPulse,
   Briefcase, Scale, FlaskConical, HardHat, GraduationCap,
-  Landmark, Globe, ChevronDown, ChevronUp,
+  Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark,
 } from 'lucide-react';
 import BURSARIES from '../data/bursaries.json';
 
@@ -43,8 +43,14 @@ const FUNDER_BADGE = {
 };
 
 const INITIAL_FILTERS = { field: 'all', funder: 'all', level: 'all', search: '' };
+const SELECT_CLASS = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
-const SELECT_CLASS = 'px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white';
+const OPPORTUNITY_TYPES = [
+  { title: 'Bursaries', text: 'Funding for tuition, books, accommodation, and living costs.', icon: Award, active: true },
+  { title: 'Internships', text: 'Vacation work and practical experience opportunities.', icon: Briefcase },
+  { title: 'Graduate roles', text: 'Entry level programmes for final year students and graduates.', icon: GraduationCap },
+  { title: 'Competitions', text: 'Hackathons, case challenges, and innovation programmes.', icon: Target },
+];
 
 const daysUntil = (dateStr) => {
   const d = new Date(dateStr);
@@ -67,80 +73,58 @@ const BursaryCard = ({ bursary }) => {
   const fieldColor = FIELD_COLORS[bursary.field] || FIELD_COLORS.general;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${fieldColor}`}>
-              <FieldIcon field={bursary.field} className="w-5 h-5" />
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-0.5 leading-snug">{bursary.title}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{bursary.provider}</p>
-            </div>
+    <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${fieldColor}`}>
+            <FieldIcon field={bursary.field} className="h-5 w-5" />
           </div>
-          <div className={`flex-shrink-0 text-right text-xs ${expired ? 'text-red-500' : isUrgent ? 'text-red-500 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>
-            <div className="flex items-center gap-1 justify-end">
-              <Clock className="w-3 h-3" />
-              <span>{expired ? 'Expired' : isUrgent ? `${days}d left!` : `${days}d left`}</span>
-            </div>
-            <p className="text-gray-400 dark:text-gray-500 mt-0.5">{new Date(bursary.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          <div className="min-w-0">
+            <h3 className="text-sm font-black leading-snug text-slate-950 dark:text-white">{bursary.title}</h3>
+            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{bursary.provider}</p>
           </div>
         </div>
-
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${fieldColor}`}>{fieldLabel}</span>
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${FUNDER_BADGE[bursary.funder] || FUNDER_BADGE.corporate}`}>
-            {bursary.funder.charAt(0).toUpperCase() + bursary.funder.slice(1)}
-          </span>
-          {bursary.level.map((l) => (
-            <span key={l} className="px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 capitalize">{l}</span>
-          ))}
-          {bursary.university !== 'all' && (
-            <span className="px-2 py-0.5 rounded-full text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 font-medium">{bursary.university.toUpperCase()}</span>
-          )}
-        </div>
-
-        <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">{bursary.amount}</p>
-        <p className="text-gray-600 dark:text-gray-300 text-xs leading-relaxed mb-3">{bursary.description}</p>
-
-        <button
-          onClick={() => setExpanded((p) => !p)}
-          className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 font-medium mb-2 hover:underline"
-        >
-          {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-          {expanded ? 'Hide requirements' : 'View requirements'}
-        </button>
-
-        {expanded && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {bursary.requirements.map((req, i) => (
-              <span key={i} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
-                <CheckCircle className="w-2.5 h-2.5 text-emerald-500" />{req}
-              </span>
-            ))}
+        <div className={`shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold ${expired ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : isUrgent ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+          <div className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            <span>{expired ? 'Expired' : `${days} days left`}</span>
           </div>
-        )}
-
-        <div className="flex items-center justify-end pt-3 border-t border-gray-100 dark:border-gray-700">
-          <a
-            href={bursary.applicationUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
-          >
-            Apply Now <ExternalLink className="w-3.5 h-3.5" />
-          </a>
         </div>
       </div>
-    </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${fieldColor}`}>{fieldLabel}</span>
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${FUNDER_BADGE[bursary.funder] || FUNDER_BADGE.corporate}`}>{bursary.funder}</span>
+        {bursary.level.map((l) => <span key={l} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold capitalize text-slate-600 dark:bg-slate-800 dark:text-slate-300">{l}</span>)}
+      </div>
+
+      <p className="mt-3 text-xs font-black text-emerald-600 dark:text-emerald-400">{bursary.amount}</p>
+      <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{bursary.description}</p>
+
+      <button onClick={() => setExpanded((p) => !p)} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">
+        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        {expanded ? 'Hide requirements' : 'View requirements'}
+      </button>
+
+      {expanded && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {bursary.requirements.map((req, i) => <span key={i} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><CheckCircle className="h-3 w-3 text-emerald-500" />{req}</span>)}
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs text-slate-500 dark:text-slate-400">Deadline: {new Date(bursary.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+        <a href={bursary.applicationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold text-white hover:bg-blue-700">
+          Apply now <ExternalLink className="h-3.5 w-3.5" />
+        </a>
+      </div>
+    </article>
   );
 };
 
 const BursaryPage = () => {
   const { isAuthenticated } = useAuth();
   const [filters, setFilters] = useState(INITIAL_FILTERS);
-
   const handleFilter = (key, value) => setFilters((p) => ({ ...p, [key]: value }));
 
   const filtered = useMemo(() => BURSARIES.filter((b) => {
@@ -158,161 +142,44 @@ const BursaryPage = () => {
   const urgentCount = filtered.filter((b) => { const d = daysUntil(b.deadline); return d > 0 && d <= 30; }).length;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 text-white">
-        <div className="px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <h1 className="text-2xl md:text-3xl font-bold mb-1">SA Bursaries & Scholarships</h1>
-          <p className="text-sm text-blue-100 max-w-xl mx-auto">
-            Real South African bursaries categorized by field of study, from government grants to corporate sponsorships.
-          </p>
-        </div>
-      </section>
-
-      <div className="px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-          {[
-            { value: filtered.length, label: 'Bursaries Found', color: 'text-blue-600' },
-            { value: openCount, label: 'Open Now', color: 'text-emerald-600' },
-            { value: urgentCount, label: 'Closing ≤ 30 Days', color: 'text-red-500' },
-            { value: BURSARIES.length, label: 'Total Listed', color: 'text-purple-600' },
-          ].map(({ value, label, color }) => (
-            <div key={label} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm px-4 py-3">
-              <div className={`text-xl font-bold leading-none ${color}`}>{value}</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{label}</div>
-            </div>
-          ))}
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
+          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300"><Award className="h-3.5 w-3.5" />Opportunity Hub</div>
+          <h1 className="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">Student opportunities</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">Find bursaries now, with internships, graduate roles, and competitions planned for the hub.</p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-4">
-          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Filter by Field of Study</p>
-          <div className="flex flex-wrap gap-2">
-            {FIELDS.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                onClick={() => handleFilter('field', value)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                  filters.field === value
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
+        <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {OPPORTUNITY_TYPES.map(({ title, text, icon: Icon, active }) => <div key={title} className={`rounded-2xl border p-4 shadow-sm ${active ? 'border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-500/10' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'}`}><div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm dark:bg-slate-900 dark:text-blue-300"><Icon className="h-5 w-5" /></div><h3 className="text-sm font-black text-slate-950 dark:text-white">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p>{!active && <p className="mt-2 text-[11px] font-bold text-slate-400">Coming soon</p>}</div>)}
+        </div>
+
+        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          {[{ value: filtered.length, label: 'Found' }, { value: openCount, label: 'Open now' }, { value: urgentCount, label: 'Closing soon' }, { value: BURSARIES.length, label: 'Total listed' }].map(({ value, label }) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xl font-black leading-none text-slate-950 dark:text-white">{value}</div><div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div></div>)}
+        </div>
+
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Field of study</p>
+          <div className="flex flex-wrap gap-2">{FIELDS.map(({ value, label, icon: Icon }) => <button key={value} onClick={() => handleFilter('field', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.field === value ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
+        </div>
+
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <div className="relative md:col-span-2"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search opportunities or providers" className={`${SELECT_CLASS} pl-9`} value={filters.search} onChange={(e) => handleFilter('search', e.target.value)} /></div>
+            <select className={SELECT_CLASS} value={filters.funder} onChange={(e) => handleFilter('funder', e.target.value)}><option value="all">All funders</option><option value="government">Government</option><option value="corporate">Corporate</option><option value="private">Private foundation</option><option value="professional">Professional body</option><option value="international">International</option></select>
+            <select className={SELECT_CLASS} value={filters.level} onChange={(e) => handleFilter('level', e.target.value)}><option value="all">All study levels</option><option value="undergraduate">Undergraduate</option><option value="honours">Honours</option><option value="masters">Masters</option><option value="phd">PhD</option></select>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-4 mb-5">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <div className="md:col-span-2 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search bursaries or providers..."
-                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                value={filters.search}
-                onChange={(e) => handleFilter('search', e.target.value)}
-              />
-            </div>
-            <select className={SELECT_CLASS} value={filters.funder} onChange={(e) => handleFilter('funder', e.target.value)}>
-              <option value="all">All Funders</option>
-              <option value="government">Government</option>
-              <option value="corporate">Corporate</option>
-              <option value="private">Private Foundation</option>
-              <option value="professional">Professional Body</option>
-              <option value="international">International</option>
-            </select>
-            <select className={SELECT_CLASS} value={filters.level} onChange={(e) => handleFilter('level', e.target.value)}>
-              <option value="all">All Study Levels</option>
-              <option value="undergraduate">Undergraduate</option>
-              <option value="honours">Honours</option>
-              <option value="masters">Masters</option>
-              <option value="phd">PhD</option>
-            </select>
-          </div>
-        </div>
+        {!isAuthenticated && <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-500/10"><div className="flex gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" /><div><p className="text-sm font-black text-blue-950 dark:text-blue-200">Track saved opportunities</p><p className="mt-1 text-xs text-blue-700 dark:text-blue-300">Create an account to save opportunities and manage application deadlines.</p><div className="mt-3 flex gap-2"><Link to="/register" className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">Create account</Link><Link to="/login" className="rounded-xl border border-blue-300 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 dark:text-blue-300">Login</Link></div></div></div></div>}
 
-        {!isAuthenticated && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-5 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Track your bursary applications</p>
-              <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">Create a free account to save bursaries and track deadlines.</p>
-              <div className="flex gap-2">
-                <Link to="/register" className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors">Sign Up Free</Link>
-                <Link to="/login" className="border border-blue-300 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors">Login</Link>
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-black text-slate-950 dark:text-white sm:text-lg">{filters.field !== 'all' ? FIELDS.find((f) => f.value === filters.field)?.label : 'All bursaries'} ({filtered.length})</h2><p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p></div><div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Soonest first</div></div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {filters.field !== 'all' ? FIELDS.find((f) => f.value === filters.field)?.label : 'All Bursaries'} ({filtered.length})
-            </h2>
-            <div className="flex items-center gap-1.5 text-xs text-gray-400">
-              <Filter className="w-3.5 h-3.5" />
-              <span>Soonest deadline first</span>
-            </div>
-          </div>
+        {filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((b) => <BursaryCard key={b.id} bursary={b} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-black text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your field or filters.</p><button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">Clear filters</button></div>}
 
-          {filtered.length > 0 ? (
-            <div className="space-y-3">
-              {[...filtered]
-                .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
-                .map((b) => <BursaryCard key={b.id} bursary={b} />)}
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-12 text-center">
-              <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Search className="w-6 h-6 text-gray-300 dark:text-gray-500" />
-              </div>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">No bursaries found</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-xs mb-4">Try adjusting your field or filters.</p>
-              <button onClick={() => setFilters(INITIAL_FILTERS)} className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                Clear all filters
-              </button>
-            </div>
-          )}
-        </div>
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5"><h3 className="mb-3 text-sm font-black text-slate-950 dark:text-white">Application checklist</h3><div className="grid grid-cols-1 gap-3 md:grid-cols-3">{[{ icon: Bookmark, title: 'Save opportunities', text: 'Keep a shortlist of bursaries and deadlines.' }, { icon: GraduationCap, title: 'Prepare documents', text: 'Keep ID, transcript, proof of registration, and CV ready.' }, { icon: Building, title: 'Apply early', text: 'Corporate bursaries often close months before funding starts.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><Icon className="h-4 w-4" /></div><div><h4 className="text-xs font-black text-slate-950 dark:text-white">{title}</h4><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p></div></div>)}</div></div>
 
-        <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-6">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">Application Tips</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { icon: Award, color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400', title: 'Apply to Several', text: 'Apply to multiple bursaries simultaneously. Many are not mutually exclusive, so cast a wide net.' },
-              { icon: GraduationCap, color: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400', title: 'Certified Transcripts Ready', text: 'Have certified copies of your academic record, ID, and proof of registration ready before you start.' },
-              { icon: Building, color: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400', title: 'Meet Corporate Deadlines', text: 'Corporate bursaries close in April–September for the following year. Start researching mid-year.' },
-            ].map(({ icon: Icon, color, title, text }) => (
-              <div key={title} className="flex gap-3 items-start">
-                <div className={`w-8 h-8 ${color} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                  <Icon className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white mb-0.5">{title}</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-6 bg-gradient-to-r from-blue-600 via-indigo-700 to-violet-800 rounded-2xl p-6 text-white text-center">
-          <h3 className="text-lg font-bold mb-2">Start Your Student Application</h3>
-          <p className="text-blue-100 text-sm mb-4">Apply for accommodation while your bursary application is in progress.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/application" className="bg-white text-blue-700 px-6 py-2.5 rounded-xl hover:bg-gray-100 transition-colors font-semibold text-sm">
-              Apply for Accommodation
-            </Link>
-            {!isAuthenticated && (
-              <Link to="/register" className="border-2 border-white/60 text-white px-6 py-2.5 rounded-xl hover:bg-white/10 transition-colors font-semibold text-sm">
-                Create Account
-              </Link>
-            )}
-          </div>
-        </div>
+        <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-sm font-bold sm:text-base">Plan accommodation and funding together</h3><p className="mt-1 max-w-2xl text-xs text-slate-300 sm:text-sm">Apply for accommodation while tracking funding opportunities.</p></div><Link to="/application" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">Apply for accommodation</Link></div></div>
       </div>
     </div>
   );
