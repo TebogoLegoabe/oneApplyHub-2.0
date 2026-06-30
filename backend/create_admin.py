@@ -11,10 +11,13 @@ Notes:
 """
 
 from getpass import getpass
+import os
 import re
 import sys
 
 from dotenv import load_dotenv
+from sqlalchemy import text
+from sqlalchemy.exc import OperationalError
 
 load_dotenv()
 
@@ -85,11 +88,33 @@ def confirm_action(email, is_super_admin, existing_user):
     return response in {'y', 'yes'}
 
 
+def print_database_help(exc):
+    database_url = os.environ.get('DATABASE_URL', '')
+    print('\nDatabase connection failed')
+    print('--------------------------')
+    print('The admin script could not connect to PostgreSQL.')
+    print('\nMost common local fixes:')
+    print('1. Make sure Docker is running.')
+    print('2. From the project root, run: docker compose up -d postgres pgadmin')
+    print('3. Check backend/.env has the same password as docker-compose.yml.')
+    print('4. For the default docker-compose.yml, use:')
+    print('   DATABASE_URL=postgresql://oneapplyhub:CHANGE_ME@localhost:5432/oneapplyhub_dev')
+    print('\nCurrent DATABASE_URL:')
+    print(f'   {database_url or "Not set"}')
+    print('\nOriginal error:')
+    print(f'   {exc.orig if getattr(exc, "orig", None) else exc}')
+
+
 def create_or_update_admin():
     app = create_app()
 
     with app.app_context():
-        db.create_all()
+        try:
+            db.session.execute(text('SELECT 1'))
+            db.create_all()
+        except OperationalError as exc:
+            print_database_help(exc)
+            return 1
 
         email = prompt_email()
         existing = User.query.filter_by(email=email).first()
