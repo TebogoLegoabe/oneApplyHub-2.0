@@ -4,8 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, GraduationCap, Building, Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, UserPlus } from 'lucide-react';
 import AuthBackground from '../components/AuthBackground';
 
-const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Honours', 'Masters', 'PhD', 'Other'];
-const FACULTY_OPTIONS = ['Engineering', 'Commerce', 'Law', 'Health Sciences', 'Humanities', 'Science', 'Education', 'Management', 'Art & Design', 'Other'];
+const YEAR_OPTIONS = ['Grade 11', 'Grade 12 / Matric', 'Gap year', '1st Year', '2nd Year', '3rd Year', '4th Year', 'Honours', 'Masters', 'PhD', 'Other'];
+const FACULTY_OPTIONS = ['Matric learner', 'Not sure yet', 'Engineering', 'Commerce', 'Law', 'Health Sciences', 'Humanities', 'Science', 'Education', 'Management', 'Art & Design', 'Other'];
 const PAGE = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden';
 const CARD = 'bg-white dark:bg-slate-900/95 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden';
 const INPUT = 'w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white';
@@ -27,8 +27,8 @@ const RegisterPage = () => {
   const validateForm = () => {
     if (!formData.name.trim()) return setError('Please enter your full name'), false;
     if (!formData.email.trim()) return setError('Please enter your email address'), false;
-    if (!formData.year_of_study) return setError('Please select your year of study'), false;
-    if (!formData.faculty) return setError('Please select your faculty'), false;
+    if (!formData.year_of_study) return setError('Please select your study level'), false;
+    if (!formData.faculty) return setError('Please select your faculty or field'), false;
     if (formData.password.length < 8) return setError('Password must be at least 8 characters'), false;
     if (!/[A-Za-z]/.test(formData.password) || !/\d/.test(formData.password)) return setError('Password must contain at least one letter and one number'), false;
     if (formData.password !== formData.confirmPassword) return setError('Passwords do not match'), false;
@@ -69,14 +69,14 @@ const RegisterPage = () => {
             <UserPlus className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-black text-slate-950 dark:text-white">Create your account</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign up with your student details first. Google sign-in is available after your account exists.</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Matric learners and students can register with any valid email.</p>
         </div>
 
         <div className={CARD}>
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="p-5 sm:p-6">
             <div className="mb-5 rounded-2xl bg-blue-50 p-4 text-xs leading-5 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-              <strong>Why no Google sign-up?</strong> We need your year of study and faculty first. After registration, you can use Google to sign in.
+              <strong>Google sign-in:</strong> first create your account with your study details. After that, you can sign in with Google.
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -88,11 +88,11 @@ const RegisterPage = () => {
               )}
 
               <div className="relative"><User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="name" type="text" placeholder="Full name" value={formData.name} onChange={handleChange} required /></div>
-              <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="email" type="email" placeholder="University email address" value={formData.email} onChange={handleChange} required /></div>
+              <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="email" type="email" placeholder="Email address, e.g. Gmail, iCloud, or school email" value={formData.email} onChange={handleChange} required /></div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="relative"><GraduationCap className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /><select className={INPUT} name="year_of_study" value={formData.year_of_study} onChange={handleChange} required><option value="">Year of study</option>{YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
-                <div className="relative"><Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" /><select className={INPUT} name="faculty" value={formData.faculty} onChange={handleChange} required><option value="">Faculty</option>{FACULTY_OPTIONS.map((faculty) => <option key={faculty} value={faculty}>{faculty}</option>)}</select></div>
+                <div className="relative"><GraduationCap className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /><select className={INPUT} name="year_of_study" value={formData.year_of_study} onChange={handleChange} required><option value="">Study level</option>{YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
+                <div className="relative"><Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" /><select className={INPUT} name="faculty" value={formData.faculty} onChange={handleChange} required><option value="">Faculty / field</option>{FACULTY_OPTIONS.map((faculty) => <option key={faculty} value={faculty}>{faculty}</option>)}</select></div>
               </div>
 
               <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="password" type={showPassword ? 'text' : 'password'} placeholder="Password" value={formData.password} onChange={handleChange} required /><button type="button" onClick={() => setShowPassword((previous) => !previous)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button></div>
