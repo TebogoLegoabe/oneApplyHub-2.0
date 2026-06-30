@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Mail, Lock, User, GraduationCap, Building, Eye, EyeOff, AlertCircle, ArrowRight, ArrowLeft, UserPlus } from 'lucide-react';
 import AuthBackground from '../components/AuthBackground';
-import GoogleSignInButton from '../components/GoogleSignInButton';
 
 const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Honours', 'Masters', 'PhD', 'Other'];
 const FACULTY_OPTIONS = ['Engineering', 'Commerce', 'Law', 'Health Sciences', 'Humanities', 'Science', 'Education', 'Management', 'Art & Design', 'Other'];
@@ -17,17 +16,8 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const { register, googleLogin } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
-
-  const handleGoogleSuccess = async (credential) => {
-    setGoogleLoading(true);
-    setError('');
-    const result = await googleLogin(credential);
-    setGoogleLoading(false);
-    result.success ? navigate('/dashboard', { replace: true }) : setError(result.error || 'Google sign-in failed');
-  };
 
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
@@ -37,6 +27,8 @@ const RegisterPage = () => {
   const validateForm = () => {
     if (!formData.name.trim()) return setError('Please enter your full name'), false;
     if (!formData.email.trim()) return setError('Please enter your email address'), false;
+    if (!formData.year_of_study) return setError('Please select your year of study'), false;
+    if (!formData.faculty) return setError('Please select your faculty'), false;
     if (formData.password.length < 8) return setError('Password must be at least 8 characters'), false;
     if (!/[A-Za-z]/.test(formData.password) || !/\d/.test(formData.password)) return setError('Password must contain at least one letter and one number'), false;
     if (formData.password !== formData.confirmPassword) return setError('Passwords do not match'), false;
@@ -49,8 +41,13 @@ const RegisterPage = () => {
     setLoading(true);
     setError('');
     try {
-      const result = await register({ name: formData.name, email: formData.email.trim().toLowerCase(), password: formData.password, year_of_study: formData.year_of_study, faculty: formData.faculty });
-      result.success ? navigate('/dashboard', { replace: true }) : setError(result.error || 'Registration failed');
+      const email = formData.email.trim().toLowerCase();
+      const result = await register({ name: formData.name, email, password: formData.password, year_of_study: formData.year_of_study, faculty: formData.faculty });
+      if (result.success) {
+        navigate('/verify-email', { replace: true, state: { email: result.email || email } });
+      } else {
+        setError(result.error || 'Registration failed');
+      }
     } catch {
       setError('An unexpected error occurred. Please try again.');
     } finally {
@@ -72,16 +69,14 @@ const RegisterPage = () => {
             <UserPlus className="h-6 w-6" />
           </div>
           <h1 className="text-2xl font-black text-slate-950 dark:text-white">Create your account</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Find accommodation, save opportunities, and track applications.</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sign up with your student details first. Google sign-in is available after your account exists.</p>
         </div>
 
         <div className={CARD}>
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="p-5 sm:p-6">
-            <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={setError} loading={googleLoading} label="Continue with Google" />
-            <div className="relative my-5">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-700" /></div>
-              <div className="relative flex justify-center text-xs"><span className="bg-white px-3 font-bold text-slate-400 dark:bg-slate-900">or sign up with email</span></div>
+            <div className="mb-5 rounded-2xl bg-blue-50 p-4 text-xs leading-5 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+              <strong>Why no Google sign-up?</strong> We need your year of study and faculty first. After registration, you can use Google to sign in.
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,24 +88,20 @@ const RegisterPage = () => {
               )}
 
               <div className="relative"><User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="name" type="text" placeholder="Full name" value={formData.name} onChange={handleChange} required /></div>
-              <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="email" type="email" placeholder="Email address" value={formData.email} onChange={handleChange} required /></div>
+              <div className="relative"><Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="email" type="email" placeholder="University email address" value={formData.email} onChange={handleChange} required /></div>
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="relative"><GraduationCap className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /><select className={INPUT} name="year_of_study" value={formData.year_of_study} onChange={handleChange}><option value="">Year of study</option>{YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
-                <div className="relative"><Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" /><select className={INPUT} name="faculty" value={formData.faculty} onChange={handleChange}><option value="">Faculty</option>{FACULTY_OPTIONS.map((faculty) => <option key={faculty} value={faculty}>{faculty}</option>)}</select></div>
+                <div className="relative"><GraduationCap className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" /><select className={INPUT} name="year_of_study" value={formData.year_of_study} onChange={handleChange} required><option value="">Year of study</option>{YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}</select></div>
+                <div className="relative"><Building className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-purple-500" /><select className={INPUT} name="faculty" value={formData.faculty} onChange={handleChange} required><option value="">Faculty</option>{FACULTY_OPTIONS.map((faculty) => <option key={faculty} value={faculty}>{faculty}</option>)}</select></div>
               </div>
 
               <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="password" type={showPassword ? 'text' : 'password'} placeholder="Password" value={formData.password} onChange={handleChange} required /><button type="button" onClick={() => setShowPassword((previous) => !previous)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button></div>
               <div className="relative"><Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-400" /><input className={INPUT} name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Confirm password" value={formData.confirmPassword} onChange={handleChange} required /><button type="button" onClick={() => setShowConfirmPassword((previous) => !previous)} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">{showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button></div>
 
               <button disabled={loading} className="w-full rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50">
-                {loading ? 'Creating account...' : 'Create account'}
+                {loading ? 'Creating account...' : 'Create account and verify email'}
               </button>
             </form>
-
-            <div className="mt-5 rounded-2xl bg-blue-50 p-4 text-xs leading-5 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
-              <strong>Next:</strong> Verify your email, browse accommodation, and submit your application from one place.
-            </div>
 
             <Link to="/login" className="mt-4 flex items-center justify-center text-sm font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400">
               Already have an account? Sign in <ArrowRight className="ml-1.5 h-4 w-4" />
