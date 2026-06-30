@@ -111,6 +111,10 @@ export const adminAPI = {
   getUsers: (params = {}) => api.get('/admin/users', { params }),
   updateUser: (id, data) => api.patch(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
+  // Property admins
+  getPropertyAdmins: () => api.get('/admin/property-admins'),
+  assignPropertyAdmin: (propertyId, adminUserId) => api.post('/admin/property-admins', { property_id: propertyId, admin_user_id: adminUserId }),
+  removePropertyAdmin: (assignmentId) => api.delete(`/admin/property-admins/${assignmentId}`),
   // Reviews
   getReviews: (params = {}) => api.get('/admin/reviews', { params }),
   approveReview: (id, approved) => api.patch(`/admin/reviews/${id}/approve`, { approved }),
