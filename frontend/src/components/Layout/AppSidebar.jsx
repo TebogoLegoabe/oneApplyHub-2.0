@@ -24,6 +24,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
   const [verifyMsg, setVerifyMsg] = useState('');
 
   const initials = user?.name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'S';
+  const studyDetails = [user?.year_of_study, user?.faculty].filter(Boolean).join(' • ');
 
   const handleLogout = () => {
     logout();
@@ -37,7 +38,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
     const result = await sendVerificationCode(user?.email);
     setVerifyLoading(false);
     if (result.success) {
-      navigate(`/verify-email?email=${encodeURIComponent(user.email)}`);
+      navigate('/verify-email', { state: { email: user.email } });
       onClose?.();
     } else {
       setVerifyMsg(result.error || 'Failed to send code.');
@@ -71,7 +72,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
         </div>
 
         <div className="px-4 pt-5 pb-4 border-b border-white/10">
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
               <span className="text-white font-black text-sm tracking-tight">{initials}</span>
             </div>
@@ -83,6 +84,9 @@ const AppSidebar = ({ isOpen, onClose }) => {
                 )}
               </div>
               <p className="text-[11px] text-slate-400 truncate mt-0.5">{user?.email}</p>
+              {studyDetails && (
+                <p className="text-[10px] text-indigo-300 truncate mt-1 font-semibold">{studyDetails}</p>
+              )}
             </div>
           </div>
 
