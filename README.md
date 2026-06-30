@@ -191,6 +191,21 @@ Windows Command Prompt:
 venv\Scripts\activate
 ```
 
+Windows Git Bash:
+
+```bash
+cd backend/venv/Scripts
+source activate
+```
+
+After activation, Git Bash should show `(venv)` before the prompt:
+
+```bash
+(venv)
+User@TebogoLegoabe MINGW64 ~/OneDrive/Desktop/oneApplyHub/oneApplyHub-2.0/backend/venv/Scripts (main)
+$
+```
+
 ### 2. Install dependencies
 
 ```bash
@@ -441,4 +456,11 @@ Windows PowerShell:
 ```powershell
 cd backend
 venv\Scripts\Activate.ps1
+```
+
+Windows Git Bash:
+
+```bash
+cd backend/venv/Scripts
+source activate
 ```
