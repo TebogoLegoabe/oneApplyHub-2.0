@@ -12,7 +12,6 @@ const VerifyEmailPage = () => {
   const location = useLocation();
   const { verifyEmail, sendVerificationCode, user } = useAuth();
 
-  // Email can come from registration redirect state, or from the logged-in user
   const email = location.state?.email || user?.email || '';
 
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
@@ -23,7 +22,6 @@ const VerifyEmailPage = () => {
 
   const inputRefs = useRef([]);
 
-  // Start resend cooldown on mount so they can't spam immediately
   useEffect(() => {
     startCooldown();
   }, []);
@@ -37,14 +35,12 @@ const VerifyEmailPage = () => {
   const startCooldown = () => setCooldown(RESEND_COOLDOWN);
 
   const handleDigitChange = (index, value) => {
-    // Allow only a single digit
     const digit = value.replace(/\D/g, '').slice(-1);
     const next = [...digits];
     next[index] = digit;
     setDigits(next);
     setError('');
 
-    // Auto-advance
     if (digit && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -87,7 +83,7 @@ const VerifyEmailPage = () => {
 
     if (result.success) {
       setSuccess(true);
-      setTimeout(() => navigate('/dashboard'), 2000);
+      setTimeout(() => navigate('/login', { replace: true }), 2000);
     } else {
       setError(result.error || 'Invalid code. Please try again.');
       setDigits(['', '', '', '', '', '']);
@@ -99,7 +95,8 @@ const VerifyEmailPage = () => {
     if (cooldown > 0 || !email) return;
     startCooldown();
     setError('');
-    await sendVerificationCode(email);
+    const result = await sendVerificationCode(email);
+    if (!result.success) setError(result.error || 'Failed to send code. Please try again.');
   };
 
   if (success) {
@@ -113,7 +110,7 @@ const VerifyEmailPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Email Verified!</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-1">Your account is now active.</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500">Redirecting to your dashboard...</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">Redirecting to login...</p>
           </div>
         </div>
       </div>
@@ -145,7 +142,6 @@ const VerifyEmailPage = () => {
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* OTP digit inputs */}
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 text-center mb-4">
                 Enter verification code
@@ -182,18 +178,10 @@ const VerifyEmailPage = () => {
               disabled={loading || digits.join('').length < 6}
               className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3" />
-                  Verifying...
-                </div>
-              ) : (
-                'Verify Email'
-              )}
+              {loading ? 'Verifying...' : 'Verify Email'}
             </button>
           </form>
 
-          {/* Resend */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Didn't receive the code?</p>
             <button

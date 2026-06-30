@@ -60,9 +60,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      const { access_token, user: newUser } = response.data;
-      if (access_token) _storeSession(access_token, newUser);
-      return { success: true, email: response.data.email };
+      return {
+        success: true,
+        email: response.data.email,
+        message: response.data.message,
+      };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Registration failed' };
     }
@@ -79,6 +81,7 @@ export const AuthProvider = ({ children }) => {
         data?.error ||
         data?.message ||
         (status === 429 ? 'Too many attempts. Please wait a minute and try again.' : null) ||
+        (status === 503 ? 'Email service is unavailable. Please try again later.' : null) ||
         (status === 500 ? 'Server error. Please try again later.' : null) ||
         (!error.response ? 'Network error. Check your connection.' : null) ||
         'Failed to send code. Please try again.';
@@ -88,9 +91,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyEmail = async (email, code) => {
     try {
-      const response = await authAPI.verifyEmail(email, code);
-      const { access_token, user: userData } = response.data;
-      _storeSession(access_token, userData);
+      await authAPI.verifyEmail(email, code);
       return { success: true };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Verification failed' };

@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import logging
+import os
 import secrets
 from datetime import timedelta, timezone
 
@@ -14,7 +15,6 @@ from app import db, limiter
 from app.models import User
 from app.utils import utcnow, is_valid_university_email, validate_password, university_from_email
 from app.mailer import send_verification_email, send_password_reset_email
-import os
 
 logger = logging.getLogger(__name__)
 auth_bp = Blueprint('auth', __name__)
@@ -50,7 +50,6 @@ def _check_backup_code(user: User, code: str) -> bool:
 @limiter.limit('5 per minute; 20 per hour')
 def register():
     data = request.get_json(silent=True) or {}
-
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
     password = data.get('password') or ''
@@ -69,7 +68,7 @@ def register():
         return jsonify({'error': pw_error}), 400
 
     if User.query.filter_by(email=email).first():
-        return jsonify({'error': 'Email already registered'}), 409
+        return jsonify({'error': 'Email already registered. Please log in or resend your verification code.'}), 409
 
     otp = _generate_otp()
     user = User(
@@ -92,14 +91,14 @@ def register():
         db.session.rollback()
         return jsonify({'error': 'Registration failed'}), 500
 
-    send_verification_email(email, otp)
+    email_sent = send_verification_email(email, otp)
+    if not email_sent:
+        logger.warning('Verification email could not be sent to %s', email)
 
-    # Return a token so the user can access the dashboard immediately
     return jsonify({
-        'message': 'Registration successful. Check your university email for the verification code.',
-        'access_token': _make_jwt(user),
-        'user': user.to_dict(),
+        'message': 'Registration successful. Verify your email, then sign in.',
         'email': email,
+        'verification_email_sent': email_sent,
     }), 201
 
 
@@ -107,7 +106,6 @@ def register():
 @limiter.limit('10 per minute; 50 per hour')
 def login():
     data = request.get_json(silent=True) or {}
-
     email = (data.get('email') or '').strip().lower()
     password = data.get('password') or ''
 
@@ -117,6 +115,9 @@ def login():
     user = User.query.filter_by(email=email).first()
     if not user or not user.check_password(password):
         return jsonify({'error': 'Invalid email or password'}), 401
+
+    if not user.verified:
+        return jsonify({'error': 'Please verify your email before signing in.'}), 403
 
     if user.mfa_enabled:
         pending_token = secrets.token_urlsafe(32)
@@ -152,7 +153,6 @@ def send_verification():
         return jsonify({'error': 'Email is required'}), 400
 
     user = User.query.filter_by(email=email).first()
-
     if not user or user.verified:
         return jsonify({'message': 'If an unverified account exists, a code has been sent'}), 200
 
@@ -165,9 +165,11 @@ def send_verification():
     except Exception:
         logger.exception('DB error during send-verification for %s', email)
         db.session.rollback()
-        return jsonify({'error': 'Failed to send verification code'}), 500
+        return jsonify({'error': 'Failed to prepare verification code'}), 500
 
-    send_verification_email(email, otp)
+    if not send_verification_email(email, otp):
+        return jsonify({'error': 'Could not send verification email. Please try again later.'}), 503
+
     return jsonify({'message': 'Verification code sent'}), 200
 
 
@@ -186,11 +188,7 @@ def verify_email():
         return jsonify({'error': 'Invalid or expired verification code'}), 400
 
     if user.verified:
-        return jsonify({
-            'message': 'Account already verified',
-            'access_token': _make_jwt(user),
-            'user': user.to_dict(),
-        }), 200
+        return jsonify({'message': 'Account already verified'}), 200
 
     expires = _tz_aware(user.verification_code_expires)
     if (
@@ -212,11 +210,7 @@ def verify_email():
         db.session.rollback()
         return jsonify({'error': 'Verification failed'}), 500
 
-    return jsonify({
-        'message': 'Email verified successfully',
-        'access_token': _make_jwt(user),
-        'user': user.to_dict(),
-    }), 200
+    return jsonify({'message': 'Email verified successfully. You can now sign in.'}), 200
 
 
 @auth_bp.route('/google/verify', methods=['POST'])
@@ -234,7 +228,6 @@ def google_verify():
     id_token_str = data.get('id_token') or data.get('credential')
 
     if access_token:
-        # New flow: verify access token via Google's userinfo endpoint
         try:
             resp = http_requests.get(
                 'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -248,7 +241,6 @@ def google_verify():
             logger.exception('Google userinfo request failed: %s', exc)
             return jsonify({'error': 'Could not verify Google token — server error'}), 500
     elif id_token_str:
-        # Legacy flow: verify ID token
         try:
             from google.oauth2 import id_token as google_id_token
             from google.auth.transport import requests as google_requests
@@ -266,7 +258,6 @@ def google_verify():
 
     google_id = idinfo.get('sub')
     g_email = idinfo.get('email', '').lower()
-    g_name = idinfo.get('name') or g_email.split('@')[0]
 
     if not google_id or not g_email:
         return jsonify({'error': 'Could not retrieve account info from Google'}), 401
@@ -274,27 +265,21 @@ def google_verify():
     user = User.query.filter_by(google_id=google_id).first()
     if not user:
         user = User.query.filter_by(email=g_email).first()
-        if user:
-            user.google_id = google_id
-            user.oauth_provider = 'google'
-            user.verified = True
-        else:
-            user = User(
-                email=g_email,
-                name=g_name,
-                university=university_from_email(g_email) or 'Other',
-                verified=True,
-                google_id=google_id,
-                oauth_provider='google',
-            )
-            db.session.add(user)
-
+        if not user:
+            return jsonify({'error': 'Please create an account first, then sign in with Google.'}), 404
+        if not user.verified:
+            return jsonify({'error': 'Please verify your email before signing in with Google.'}), 403
+        user.google_id = google_id
+        user.oauth_provider = 'google'
         try:
             db.session.commit()
         except Exception:
-            logger.exception('DB error during Google sign-in for %s', g_email)
+            logger.exception('DB error linking Google sign-in for %s', g_email)
             db.session.rollback()
             return jsonify({'error': 'Google sign-in failed'}), 500
+
+    if not user.verified:
+        return jsonify({'error': 'Please verify your email before signing in with Google.'}), 403
 
     return jsonify({'access_token': _make_jwt(user), 'user': user.to_dict()}), 200
 
@@ -321,7 +306,8 @@ def forgot_password():
             return jsonify({'error': 'Failed to process request'}), 500
 
         frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
-        send_password_reset_email(email, f'{frontend_url}/reset-password?token={token}')
+        if not send_password_reset_email(email, f'{frontend_url}/reset-password?token={token}'):
+            return jsonify({'error': 'Could not send password reset email. Please try again later.'}), 503
 
     return jsonify({'message': 'If an account exists, a password reset email has been sent'}), 200
 
@@ -361,8 +347,6 @@ def reset_password():
 
     return jsonify({'message': 'Password reset successful'}), 200
 
-
-# ── MFA endpoints ─────────────────────────────────────────────────────────────
 
 @auth_bp.route('/mfa/verify-login', methods=['POST'])
 @limiter.limit('10 per minute')

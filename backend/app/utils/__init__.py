@@ -7,12 +7,8 @@ def utcnow() -> datetime:
 
 
 def is_valid_university_email(email: str) -> bool:
-    """Accept only Wits/UJ student email addresses."""
-    valid_domains = ('students.wits.ac.za', 'student.uj.ac.za')
-    if '@' not in email:
-        return False
-    local, domain = email.split('@', 1)
-    return domain in valid_domains and bool(re.match(r'^\d{6,10}$', local))
+    """Backward-compatible name: accept any normal email address for learners and students."""
+    return bool(re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email or ''))
 
 
 def validate_password(password: str) -> str | None:
@@ -27,4 +23,9 @@ def validate_password(password: str) -> str | None:
 
 
 def university_from_email(email: str) -> str:
-    return 'wits' if 'wits' in email else 'uj'
+    domain = (email or '').split('@')[-1].lower()
+    if domain == 'students.wits.ac.za':
+        return 'wits'
+    if domain == 'student.uj.ac.za':
+        return 'uj'
+    return 'other'
