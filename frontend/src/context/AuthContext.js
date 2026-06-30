@@ -60,9 +60,11 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      const { access_token, user: newUser } = response.data;
-      if (access_token) _storeSession(access_token, newUser);
-      return { success: true, email: response.data.email };
+      return {
+        success: true,
+        email: response.data.email,
+        message: response.data.message,
+      };
     } catch (error) {
       return { success: false, error: error.response?.data?.error || 'Registration failed' };
     }
