@@ -23,6 +23,7 @@ import StudentApplicationPage from './pages/StudentApplicationPage';
 import BursaryPage from './pages/BursaryPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
+import PropertyAdminsPage from './pages/PropertyAdminsPage';
 import MFASetupPage from './pages/MFASetupPage';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
@@ -62,6 +63,7 @@ const AppLayout = () => {
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/mfa-setup" element={<ProtectedRoute><MFASetupPage /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/admin/property-admins" element={<AdminRoute><PropertyAdminsPage /></AdminRoute>} />
     </Routes>
   );
 

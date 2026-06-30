@@ -56,7 +56,7 @@ def create_app():
     mail.init_app(app)
     limiter.init_app(app)
 
-    from app.models import User, Property, Review, PropertyImage, HelpfulVote  # noqa: F401
+    from app.models import User, Property, Review, PropertyImage, HelpfulVote, PropertyAdmin  # noqa: F401
     from app.models.application import Application  # noqa: F401
 
     from app.routes.auth import auth_bp

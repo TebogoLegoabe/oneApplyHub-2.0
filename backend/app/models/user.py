@@ -3,6 +3,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.utils import utcnow
 
+SUPER_ADMIN_EMAIL = 'info@oneapplyhub.co.za'
+
 
 class User(db.Model):
     __tablename__ = 'user'
@@ -41,6 +43,18 @@ class User(db.Model):
     # Relationships
     reviews = db.relationship('Review', backref='author', lazy='dynamic')
 
+    @property
+    def is_official_super_admin(self) -> bool:
+        return (self.email or '').lower() == SUPER_ADMIN_EMAIL
+
+    @property
+    def effective_is_super_admin(self) -> bool:
+        return bool(self.is_super_admin or self.is_official_super_admin)
+
+    @property
+    def effective_is_admin(self) -> bool:
+        return bool(self.is_admin or self.effective_is_super_admin)
+
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
@@ -58,8 +72,8 @@ class User(db.Model):
             'year_of_study': self.year_of_study,
             'faculty': self.faculty,
             'verified': self.verified,
-            'is_admin': self.is_admin,
-            'is_super_admin': self.is_super_admin,
+            'is_admin': self.effective_is_admin,
+            'is_super_admin': self.effective_is_super_admin,
             'oauth_provider': self.oauth_provider,
             'mfa_enabled': self.mfa_enabled,
             'created_at': self.created_at.isoformat() if self.created_at else None,
