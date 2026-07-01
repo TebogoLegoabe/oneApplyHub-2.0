@@ -89,7 +89,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
     onClose?.();
   };
 
