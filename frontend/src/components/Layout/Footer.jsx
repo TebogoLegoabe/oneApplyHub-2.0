@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Mail, MapPin, GraduationCap,
-  Home, Star, Award,
+  Home, Star, Award, Facebook, Linkedin,
 } from 'lucide-react';
 import logoImg from '../../assets/OneHubLogo.png';
 
@@ -24,6 +24,19 @@ const SERVICE_POINTS = [
   { icon: Award, label: 'Bursary opportunities' },
 ];
 
+const SOCIAL_LINKS = [
+  {
+    href: 'https://www.facebook.com/profile.php?id=61573343413373',
+    label: 'Facebook',
+    icon: Facebook,
+  },
+  {
+    href: 'https://www.linkedin.com/company/oneapplyhub/',
+    label: 'LinkedIn',
+    icon: Linkedin,
+  },
+];
+
 const FooterLink = ({ to, label }) => (
   <li>
     <Link
@@ -33,6 +46,18 @@ const FooterLink = ({ to, label }) => (
       {label}
     </Link>
   </li>
+);
+
+const SocialLink = ({ href, label, icon: Icon }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={`oneApplyHub on ${label}`}
+    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-300 transition-all hover:-translate-y-0.5 hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white"
+  >
+    <Icon className="h-4 w-4" />
+  </a>
 );
 
 const Footer = () => (
@@ -57,6 +82,10 @@ const Footer = () => (
           <p className="mt-5 max-w-sm text-sm leading-6 text-slate-400">
             A student focused platform for finding accommodation, reading reviews, and accessing opportunities from one place.
           </p>
+
+          <div className="mt-5 flex items-center gap-3">
+            {SOCIAL_LINKS.map((link) => <SocialLink key={link.label} {...link} />)}
+          </div>
 
           <Link
             to="/properties"
@@ -109,6 +138,9 @@ const Footer = () => (
         <div className="flex flex-col gap-3 text-xs text-slate-500 md:flex-row md:items-center md:justify-between">
           <p>&copy; {new Date().getFullYear()} oneApplyHub. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 md:hidden">
+              {SOCIAL_LINKS.map((link) => <SocialLink key={link.label} {...link} />)}
+            </div>
             <button className="hover:text-slate-300 transition-colors">Privacy</button>
             <button className="hover:text-slate-300 transition-colors">Terms</button>
             <span className="inline-flex items-center gap-1.5 text-slate-400">
