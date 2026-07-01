@@ -87,84 +87,96 @@ oneApplyHub-2.0/
   README.md
 ```
 
-## 🚀 Quick local setup checklist
+## 🚀 Tested local setup on Windows
+
+These steps use Docker PostgreSQL on host port `15432`. This avoids conflicts with any local Windows PostgreSQL service already using ports `5432` or `5433`.
+
+### 1. Pull latest code
 
 From the project root:
 
-```bash
+```powershell
 git pull
 ```
 
-Start PostgreSQL and pgAdmin:
+### 2. Start PostgreSQL and pgAdmin
 
-```bash
-docker compose up -d postgres pgadmin
-```
-
-Set up backend:
-
-```bash
-cd backend
-python -m venv venv
-```
-
-Activate the virtual environment.
-
-Mac or Linux:
-
-```bash
-source venv/bin/activate
-```
-
-Windows PowerShell:
+From the project root:
 
 ```powershell
-venv\Scripts\Activate.ps1
+docker compose down -v
+docker compose up -d postgres pgadmin
+docker compose ps
 ```
 
-Windows Command Prompt:
+Expected PostgreSQL status:
 
-```cmd
-venv\Scripts\activate
+```text
+oneapplyhub-postgres   Up ... (healthy)   0.0.0.0:15432->5432/tcp
 ```
 
-Windows Git Bash:
+`docker compose down -v` deletes only your local Docker database volume. Use it when resetting local dev data is okay.
 
-```bash
-cd backend/venv/Scripts
-source activate
-cd ../..
+### 3. Test the database port from Windows
+
+From the project root:
+
+```powershell
+cd backend
+python -c "import psycopg2; conn=psycopg2.connect(host='127.0.0.1', port=15432, dbname='oneapplyhub_dev', user='oneapplyhub', password='oneapplyhub123'); print('connected')"
 ```
 
-Install backend dependencies:
+Expected output:
 
-```bash
+```text
+connected
+```
+
+### 4. Create and activate the backend virtual environment
+
+From the `backend` folder:
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+If PowerShell blocks activation, run this once:
+
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+```
+
+Then activate again:
+
+```powershell
+.\venv\Scripts\Activate.ps1
+```
+
+Expected prompt:
+
+```text
+(venv) PS ...\oneApplyHub-2.0\backend>
+```
+
+### 5. Install backend dependencies
+
+```powershell
 pip install -r requirements.txt
 ```
 
-Create backend `.env`:
+### 6. Create backend `.env`
 
-Git Bash or Mac/Linux:
-
-```bash
-cp .env.example .env
-```
-
-Windows Command Prompt:
-
-```cmd
-copy .env.example .env
-```
-
-Windows PowerShell:
+From the `backend` folder:
 
 ```powershell
 Copy-Item .env.example .env
+notepad .env
 ```
 
 Generate two secret keys:
 
-```bash
+```powershell
 python -c "import secrets; print(secrets.token_hex(32))"
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
@@ -174,39 +186,37 @@ Put them into `backend/.env`:
 ```env
 SECRET_KEY=paste_first_generated_key_here
 JWT_SECRET_KEY=paste_second_generated_key_here
-DATABASE_URL=postgresql://oneapplyhub:CHANGE_ME@localhost:5432/oneapplyhub_dev
+DATABASE_URL=postgresql://oneapplyhub:oneapplyhub123@127.0.0.1:15432/oneapplyhub_dev
 FRONTEND_URL=http://localhost:3000
 ```
 
-The local database password must match `docker-compose.yml`:
+### 7. Create the local super admin
 
-```yaml
-POSTGRES_USER: oneapplyhub
-POSTGRES_PASSWORD: CHANGE_ME
-POSTGRES_DB: oneapplyhub_dev
-```
+From the `backend` folder:
 
-Run migrations or create tables:
-
-```bash
-flask db upgrade
-```
-
-Create or promote the local super admin:
-
-```bash
+```powershell
 python create_admin.py
 ```
 
-For the official super admin, press Enter when asked for email. It defaults to:
+When asked for email, press Enter to use the default official super admin email:
 
 ```text
 info@oneapplyhub.co.za
 ```
 
-Start the backend:
+Example successful result:
 
-```bash
+```text
+Done
+----
+Email : info@oneapplyhub.co.za
+Role  : Super Admin
+Status: verified and active
+```
+
+### 8. Start the backend
+
+```powershell
 python run.py
 ```
 
@@ -226,29 +236,16 @@ http://localhost:5000/api/health
 
 Open a second terminal from the project root:
 
-```bash
+```powershell
 cd frontend
 npm install
 ```
 
 Create frontend environment file:
 
-Git Bash or Mac/Linux:
-
-```bash
-cp .env.example .env
-```
-
-Windows Command Prompt:
-
-```cmd
-copy .env.example .env
-```
-
-Windows PowerShell:
-
 ```powershell
 Copy-Item .env.example .env
+notepad .env
 ```
 
 Make sure this is set in `frontend/.env`:
@@ -259,7 +256,7 @@ REACT_APP_API_BASE_URL=http://localhost:5000/api
 
 Start the frontend:
 
-```bash
+```powershell
 npm start
 ```
 
@@ -271,7 +268,7 @@ http://localhost:3000
 
 ## 🗄️ pgAdmin setup
 
-Open pgAdmin:
+Open pgAdmin in the browser:
 
 ```text
 http://localhost:5050
@@ -281,7 +278,7 @@ Default local pgAdmin login from `docker-compose.yml`:
 
 ```text
 Email: admin@oneapplyhub.local
-Password: CHANGE_ME
+Password: oneapplyhub123
 ```
 
 Register the local PostgreSQL server in pgAdmin:
@@ -298,33 +295,39 @@ General tab:
 Name: oneApplyHub Local
 ```
 
-Connection tab:
+Connection tab when using Docker pgAdmin at `http://localhost:5050`:
 
 ```text
 Host name/address: postgres
 Port: 5432
 Maintenance database: oneapplyhub_dev
 Username: oneapplyhub
-Password: CHANGE_ME
+Password: oneapplyhub123
 ```
 
-Use `postgres` as the host inside pgAdmin because pgAdmin and PostgreSQL are running in the same Docker network.
+Connection tab when using the desktop pgAdmin app on Windows:
 
-Use `localhost` as the host from your Flask app because Flask runs on your machine.
+```text
+Host name/address: 127.0.0.1
+Port: 15432
+Maintenance database: oneapplyhub_dev
+Username: oneapplyhub
+Password: oneapplyhub123
+```
 
 ## 👤 Super admin and managing admins
-
-Create or promote the super admin locally:
-
-```bash
-cd backend
-python create_admin.py
-```
 
 The official super admin email is:
 
 ```text
 info@oneapplyhub.co.za
+```
+
+Create or promote the super admin locally:
+
+```powershell
+cd backend
+python create_admin.py
 ```
 
 After logging in as super admin, go to:
@@ -346,35 +349,34 @@ Managing admins can only manage:
 
 Check running containers:
 
-```bash
+```powershell
 docker compose ps
 ```
 
 Stop containers:
 
-```bash
+```powershell
 docker compose down
 ```
 
 Start containers again:
 
-```bash
+```powershell
 docker compose up -d postgres pgadmin
 ```
 
 View PostgreSQL logs:
 
-```bash
+```powershell
 docker compose logs -f postgres
 ```
 
 Reset the local database completely:
 
-```bash
+```powershell
 docker compose down -v
 docker compose up -d postgres pgadmin
 cd backend
-flask db upgrade
 python create_admin.py
 ```
 
@@ -399,6 +401,15 @@ If a real secret is accidentally committed, delete it from the file, rotate the 
 
 ## 🧯 Troubleshooting
 
+### `docker compose up` says no configuration file provided
+
+You are not in the project root. Run:
+
+```powershell
+cd "C:\Users\User\OneDrive\Desktop\oneApplyHub\oneApplyHub-2.0"
+docker compose up -d postgres pgadmin
+```
+
 ### Missing `SECRET_KEY` or `JWT_SECRET_KEY`
 
 Error:
@@ -409,121 +420,63 @@ RuntimeError: Missing required environment variables: SECRET_KEY, JWT_SECRET_KEY
 
 Fix:
 
-```bash
+```powershell
 cd backend
-cp .env.example .env
+Copy-Item .env.example .env
 python -c "import secrets; print(secrets.token_hex(32))"
 python -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Then add both generated values to `backend/.env`:
-
-```env
-SECRET_KEY=first_generated_value
-JWT_SECRET_KEY=second_generated_value
-```
+Then add both generated values to `backend/.env`.
 
 ### Password authentication failed for user `oneapplyhub`
 
 Error:
 
 ```text
-psycopg2.OperationalError: connection to server at "localhost", port 5432 failed: FATAL: password authentication failed for user "oneapplyhub"
+psycopg2.OperationalError: FATAL: password authentication failed for user "oneapplyhub"
 ```
 
-This means `backend/.env` has the wrong database password.
-
-For the default local Docker setup, use:
+Use the tested local database URL:
 
 ```env
-DATABASE_URL=postgresql://oneapplyhub:CHANGE_ME@localhost:5432/oneapplyhub_dev
+DATABASE_URL=postgresql://oneapplyhub:oneapplyhub123@127.0.0.1:15432/oneapplyhub_dev
 ```
 
-This must match `docker-compose.yml`:
+Then reset the local database volume if needed:
 
-```yaml
-POSTGRES_USER: oneapplyhub
-POSTGRES_PASSWORD: CHANGE_ME
-POSTGRES_DB: oneapplyhub_dev
-```
-
-If you previously started Docker with a different password, the old password is stored in the Docker volume. Either use the old password in `.env`, or reset the local DB:
-
-```bash
+```powershell
+cd "C:\Users\User\OneDrive\Desktop\oneApplyHub\oneApplyHub-2.0"
 docker compose down -v
 docker compose up -d postgres pgadmin
 ```
 
-Then rerun:
+Test the Windows PostgreSQL port:
 
-```bash
+```powershell
 cd backend
-flask db upgrade
-python create_admin.py
+python -c "import psycopg2; conn=psycopg2.connect(host='127.0.0.1', port=15432, dbname='oneapplyhub_dev', user='oneapplyhub', password='oneapplyhub123'); print('connected')"
 ```
-
-### Backend cannot connect to PostgreSQL
-
-Check Docker is running:
-
-```bash
-docker compose ps
-```
-
-Start the database:
-
-```bash
-docker compose up -d postgres pgadmin
-```
-
-Check that the backend `.env` uses `localhost`, not `postgres`:
-
-```env
-DATABASE_URL=postgresql://oneapplyhub:CHANGE_ME@localhost:5432/oneapplyhub_dev
-```
-
-### pgAdmin cannot connect to PostgreSQL
-
-Inside pgAdmin, use this host:
-
-```text
-postgres
-```
-
-Not `localhost`.
 
 ### Port already in use
 
-Mac or Linux:
-
-```bash
-lsof -ti:5000 | xargs kill
-lsof -ti:3000 | xargs kill
-```
-
 Windows:
 
-```cmd
-netstat -ano | findstr :5000
-taskkill /PID <PID> /F
+```powershell
+netstat -ano | findstr :5432
+netstat -ano | findstr :5433
+netstat -ano | findstr :15432
 ```
+
+The project uses host port `15432` for Docker PostgreSQL to avoid common local conflicts.
 
 ### Virtual environment not active
-
-Activate it again.
-
-Mac or Linux:
-
-```bash
-cd backend
-source venv/bin/activate
-```
 
 Windows PowerShell:
 
 ```powershell
 cd backend
-venv\Scripts\Activate.ps1
+.\venv\Scripts\Activate.ps1
 ```
 
 Windows Git Bash:
