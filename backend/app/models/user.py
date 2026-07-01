@@ -16,6 +16,7 @@ class User(db.Model):
     university = db.Column(db.String(50), nullable=False)
     year_of_study = db.Column(db.String(20))
     faculty = db.Column(db.String(100))
+    profile_picture_url = db.Column(db.Text, nullable=True)
     verified = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_super_admin = db.Column(db.Boolean, default=False, nullable=False)
@@ -71,6 +72,7 @@ class User(db.Model):
             'university': self.university,
             'year_of_study': self.year_of_study,
             'faculty': self.faculty,
+            'profile_picture_url': self.profile_picture_url,
             'verified': self.verified,
             'is_admin': self.effective_is_admin,
             'is_super_admin': self.effective_is_super_admin,
