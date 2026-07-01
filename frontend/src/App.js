@@ -25,6 +25,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PropertyAdminsPage from './pages/PropertyAdminsPage';
 import MFASetupPage from './pages/MFASetupPage';
+import logoImg from './assets/OneHubLogo.png';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
 
@@ -43,8 +44,9 @@ const AppLayout = () => {
   const isAuth = AUTH_ROUTES.includes(pathname);
   const isAdmin = pathname.startsWith('/admin');
   const hasSession = Boolean(localStorage.getItem('token'));
-  const showSidebar = hasSession && !isAuth && !isAdmin;
-  const showPublicShell = !hasSession && isPublicRoute(pathname) && !isAuth;
+  const isHome = pathname === '/';
+  const showSidebar = hasSession && !isHome && !isAuth && !isAdmin;
+  const showPublicShell = isHome || (!hasSession && isPublicRoute(pathname) && !isAuth);
 
   const routes = (
     <Routes>
@@ -80,6 +82,7 @@ const AppLayout = () => {
             >
               <Menu className="h-5 w-5" />
             </button>
+            <img src={logoImg} alt="oneApplyHub logo" className="h-8 w-8 object-contain" />
             <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">oneApplyHub</span>
           </div>
           <main className="min-w-0 flex-1">{routes}</main>
