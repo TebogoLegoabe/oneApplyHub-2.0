@@ -78,8 +78,12 @@ const AppSidebar = ({ isOpen, onClose }) => {
         <div className="px-3 pt-4 pb-3 border-b border-white/10">
           <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-3 shadow-2xl shadow-indigo-950/30 backdrop-blur">
             <div className="flex items-start gap-3">
-              <div className="relative w-11 h-11 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
-                <span className="text-white font-black text-sm tracking-tight">{initials}</span>
+              <div className="relative w-11 h-11 bg-gradient-to-br from-indigo-500 via-violet-500 to-fuchsia-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0 overflow-hidden">
+                {user?.profile_picture_url ? (
+                  <img src={user.profile_picture_url} alt={user?.name || 'Profile'} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-white font-black text-sm tracking-tight">{initials}</span>
+                )}
                 <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-slate-950 ${user?.verified ? 'bg-emerald-400' : 'bg-amber-400'}`} />
               </div>
               <div className="min-w-0 flex-1">
