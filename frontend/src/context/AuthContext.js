@@ -32,6 +32,11 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
+  const _storeUser = (userData) => {
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+  };
+
   const login = async (email, password) => {
     try {
       const response = await authAPI.login({ email, password });
@@ -113,10 +118,20 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authAPI.getProfile();
       const userData = response.data.user;
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      _storeUser(userData);
     } catch {
       // silently fail — token may have expired
+    }
+  };
+
+  const updateProfilePicture = async (profilePictureUrl) => {
+    try {
+      const response = await authAPI.updateProfile({ profile_picture_url: profilePictureUrl });
+      const userData = response.data.user;
+      _storeUser(userData);
+      return { success: true, user: userData };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Failed to update profile picture' };
     }
   };
 
@@ -139,6 +154,7 @@ export const AuthProvider = ({ children }) => {
     verifyEmail,
     googleLogin,
     refreshUser,
+    updateProfilePicture,
   };
 
   return (
