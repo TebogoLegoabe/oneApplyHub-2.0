@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Map, Star, Award, FileText,
   Shield, BadgeCheck, LogOut, Sun, Moon, X,
-  Sparkles, ChevronRight,
+  Sparkles, ChevronRight, Camera,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -17,12 +17,14 @@ const NAV_ITEMS = [
 ];
 
 const AppSidebar = ({ isOpen, onClose }) => {
-  const { user, logout, sendVerificationCode } = useAuth();
+  const { user, logout, sendVerificationCode, updateProfilePicture } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyMsg, setVerifyMsg] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState('');
 
   const initials = user?.name?.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'S';
   const studyLevel = user?.year_of_study;
@@ -32,6 +34,36 @@ const AppSidebar = ({ isOpen, onClose }) => {
     logout();
     navigate('/login', { replace: true });
     onClose?.();
+  };
+
+  const handleProfileUpload = (file) => {
+    setProfileMsg('');
+    if (!file) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setProfileMsg('Use JPG, PNG, or WebP.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileMsg('Image must be under 2 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = async () => {
+      setProfileSaving(true);
+      const result = await updateProfilePicture(reader.result);
+      setProfileSaving(false);
+      setProfileMsg(result.success ? 'Profile picture updated.' : result.error);
+    };
+    reader.onerror = () => setProfileMsg('Could not read image.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveProfilePicture = async () => {
+    setProfileSaving(true);
+    setProfileMsg('');
+    const result = await updateProfilePicture(null);
+    setProfileSaving(false);
+    setProfileMsg(result.success ? 'Profile picture removed.' : result.error);
   };
 
   const handleSendVerification = async () => {
@@ -96,6 +128,35 @@ const AppSidebar = ({ isOpen, onClose }) => {
                   {studyLevel && <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 text-[10px] font-bold text-indigo-200 ring-1 ring-indigo-400/20">{studyLevel}</span>}
                   {field && <span className="rounded-full bg-blue-500/15 px-2 py-0.5 text-[10px] font-bold text-blue-200 ring-1 ring-blue-400/20">{field}</span>}
                 </div>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-white/10 bg-white/[0.04] p-2">
+              {profileMsg && <p className="mb-1.5 text-[10px] text-slate-300">{profileMsg}</p>}
+              <div className="flex gap-2">
+                <input
+                  id="profile-picture-input"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  className="hidden"
+                  onChange={(event) => handleProfileUpload(event.target.files?.[0])}
+                />
+                <label
+                  htmlFor="profile-picture-input"
+                  className="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-indigo-400/15 px-3 py-1.5 text-[11px] font-black text-indigo-100 transition-colors hover:bg-indigo-400/25"
+                >
+                  <Camera className="h-3.5 w-3.5" />{profileSaving ? 'Saving...' : 'Photo'}
+                </label>
+                {user?.profile_picture_url && (
+                  <button
+                    type="button"
+                    onClick={handleRemoveProfilePicture}
+                    disabled={profileSaving}
+                    className="rounded-lg bg-red-400/10 px-3 py-1.5 text-[11px] font-black text-red-200 transition-colors hover:bg-red-400/20 disabled:opacity-50"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
             </div>
 
