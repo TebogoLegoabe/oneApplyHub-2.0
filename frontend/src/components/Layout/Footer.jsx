@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  ArrowRight, Mail, MapPin, GraduationCap,
+  Mail, MapPin, GraduationCap,
   Home, Star, Award, Facebook, Linkedin,
 } from 'lucide-react';
 import logoImg from '../../assets/OneHubLogo.png';
@@ -86,14 +86,6 @@ const Footer = () => (
           <div className="mt-5 flex items-center gap-3">
             {SOCIAL_LINKS.map((link) => <SocialLink key={link.label} {...link} />)}
           </div>
-
-          <Link
-            to="/properties"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-500 transition-colors"
-          >
-            Browse properties
-            <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
 
         <div>
