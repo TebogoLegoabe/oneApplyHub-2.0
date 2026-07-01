@@ -109,6 +109,7 @@ export const adminAPI = {
   deleteProperty: (id) => api.delete(`/admin/properties/${id}`),
   // Users
   getUsers: (params = {}) => api.get('/admin/users', { params }),
+  createAdminUser: (data) => api.post('/admin/admin-users', data),
   updateUser: (id, data) => api.patch(`/admin/users/${id}`, data),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   // Property admins
