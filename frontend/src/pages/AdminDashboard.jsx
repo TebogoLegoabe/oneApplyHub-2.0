@@ -1,19 +1,22 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   Building2,
   CheckCircle,
   ClipboardList,
   Crown,
+  Eye,
   LayoutDashboard,
   LogOut,
   MessageSquare,
   Moon,
+  Save,
   Shield,
   Sun,
   Trash2,
   UserCog,
   Users,
+  X,
   XCircle,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
@@ -30,7 +33,7 @@ const Badge = ({ children, color = 'gray' }) => {
     red: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-300',
     gray: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
   };
-  return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${colors[color]}`}>{children}</span>;
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold capitalize ${colors[color]}`}>{children}</span>;
 };
 
 const Loading = () => (
@@ -40,8 +43,18 @@ const Loading = () => (
 );
 
 const EmptyState = ({ text }) => <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-gray-400 dark:border-gray-800">{text}</div>;
-
 const ShellCard = ({ children, className = '' }) => <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 ${className}`}>{children}</div>;
+
+const statusColor = (status) => status === 'approved' ? 'green' : status === 'rejected' ? 'red' : status === 'under_review' ? 'blue' : 'amber';
+const fmt = (value) => value ? new Date(value).toLocaleDateString('en-ZA') : '—';
+const show = (value) => value || '—';
+
+const DetailRow = ({ label, value }) => (
+  <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/60">
+    <p className="text-[11px] font-black uppercase tracking-wide text-gray-400">{label}</p>
+    <p className="mt-1 break-words text-sm font-bold text-gray-950 dark:text-white">{show(value)}</p>
+  </div>
+);
 
 const Overview = ({ stats, user, onNav }) => {
   if (!stats) return <Loading />;
@@ -218,10 +231,131 @@ const UsersTab = ({ currentUser, onToast }) => {
   );
 };
 
+const ApplicationReviewModal = ({ application, onClose, onSave, saving }) => {
+  const [status, setStatus] = useState(application.status || 'pending');
+  const [notes, setNotes] = useState(application.admin_notes || '');
+  const data = application.form_data || {};
+  const selectedProperties = application.selected_properties || [];
+  const documents = data.documents || {};
+  const documentNames = Object.keys(documents).filter((key) => documents[key]);
+
+  const sections = useMemo(() => [
+    {
+      title: 'Applicant details',
+      fields: [
+        ['First name', data.firstName || application.first_name],
+        ['Last name', data.lastName || application.last_name],
+        ['Email', data.email || application.applicant_email],
+        ['Phone', data.phoneNumber],
+        ['ID number', data.idNumber],
+        ['Nationality', data.nationality],
+      ],
+    },
+    {
+      title: 'Studies and funding',
+      fields: [
+        ['University', (data.university || application.university || '').toUpperCase()],
+        ['Student number', data.studentNumber || application.student_number],
+        ['Faculty', data.faculty],
+        ['Year of study', data.yearOfStudy],
+        ['Degree programme', data.degreeProgram],
+        ['Financial aid', data.financialAid],
+        ['NSFAS applicant', data.nsfasApplicant ? 'Yes' : 'No'],
+      ],
+    },
+    {
+      title: 'Accommodation preferences',
+      fields: [
+        ['Selected properties', selectedProperties.map((p) => p.name).join(', ') || '—'],
+        ['Room type', data.roomType],
+        ['Special requirements', data.specialRequirements],
+      ],
+    },
+    {
+      title: 'Parent / guardian',
+      fields: [
+        ['Name', data.parentGuardianName],
+        ['ID number', data.parentGuardianIdNumber],
+        ['Phone', data.parentGuardianPhone],
+        ['Email', data.parentGuardianEmail],
+      ],
+    },
+  ], [application, data, selectedProperties]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900">
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge color={statusColor(application.status)}>{application.status?.replace('_', ' ') || 'pending'}</Badge>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application.reference || `APP-${application.id}`}</span>
+            </div>
+            <h2 className="text-xl font-black text-gray-950 dark:text-white">Review application: {application.first_name} {application.last_name}</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application.submitted_at)} · Last updated {fmt(application.updated_at)}</p>
+          </div>
+          <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-5">
+          <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-500/10">
+            <p className="text-sm font-black text-gray-950 dark:text-white">Managed property match</p>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This application appears here because the student selected at least one property that this admin can manage.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {selectedProperties.length ? selectedProperties.map((property) => <Badge key={property.id} color="blue">{property.name}</Badge>) : <Badge>No selected property data</Badge>}
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            {sections.map((section) => (
+              <div key={section.title}>
+                <h3 className="mb-3 text-sm font-black text-gray-950 dark:text-white">{section.title}</h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {section.fields.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+                </div>
+              </div>
+            ))}
+
+            <div>
+              <h3 className="mb-3 text-sm font-black text-gray-950 dark:text-white">Documents</h3>
+              {documentNames.length ? <div className="flex flex-wrap gap-2">{documentNames.map((name) => <Badge key={name} color="gray">{name}</Badge>)}</div> : <EmptyState text="No document metadata submitted yet." />}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
+              <div>
+                <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-400">Decision status</label>
+                <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-950 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white">
+                  <option value="pending">Pending</option>
+                  <option value="under_review">Under review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-black uppercase tracking-wide text-gray-400">Admin notes / feedback to applicant</label>
+                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} placeholder="Add notes about missing documents, approval comments, or rejection reason..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-end">
+          <button onClick={onClose} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-black text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Cancel</button>
+          <button onClick={() => onSave(application, status, notes)} disabled={saving === application.id} className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-50">
+            <Save className="mr-2 h-4 w-4" />{saving === application.id ? 'Saving...' : 'Save review decision'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ApplicationsTab = ({ onToast }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
+  const [selected, setSelected] = useState(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -235,11 +369,12 @@ const ApplicationsTab = ({ onToast }) => {
   }, [onToast]);
   useEffect(() => { load(); }, [load]);
 
-  const updateStatus = async (app, status) => {
+  const updateStatus = async (app, status, notes = app.admin_notes || '') => {
     setSaving(app.id);
     try {
-      await adminAPI.updateApplicationStatus(app.id, { status, admin_notes: app.admin_notes || '' });
-      onToast('Application updated');
+      await adminAPI.updateApplicationStatus(app.id, { status, admin_notes: notes });
+      onToast('Application reviewed and updated');
+      setSelected(null);
       load();
     } catch (err) {
       onToast(err.response?.data?.error || 'Failed to update application', 'error');
@@ -250,10 +385,38 @@ const ApplicationsTab = ({ onToast }) => {
 
   if (loading) return <Loading />;
   return (
-    <ShellCard className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-black text-gray-950 dark:text-white">Applications</h2></div>
-      {!items.length ? <EmptyState text="No applications found." /> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Selected properties</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{items.map((app) => <tr key={app.id}><td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{app.first_name} {app.last_name}</p><p className="text-xs text-gray-400">{app.applicant_email}</p></td><td className="px-4 py-3"><p className="max-w-xs truncate text-gray-600 dark:text-gray-300">{app.selected_properties?.map((p) => p.name).join(', ') || '—'}</p></td><td className="px-4 py-3"><Badge color={app.status === 'approved' ? 'green' : app.status === 'rejected' ? 'red' : app.status === 'under_review' ? 'blue' : 'amber'}>{app.status?.replace('_', ' ')}</Badge></td><td className="px-4 py-3 text-right"><select disabled={saving === app.id} value={app.status} onChange={(e) => updateStatus(app, e.target.value)} className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option value="pending">Pending</option><option value="under_review">Under review</option><option value="approved">Approved</option><option value="rejected">Rejected</option></select></td></tr>)}</tbody></table></div>}
-    </ShellCard>
+    <>
+      {selected && <ApplicationReviewModal application={selected} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
+      <ShellCard className="overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-black text-gray-950 dark:text-white">Applications</h2>
+            <p className="mt-1 text-xs text-gray-400">Open an application to review full student details before changing status.</p>
+          </div>
+          <Badge color="blue">{items.length} visible</Badge>
+        </div>
+        {!items.length ? <EmptyState text="No applications found for your assigned properties." /> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
+                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Selected properties</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {items.map((app) => (
+                  <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{app.first_name} {app.last_name}</p><p className="text-xs text-gray-400">{app.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{app.reference}</p></td>
+                    <td className="px-4 py-3"><p className="max-w-sm truncate text-gray-600 dark:text-gray-300">{app.selected_properties?.map((p) => p.name).join(', ') || '—'}</p></td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(app.submitted_at)}</td>
+                    <td className="px-4 py-3"><Badge color={statusColor(app.status)}>{app.status?.replace('_', ' ') || 'pending'}</Badge></td>
+                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected(app)} className="inline-flex items-center rounded-xl bg-blue-600 px-4 py-2 text-xs font-black text-white hover:bg-blue-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </ShellCard>
+    </>
   );
 };
 
@@ -303,7 +466,7 @@ const AdminDashboard = () => {
     Properties: 'Manage and approve accommodation listings',
     Reviews: 'Moderate student reviews before publishing',
     Users: 'Manage registered students and admins',
-    Applications: 'Review and process student accommodation applications',
+    Applications: 'Review full student application details and process decisions',
   };
 
   return (
