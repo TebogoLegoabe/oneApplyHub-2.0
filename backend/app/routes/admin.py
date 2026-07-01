@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from functools import wraps
 
 from flask import Blueprint, jsonify, request
@@ -10,6 +11,9 @@ from app.models import HelpfulVote, Property, PropertyAdmin, PropertyImage, Revi
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
+
+
+EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 
 def _current_admin():
@@ -86,6 +90,26 @@ def _application_dict(application, applicant=None):
         data['applicant_email'] = applicant.email
         data['applicant_name'] = applicant.name
     return data
+
+
+def _assign_properties_to_admin(admin_user, property_ids, assigned_by_user_id):
+    created = []
+    for property_id in property_ids:
+        prop = db.session.get(Property, int(property_id))
+        if not prop:
+            raise ValueError(f'Property not found: {property_id}')
+        existing = PropertyAdmin.query.filter_by(property_id=prop.id, admin_user_id=admin_user.id).first()
+        if existing:
+            created.append(existing)
+            continue
+        assignment = PropertyAdmin(
+            property_id=prop.id,
+            admin_user_id=admin_user.id,
+            assigned_by_user_id=assigned_by_user_id,
+        )
+        db.session.add(assignment)
+        created.append(assignment)
+    return created
 
 
 @admin_bp.route('/stats', methods=['GET'])
@@ -256,14 +280,81 @@ def list_users():
     query = User.query
     university = request.args.get('university')
     verified = request.args.get('verified')
+    role = request.args.get('role')
     if university:
         query = query.filter_by(university=university)
     if verified == 'true':
         query = query.filter_by(verified=True)
     elif verified == 'false':
         query = query.filter_by(verified=False)
+    if role == 'admin':
+        query = query.filter(User.is_admin == True, User.is_super_admin == False)  # noqa: E712
+    elif role == 'super_admin':
+        query = query.filter(User.is_super_admin == True)  # noqa: E712
+    elif role == 'student':
+        query = query.filter(User.is_admin == False, User.is_super_admin == False)  # noqa: E712
     results = query.order_by(User.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     return jsonify({'users': [u.to_dict() for u in results.items], 'total': results.total, 'pages': results.pages, 'current_page': page}), 200
+
+
+@admin_bp.route('/admin-users', methods=['POST'])
+@super_admin_required
+def create_admin_user():
+    data = request.get_json(silent=True) or {}
+    email = str(data.get('email', '')).strip().lower()
+    name = str(data.get('name', '')).strip()
+    password = str(data.get('password', '')).strip()
+    property_ids = data.get('property_ids') or []
+
+    if not EMAIL_RE.match(email):
+        return jsonify({'error': 'A valid admin email is required'}), 400
+    if not name:
+        return jsonify({'error': 'Admin name is required'}), 400
+    if not isinstance(property_ids, list) or not property_ids:
+        return jsonify({'error': 'Select at least one property for this admin'}), 400
+
+    user = User.query.filter(db.func.lower(User.email) == email).first()
+    creating = user is None
+    if creating and (len(password) < 8 or not re.search(r'[A-Za-z]', password) or not re.search(r'\d', password)):
+        return jsonify({'error': 'Password must be at least 8 characters and contain letters and numbers'}), 400
+
+    try:
+        if creating:
+            user = User(
+                email=email,
+                name=name,
+                university='admin',
+                year_of_study='Admin',
+                faculty='Property Management',
+                verified=True,
+                is_admin=True,
+                is_super_admin=False,
+            )
+            user.set_password(password)
+            db.session.add(user)
+            db.session.flush()
+        else:
+            user.name = name or user.name
+            user.verified = True
+            user.is_admin = True
+            if password:
+                user.set_password(password)
+
+        assignments = _assign_properties_to_admin(user, property_ids, int(get_jwt_identity()))
+        db.session.commit()
+    except ValueError as exc:
+        db.session.rollback()
+        return jsonify({'error': str(exc)}), 404
+    except Exception:
+        logger.exception('Failed to create property admin user')
+        db.session.rollback()
+        return jsonify({'error': 'Failed to create admin user'}), 500
+
+    return jsonify({
+        'message': 'Admin created and assigned' if creating else 'Admin updated and assigned',
+        'user': user.to_dict(),
+        'assignments': [assignment.to_dict() for assignment in assignments],
+    }), 201 if creating else 200
 
 
 @admin_bp.route('/users/<int:user_id>', methods=['PATCH'])
