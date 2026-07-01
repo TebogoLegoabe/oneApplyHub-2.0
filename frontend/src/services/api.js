@@ -36,14 +36,26 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor - handle 401
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries'];
+const isPublicPath = (pathname) => PUBLIC_PATHS.some((path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`)));
+
+// Response interceptor - handle expired/invalid sessions
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const manualLogout = sessionStorage.getItem('manual_logout') === '1';
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
+
+      if (manualLogout) {
+        sessionStorage.removeItem('manual_logout');
+        if (window.location.pathname !== '/') {
+          window.location.replace('/');
+        }
+      } else if (!isPublicPath(window.location.pathname)) {
+        window.location.replace('/login');
+      }
     }
     return Promise.reject(error);
   }
