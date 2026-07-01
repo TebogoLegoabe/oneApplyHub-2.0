@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const _storeSession = (token, userData) => {
+    sessionStorage.removeItem('manual_logout');
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
@@ -136,6 +137,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    sessionStorage.setItem('manual_logout', '1');
     window.google?.accounts?.id?.disableAutoSelect();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
