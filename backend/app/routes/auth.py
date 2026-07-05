@@ -83,10 +83,7 @@ def register():
         return jsonify({'error': 'Name, email, and password are required'}), 400
 
     if not is_valid_university_email(email):
-        return jsonify({
-            'error': 'Please use your university student email '
-                     '(e.g. 2307134@students.wits.ac.za or 2307134@student.uj.ac.za)'
-        }), 400
+        return jsonify({'error': 'Please enter a valid email address'}), 400
 
     pw_error = validate_password(password)
     if pw_error:
@@ -118,7 +115,16 @@ def register():
 
     email_sent = send_verification_email(email, otp)
     if not email_sent:
-        logger.warning('Verification email could not be sent to %s', email)
+        logger.error('Verification email delivery failed after registration for %s', email)
+        try:
+            db.session.delete(user)
+            db.session.commit()
+        except Exception:
+            logger.exception('Failed to roll back user after verification email failure for %s', email)
+            db.session.rollback()
+        return jsonify({
+            'error': 'Registration could not be completed because the verification email was not sent. Please try again later.'
+        }), 502
 
     return jsonify({
         'message': 'Registration successful. Verify your email, then sign in.',
@@ -503,5 +509,12 @@ def mfa_disable():
     user.mfa_backup_codes = None
     user.mfa_pending_token = None
     user.mfa_pending_expires = None
-    db.session.commit()
-    return jsonify({'message': 'MFA disabled', 'user': user.to_dict()}), 200
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('DB error disabling MFA for user %s', user.id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to disable MFA'}), 500
+
+    return jsonify({'message': 'MFA disabled successfully', 'user': user.to_dict()}), 200
+

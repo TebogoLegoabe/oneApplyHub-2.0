@@ -154,10 +154,10 @@ const CreateReviewPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">Verify Your Email First</h2>
           <p className="text-gray-600 dark:text-gray-300 mb-2">
-            You need to verify your university email address before you can write reviews.
+            You need to verify your email address before you can write reviews.
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
-            This helps us ensure all reviews come from real students at Wits and UJ.
+            This helps us keep reviews tied to real student accounts.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <Link

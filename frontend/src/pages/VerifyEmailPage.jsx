@@ -93,10 +93,13 @@ const VerifyEmailPage = () => {
 
   const handleResend = async () => {
     if (cooldown > 0 || !email) return;
-    startCooldown();
     setError('');
     const result = await sendVerificationCode(email);
-    if (!result.success) setError(result.error || 'Failed to send code. Please try again.');
+    if (result.success) {
+      startCooldown();
+    } else {
+      setError(result.error || 'Failed to send code. Please try again.');
+    }
   };
 
   if (success) {
@@ -214,3 +217,4 @@ const VerifyEmailPage = () => {
 };
 
 export default VerifyEmailPage;
+
