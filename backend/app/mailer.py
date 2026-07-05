@@ -7,11 +7,17 @@ from app import mail
 
 logger = logging.getLogger(__name__)
 
-FROM_ADDRESS = 'oneApplyHub <noreply@oneapplyhub.co.za>'
 
 
 def _is_mail_configured() -> bool:
     return bool(current_app.config.get('MAIL_USERNAME') and current_app.config.get('MAIL_PASSWORD'))
+
+
+def _sender() -> str:
+    return (
+        current_app.config.get('MAIL_DEFAULT_SENDER')
+        or current_app.config.get('MAIL_USERNAME')
+    )
 
 
 def _wrap(title: str, body: str) -> str:
@@ -35,7 +41,7 @@ def _send(to: str, subject: str, html: str) -> bool:
     try:
         mail.send(Message(
             subject=subject,
-            sender=FROM_ADDRESS,
+            sender=_sender(),
             recipients=[to],
             html=html,
         ))
@@ -47,7 +53,7 @@ def _send(to: str, subject: str, html: str) -> bool:
 
 def send_verification_email(to: str, code: str) -> bool:
     body = f"""
-        <p style="color:#475569;font-size:14px;">Enter the code below to verify your university email and activate your account:</p>
+        <p style="color:#475569;font-size:14px;">Enter the code below to verify your email and activate your account:</p>
         <div style="background:#f1f5f9;border-radius:8px;padding:20px;text-align:center;margin:20px 0;">
           <span style="font-size:38px;font-weight:800;letter-spacing:10px;color:#1a5fa8;font-family:monospace;">{code}</span>
         </div>
