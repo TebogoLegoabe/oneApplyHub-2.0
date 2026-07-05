@@ -18,7 +18,7 @@ const LoginPage = () => {
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState('');
   const [mfaCode, setMfaCode] = useState('');
-  const { login, verifyMFALogin, googleLogin } = useAuth();
+  const { login, verifyMFALogin, googleLogin, sendVerificationCode } = useAuth();
   const navigate = useNavigate();
 
   const goAfterLogin = (user) => navigate(user?.is_admin ? '/admin' : '/dashboard', { replace: true });
@@ -47,6 +47,14 @@ const LoginPage = () => {
         setMfaRequired(true);
       } else if (result.success) {
         goAfterLogin(result.user);
+      } else if ((result.error || '').toLowerCase().includes('verify your email')) {
+        const email = formData.email.trim().toLowerCase();
+        const resend = await sendVerificationCode(email);
+        if (resend.success) {
+          navigate('/verify-email', { replace: true, state: { email } });
+        } else {
+          setError(resend.error || result.error || 'Please verify your email before signing in.');
+        }
       } else {
         setError(result.error || 'Login failed');
       }
