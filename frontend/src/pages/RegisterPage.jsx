@@ -16,7 +16,7 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, sendVerificationCode } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -45,6 +45,13 @@ const RegisterPage = () => {
       const result = await register({ name: formData.name, email, password: formData.password, year_of_study: formData.year_of_study, faculty: formData.faculty });
       if (result.success) {
         navigate('/verify-email', { replace: true, state: { email: result.email || email } });
+      } else if ((result.error || '').toLowerCase().includes('already registered')) {
+        const resend = await sendVerificationCode(email);
+        if (resend.success) {
+          navigate('/verify-email', { replace: true, state: { email } });
+        } else {
+          setError(resend.error || 'Account exists, but we could not send a new verification code.');
+        }
       } else {
         setError(result.error || 'Registration failed');
       }

@@ -12,7 +12,8 @@ const VerifyEmailPage = () => {
   const location = useLocation();
   const { verifyEmail, sendVerificationCode, user } = useAuth();
 
-  const email = location.state?.email || user?.email || '';
+  const initialEmail = location.state?.email || user?.email || '';
+  const [email, setEmail] = useState(initialEmail);
 
   const [digits, setDigits] = useState(['', '', '', '', '', '']);
   const [error, setError] = useState('');
@@ -23,8 +24,8 @@ const VerifyEmailPage = () => {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    startCooldown();
-  }, []);
+    if (initialEmail) startCooldown();
+  }, [initialEmail]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -134,9 +135,9 @@ const VerifyEmailPage = () => {
           </div>
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Check your inbox</h2>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            We sent a 6-digit verification code to
+            {initialEmail ? 'We sent a 6-digit verification code to' : 'Enter your account email to receive a verification code.'}
           </p>
-          {email && (
+          {initialEmail && (
             <p className="text-sm font-semibold text-blue-700 mt-1">{email}</p>
           )}
         </div>
@@ -145,6 +146,22 @@ const VerifyEmailPage = () => {
           <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
           <div className="py-8 px-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {!initialEmail && (
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
+                  Email address
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
+                  placeholder="Enter your account email"
+                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-gray-600 dark:bg-gray-700/80 dark:text-white"
+                  required
+                />
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 text-center mb-4">
                 Enter verification code
@@ -189,11 +206,11 @@ const VerifyEmailPage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Didn't receive the code?</p>
             <button
               onClick={handleResend}
-              disabled={cooldown > 0}
+              disabled={cooldown > 0 || !email}
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 hover:text-blue-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />
-              {cooldown > 0 ? `Resend in ${cooldown}s` : 'Resend code'}
+              {cooldown > 0 ? `Resend in ${cooldown}s` : initialEmail ? 'Resend code' : 'Send code'}
             </button>
           </div>
 
