@@ -135,6 +135,7 @@ const Footer = () => (
             </div>
             <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
             <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
+            <a href="https://codevmasters.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-300 transition-colors">Made by CodevMasters developers</a>
             <span className="inline-flex items-center gap-1.5 text-slate-400">
               <GraduationCap className="h-3.5 w-3.5" />
               Built for students
