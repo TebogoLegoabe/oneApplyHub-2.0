@@ -36,7 +36,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries'];
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries', '/privacy', '/terms'];
 const isPublicPath = (pathname) => PUBLIC_PATHS.some((path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`)));
 
 // Response interceptor - handle expired/invalid sessions

@@ -1,4 +1,6 @@
+import json
 import logging
+import re
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -7,11 +9,66 @@ from sqlalchemy.exc import IntegrityError
 
 from app import db, limiter
 from app.models import Review, Property, User, HelpfulVote
+from app.models.application import Application
 
 logger = logging.getLogger(__name__)
 reviews_bp = Blueprint('reviews', __name__)
 
 _MAX_PER_PAGE = 50
+
+
+_BLOCKED_REVIEW_TERMS = {
+    'fuck', 'fucking', 'shit', 'bullshit', 'bitch', 'bastard', 'asshole',
+    'cunt', 'idiot', 'stupid', 'scam', 'scammer', 'fraud', 'fraudster',
+}
+
+_THREAT_PATTERNS = (
+    r'\bkill\b', r'\bhurt\b', r'\bassault\b', r'\bburn\s+down\b',
+    r'\bdestroy\b', r'\bmake\s+them\s+pay\b',
+)
+
+_UNVERIFIED_CLAIM_PATTERNS = (
+    r'\bcriminal\b', r'\bthief\b', r'\bstole\b', r'\bsteals\b',
+    r'\billegal\b', r'\bcorrupt\b', r'\bbribe\b',
+)
+
+
+def _combined_review_text(data: dict, review_text: str) -> str:
+    parts = [
+        review_text,
+        str(data.get('pros') or ''),
+        str(data.get('cons') or ''),
+    ]
+    return ' '.join(part.strip() for part in parts if part and part.strip())
+
+
+def _review_language_issues(text: str) -> list[str]:
+    lowered = text.lower()
+    words = set(re.findall(r"[a-z']+", lowered))
+    issues = []
+
+    if words & _BLOCKED_REVIEW_TERMS:
+        issues.append('Use respectful, factual language and remove insults, profanity, or name-calling.')
+    if any(re.search(pattern, lowered) for pattern in _THREAT_PATTERNS):
+        issues.append('Remove threatening or intimidating language.')
+    if any(re.search(pattern, lowered) for pattern in _UNVERIFIED_CLAIM_PATTERNS):
+        issues.append('Avoid serious accusations unless you describe the specific facts from your own experience.')
+    if re.search(r'(.)\1{6,}', text):
+        issues.append('Please avoid spam-like repeated characters.')
+
+    return issues
+
+
+def _user_selected_property_in_application(user_id: int, property_id: int) -> bool:
+    application = Application.query.filter_by(user_id=user_id).first()
+    if not application or not application.form_data:
+        return False
+    try:
+        form_data = json.loads(application.form_data)
+    except Exception:
+        return False
+    selected = form_data.get('selectedResidences') or []
+    return str(property_id) in {str(item) for item in selected}
 
 
 def _build_review_dict(review: Review, property_obj: Property, user: User) -> dict:
@@ -175,6 +232,17 @@ def create_review(property_id):
     if recommend is None:
         return jsonify({'error': 'Recommendation is required'}), 400
 
+    if not data.get('truthful_experience_confirmed'):
+        return jsonify({'error': 'Please confirm that your review is truthful and based on your own experience at this property.'}), 400
+
+    moderation_flags = []
+    if not _user_selected_property_in_application(user_id, property_id):
+        moderation_flags.append('Could not verify that this property was selected in the user application record.')
+
+    language_issues = _review_language_issues(_combined_review_text(data, review_text))
+    moderation_flags.extend(language_issues)
+    auto_approve = not moderation_flags
+
     def _bounded_rating(val):
         if val is None:
             return None
@@ -196,6 +264,7 @@ def create_review(property_id):
         cons=(data.get('cons') or '').strip()[:1000] or None,
         recommend=bool(recommend),
         anonymous=bool(data.get('anonymous', False)),
+        approved=auto_approve,
     )
 
     try:
@@ -210,7 +279,10 @@ def create_review(property_id):
         return jsonify({'error': 'Failed to create review'}), 500
 
     return jsonify({
-        'message': 'Review submitted successfully',
+        'message': 'Review published successfully' if auto_approve else 'Review submitted for admin review',
+        'approved': review.approved,
+        'flagged_for_admin': not auto_approve,
+        'moderation_flags': moderation_flags,
         'review': {
             'id': review.id,
             'property_id': review.property_id,
@@ -218,6 +290,7 @@ def create_review(property_id):
             'review_text': review.review_text,
             'recommend': review.recommend,
             'anonymous': review.anonymous,
+            'approved': review.approved,
             'created_at': review.created_at.isoformat() if review.created_at else None,
         },
     }), 201

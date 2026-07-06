@@ -133,8 +133,8 @@ const Footer = () => (
             <div className="flex items-center gap-2 md:hidden">
               {SOCIAL_LINKS.map((link) => <SocialLink key={link.label} {...link} />)}
             </div>
-            <button className="hover:text-slate-300 transition-colors">Privacy</button>
-            <button className="hover:text-slate-300 transition-colors">Terms</button>
+            <Link to="/privacy" className="hover:text-slate-300 transition-colors">Privacy</Link>
+            <Link to="/terms" className="hover:text-slate-300 transition-colors">Terms</Link>
             <span className="inline-flex items-center gap-1.5 text-slate-400">
               <GraduationCap className="h-3.5 w-3.5" />
               Built for students

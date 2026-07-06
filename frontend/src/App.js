@@ -25,6 +25,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PropertyAdminsPage from './pages/PropertyAdminsPage';
 import MFASetupPage from './pages/MFASetupPage';
+import LegalPage from './pages/LegalPage';
 import logoImg from './assets/OneHubLogo.png';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
@@ -34,7 +35,9 @@ const isPublicRoute = (pathname) => (
   pathname === '/properties' ||
   pathname.startsWith('/properties/') ||
   pathname === '/reviews' ||
-  pathname === '/bursaries'
+  pathname === '/bursaries' ||
+  pathname === '/privacy' ||
+  pathname === '/terms'
 );
 
 const AppLayout = () => {
@@ -55,6 +58,8 @@ const AppLayout = () => {
       <Route path="/properties/:id" element={<PropertyDetailPage />} />
       <Route path="/reviews" element={<ReviewsPage />} />
       <Route path="/bursaries" element={<BursaryPage />} />
+      <Route path="/privacy" element={<LegalPage type="privacy" />} />
+      <Route path="/terms" element={<LegalPage type="terms" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
