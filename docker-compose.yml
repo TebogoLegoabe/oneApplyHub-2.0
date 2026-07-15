@@ -8,8 +8,7 @@ services:
       POSTGRES_USER: oneapplyhub
       POSTGRES_PASSWORD: oneapplyhub123
     ports:
-      # Use 15432 on the host to avoid conflicts with any local Windows PostgreSQL service on 5432/5433.
-      - "15432:5432"
+      - "5432:5432"
     volumes:
       - oneapplyhub_pgdata:/var/lib/postgresql/data
     healthcheck:
