@@ -7,6 +7,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import AppSidebar from './components/Layout/AppSidebar';
+import SEO from './components/SEO';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -115,6 +116,7 @@ function App() {
       <ErrorBoundary>
         <AuthProvider>
           <Router>
+            <SEO />
             <AppLayout />
           </Router>
         </AuthProvider>
