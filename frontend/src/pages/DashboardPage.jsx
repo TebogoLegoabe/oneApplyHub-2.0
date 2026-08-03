@@ -42,7 +42,7 @@ const StatCard = ({ icon: Icon, label, value, sub, tone, loading }) => (
     <div className="flex items-center justify-between gap-3">
       <div className="min-w-0">
         <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</p>
-        <p className="mt-1.5 text-2xl font-black text-slate-950 dark:text-white">
+        <p className="mt-1.5 text-2xl font-bold text-slate-950 dark:text-white">
           {loading ? <span className="inline-block h-7 w-14 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" /> : value}
         </p>
         <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{sub}</p>
@@ -93,14 +93,14 @@ const DashboardPage = () => {
       label: 'Properties',
       value: overview.total_properties ?? 0,
       sub: 'Approved listings',
-      tone: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300',
+      tone: 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300',
     },
     {
       icon: MessageSquare,
       label: 'Reviews',
       value: overview.total_reviews ?? 0,
       sub: 'Published reviews',
-      tone: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300',
+      tone: 'bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300',
     },
     {
       icon: Star,
@@ -124,7 +124,7 @@ const DashboardPage = () => {
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <h1 className="truncate text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+              <h1 className="truncate text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                 Welcome back, {firstName}
               </h1>
               <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
@@ -158,7 +158,7 @@ const DashboardPage = () => {
             <div className="mb-4 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-blue-500" />
+                  <TrendingUp className="h-4 w-4 text-brand-500" />
                   <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Most reviewed properties</h3>
                 </div>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Properties with the highest feedback volume.</p>
@@ -183,7 +183,7 @@ const DashboardPage = () => {
                   <XAxis type="number" tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" width={110} tick={{ fill: axisColor, fontSize: 11 }} tickLine={false} axisLine={false} />
                   <Tooltip content={<PropertyTooltip />} cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(15,23,42,0.04)' }} />
-                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#2563eb" />
+                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#2f5c58" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -191,7 +191,7 @@ const DashboardPage = () => {
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
             <div className="mb-4 flex items-center gap-2">
-              <Star className="h-4 w-4 text-amber-400" />
+              <Star className="h-4 w-4 text-gold-400" />
               <div className="min-w-0">
                 <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Rating distribution</h3>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Approved review scores.</p>
@@ -225,7 +225,7 @@ const DashboardPage = () => {
         <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 dark:border-slate-800">
             <div className="flex min-w-0 items-center gap-2">
-              <Users className="h-4 w-4 shrink-0 text-blue-500" />
+              <Users className="h-4 w-4 shrink-0 text-brand-500" />
               <div className="min-w-0">
                 <h3 className="truncate text-sm font-bold text-slate-950 dark:text-white">Recent reviews</h3>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Latest approved feedback.</p>
@@ -247,21 +247,21 @@ const DashboardPage = () => {
               <p className="mb-5 max-w-xs text-xs text-slate-400">
                 Be the first to share your accommodation experience.
               </p>
-              <Link to="/properties" className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-blue-700">
+              <Link to="/properties" className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-700">
                 Browse Properties <ArrowRight className="h-3.5 w-3.5" />
               </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
               {data.recent_reviews.map((review) => (
-                <div key={review.id} className="rounded-2xl border border-slate-100 p-3.5 transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-blue-900">
+                <div key={review.id} className="rounded-2xl border border-slate-100 p-3.5 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lg dark:border-slate-800 dark:hover:border-brand-900">
                   <div className="mb-3 flex items-start justify-between gap-3">
-                    <Link to={`/properties/${review.property_id}`} className="line-clamp-1 text-sm font-bold leading-snug text-blue-600 hover:text-blue-700 dark:text-blue-400">
+                    <Link to={`/properties/${review.property_id}`} className="line-clamp-1 text-sm font-bold leading-snug text-brand-600 hover:text-brand-700 dark:text-brand-400">
                       {review.property_name}
                     </Link>
-                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 dark:bg-amber-500/10">
-                      <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                      <span className="text-xs font-black text-slate-700 dark:text-slate-200">{review.overall_rating}</span>
+                    <div className="flex shrink-0 items-center gap-1 rounded-full bg-gold-50 px-2 py-1 dark:bg-gold-500/10">
+                      <Star className="h-3 w-3 fill-gold-400 text-gold-400" />
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{review.overall_rating}</span>
                     </div>
                   </div>
                   <p className="mb-4 line-clamp-3 text-xs leading-5 text-slate-500 dark:text-slate-400">

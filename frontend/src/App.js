@@ -89,7 +89,7 @@ const AppLayout = () => {
               <Menu className="h-5 w-5" />
             </button>
             <img src={logoImg} alt="oneApplyHub logo" className="h-8 w-8 object-contain" />
-            <span className="text-sm font-black tracking-tight text-slate-900 dark:text-white">oneApplyHub</span>
+            <span className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">oneApplyHub</span>
           </div>
           <main className="min-w-0 flex-1">{routes}</main>
         </div>

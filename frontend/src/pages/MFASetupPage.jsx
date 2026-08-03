@@ -98,21 +98,21 @@ const MFASetupPage = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
 
-        <Link to="/dashboard" className="inline-flex items-center text-sm text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 mb-6 transition-colors">
+        <Link to="/dashboard" className="inline-flex items-center text-sm text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 mb-6 transition-colors">
           <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Dashboard
         </Link>
 
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
 
           {/* Header */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 px-6 py-6 text-white">
+          <div className="bg-brand-700 px-6 py-6 text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
                 <h1 className="text-lg font-bold">Two-Factor Authentication</h1>
-                <p className="text-blue-100 text-sm">Protect your account with an authenticator app</p>
+                <p className="text-brand-100 text-sm">Protect your account with an authenticator app</p>
               </div>
             </div>
           </div>
@@ -163,9 +163,9 @@ const MFASetupPage = () => {
                   </div>
                 ) : (
                   <div className="space-y-5">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl p-5">
-                      <h3 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">How it works</h3>
-                      <ul className="space-y-1.5 text-sm text-blue-700 dark:text-blue-400">
+                    <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-700 rounded-xl p-5">
+                      <h3 className="text-sm font-semibold text-brand-800 dark:text-brand-300 mb-2">How it works</h3>
+                      <ul className="space-y-1.5 text-sm text-brand-700 dark:text-brand-400">
                         <li>1. Install <strong>Google Authenticator</strong>, <strong>Authy</strong>, or <strong>Microsoft Authenticator</strong> on your phone</li>
                         <li>2. Scan the QR code we generate</li>
                         <li>3. Enter the 6-digit code to confirm setup</li>
@@ -175,7 +175,7 @@ const MFASetupPage = () => {
                     <button
                       onClick={handleStartSetup}
                       disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors"
                     >
                       {loading ? (
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
@@ -209,7 +209,7 @@ const MFASetupPage = () => {
                     <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 break-all">{secret}</code>
                     <button
                       onClick={() => navigator.clipboard.writeText(secret)}
-                      className="text-gray-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                      className="text-gray-400 hover:text-brand-600 transition-colors flex-shrink-0"
                       title="Copy secret"
                     >
                       <Copy className="w-4 h-4" />
@@ -224,7 +224,7 @@ const MFASetupPage = () => {
                     <input
                       type="text" inputMode="numeric" autoComplete="one-time-code"
                       maxLength={6} required autoFocus
-                      className="w-full text-center text-2xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      className="w-full text-center text-2xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                       placeholder="000000"
                       value={code}
                       onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); if (error) setError(''); }}
@@ -241,7 +241,7 @@ const MFASetupPage = () => {
                     <button
                       type="submit"
                       disabled={loading || code.length < 6}
-                      className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl font-semibold text-sm transition-colors"
+                      className="flex-1 py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl font-semibold text-sm transition-colors"
                     >
                       {loading ? (
                         <div className="flex items-center justify-center gap-2">
@@ -271,7 +271,7 @@ const MFASetupPage = () => {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Backup Codes</span>
-                    <button onClick={handleCopyAll} className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                    <button onClick={handleCopyAll} className="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
                       {copiedAll ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                       {copiedAll ? 'Copied!' : 'Copy all'}
                     </button>
@@ -289,7 +289,7 @@ const MFASetupPage = () => {
                     type="checkbox" id="savedConfirm"
                     checked={savedConfirmed}
                     onChange={(e) => setSavedConfirmed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                   />
                   <label htmlFor="savedConfirm" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                     I have saved my backup codes in a safe place
@@ -326,13 +326,13 @@ const MFASetupPage = () => {
                         <input
                           type={showDisablePassword ? 'text' : 'password'}
                           required
-                          className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
+                          className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all"
                           placeholder="Enter your password"
                           value={disablePassword}
                           onChange={(e) => { setDisablePassword(e.target.value); if (error) setError(''); }}
                         />
                         <button type="button" onClick={() => setShowDisablePassword(!showDisablePassword)}
-                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-blue-500 transition-colors">
+                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-brand-500 transition-colors">
                           {showDisablePassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                         </button>
                       </div>
@@ -344,7 +344,7 @@ const MFASetupPage = () => {
                     </label>
                     <input
                       type="text" inputMode="numeric" maxLength={6}
-                      className="w-full text-center text-xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      className="w-full text-center text-xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
                       placeholder="000000"
                       value={disableCode}
                       onChange={(e) => { setDisableCode(e.target.value.replace(/\D/g, '')); if (error) setError(''); }}

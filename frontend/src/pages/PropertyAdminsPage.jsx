@@ -17,14 +17,14 @@ import {
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 const cardClass = 'rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900';
 
 const Badge = ({ children, color = 'slate' }) => {
   const classes = {
-    blue: 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300',
+    blue: 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300',
     green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
-    purple: 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300',
+    purple: 'bg-gold-50 text-gold-700 dark:bg-gold-500/10 dark:text-gold-300',
     amber: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
     slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
   };
@@ -162,9 +162,9 @@ const PropertyAdminsPage = () => {
       <div className="min-h-screen bg-slate-50 p-6 dark:bg-slate-950">
         <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Shield className="mx-auto mb-3 h-10 w-10 text-slate-400" />
-          <h1 className="text-xl font-black text-slate-950 dark:text-white">Super admin only</h1>
+          <h1 className="text-xl font-bold text-slate-950 dark:text-white">Super admin only</h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Only the platform super admin can create and assign property admins.</p>
-          <Link to="/admin" className="mt-5 inline-flex rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white">Back to admin</Link>
+          <Link to="/admin" className="mt-5 inline-flex rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white">Back to admin</Link>
         </div>
       </div>
     );
@@ -173,23 +173,23 @@ const PropertyAdminsPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 lg:px-6">
-        <Link to="/admin" className="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-xs font-bold text-blue-600 shadow-sm hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-400">
+        <Link to="/admin" className="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-xs font-bold text-brand-600 shadow-sm hover:bg-brand-50 dark:bg-slate-900 dark:text-brand-400">
           <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to admin dashboard
         </Link>
 
-        <div className="mb-5 overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-6 text-white shadow-sm">
+        <div className="mb-5 overflow-hidden rounded-3xl bg-brand-800 p-6 text-white shadow-sm">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
             <UserCog className="h-3.5 w-3.5" /> Super admin workspace
           </div>
           <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
             <div>
-              <h1 className="text-2xl font-black sm:text-3xl">Managing admins</h1>
-              <p className="mt-2 max-w-2xl text-sm text-blue-50">Create admins for each property and control which applications they can see. Admins only manage students who selected one of their assigned properties.</p>
+              <h1 className="text-2xl font-bold sm:text-3xl">Managing admins</h1>
+              <p className="mt-2 max-w-2xl text-sm text-brand-50">Create admins for each property and control which applications they can see. Admins only manage students who selected one of their assigned properties.</p>
             </div>
             <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-black">{adminCount}</p><p className="text-xs text-blue-50">Admins</p></div>
-              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-black">{coveredProperties}</p><p className="text-xs text-blue-50">Properties</p></div>
-              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-black">{assignments.length}</p><p className="text-xs text-blue-50">Assignments</p></div>
+              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-bold">{adminCount}</p><p className="text-xs text-brand-50">Admins</p></div>
+              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-bold">{coveredProperties}</p><p className="text-xs text-brand-50">Properties</p></div>
+              <div className="rounded-2xl bg-white/15 px-4 py-3 backdrop-blur"><p className="text-2xl font-bold">{assignments.length}</p><p className="text-xs text-brand-50">Assignments</p></div>
             </div>
           </div>
         </div>
@@ -205,7 +205,7 @@ const PropertyAdminsPage = () => {
           <form onSubmit={handleCreateAdmin} className={`${cardClass} p-5`}>
             <div className="mb-5 flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-black text-slate-950 dark:text-white">Create property admin</h2>
+                <h2 className="text-lg font-bold text-slate-950 dark:text-white">Create property admin</h2>
                 <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Set the login details and assign properties immediately.</p>
               </div>
               <Badge color="purple"><KeyRound className="h-3 w-3" /> Login access</Badge>
@@ -234,13 +234,13 @@ const PropertyAdminsPage = () => {
                 {properties.map((property) => {
                   const active = form.propertyIds.includes(property.id);
                   return (
-                    <button type="button" key={property.id} onClick={() => toggleProperty(property.id)} className={`rounded-2xl border p-3 text-left transition-all ${active ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10' : 'border-slate-200 hover:border-blue-300 dark:border-slate-800 dark:hover:border-blue-700'}`}>
+                    <button type="button" key={property.id} onClick={() => toggleProperty(property.id)} className={`rounded-2xl border p-3 text-left transition-all ${active ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-slate-200 hover:border-brand-300 dark:border-slate-800 dark:hover:border-brand-700'}`}>
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="text-sm font-black text-slate-950 dark:text-white">{property.name}</p>
+                          <p className="text-sm font-bold text-slate-950 dark:text-white">{property.name}</p>
                           <p className="mt-0.5 line-clamp-1 text-xs text-slate-500 dark:text-slate-400">{property.address}</p>
                         </div>
-                        {active && <BadgeCheck className="h-5 w-5 shrink-0 text-blue-600" />}
+                        {active && <BadgeCheck className="h-5 w-5 shrink-0 text-brand-600" />}
                       </div>
                     </button>
                   );
@@ -249,14 +249,14 @@ const PropertyAdminsPage = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={saving} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
               <Plus className="mr-2 h-4 w-4" /> {saving ? 'Saving...' : 'Create admin and assign'}
             </button>
           </form>
 
           <div className={`${cardClass} p-5`}>
             <div className="mb-5">
-              <h2 className="text-lg font-black text-slate-950 dark:text-white">Assign existing admin</h2>
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">Assign existing admin</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Use this when the account already exists.</p>
             </div>
             <div className="space-y-4">
@@ -272,17 +272,17 @@ const PropertyAdminsPage = () => {
                   {assignableUsers.map((item) => <option key={item.id} value={item.id}>{item.name} — {item.email}</option>)}
                 </select>
               </Field>
-              <button type="button" onClick={handleAssignExisting} disabled={saving} className="inline-flex w-full items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 text-sm font-black text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:border-blue-900 dark:bg-blue-500/10 dark:text-blue-300">
+              <button type="button" onClick={handleAssignExisting} disabled={saving} className="inline-flex w-full items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 py-3 text-sm font-bold text-brand-700 hover:bg-brand-100 disabled:opacity-50 dark:border-brand-900 dark:bg-brand-500/10 dark:text-brand-300">
                 <Shield className="mr-2 h-4 w-4" /> Assign existing admin
               </button>
             </div>
 
             <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
-              <h3 className="text-sm font-black text-slate-950 dark:text-white">What they can manage</h3>
+              <h3 className="text-sm font-bold text-slate-950 dark:text-white">What they can manage</h3>
               <ul className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                <li className="flex gap-2"><Building2 className="mt-0.5 h-4 w-4 text-blue-500" /> Assigned property details and reviews.</li>
-                <li className="flex gap-2"><Users className="mt-0.5 h-4 w-4 text-blue-500" /> Applications where the student selected their property.</li>
-                <li className="flex gap-2"><Mail className="mt-0.5 h-4 w-4 text-blue-500" /> Applicant status updates and admin notes.</li>
+                <li className="flex gap-2"><Building2 className="mt-0.5 h-4 w-4 text-brand-500" /> Assigned property details and reviews.</li>
+                <li className="flex gap-2"><Users className="mt-0.5 h-4 w-4 text-brand-500" /> Applications where the student selected their property.</li>
+                <li className="flex gap-2"><Mail className="mt-0.5 h-4 w-4 text-brand-500" /> Applicant status updates and admin notes.</li>
               </ul>
             </div>
           </div>
@@ -291,7 +291,7 @@ const PropertyAdminsPage = () => {
         <div className={`${cardClass} mt-5 overflow-hidden`}>
           <div className="flex flex-col gap-2 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-black text-slate-950 dark:text-white">Current property admins</h2>
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">Current property admins</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Review and remove assignments anytime.</p>
             </div>
             <Badge color="blue">{assignments.length} active assignments</Badge>
@@ -305,9 +305,9 @@ const PropertyAdminsPage = () => {
                 <div key={admin.admin_user_id} className="p-5">
                   <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-300"><UserCog className="h-5 w-5" /></div>
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"><UserCog className="h-5 w-5" /></div>
                       <div>
-                        <p className="text-sm font-black text-slate-950 dark:text-white">{admin.admin_name}</p>
+                        <p className="text-sm font-bold text-slate-950 dark:text-white">{admin.admin_name}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400">{admin.admin_email}</p>
                       </div>
                     </div>

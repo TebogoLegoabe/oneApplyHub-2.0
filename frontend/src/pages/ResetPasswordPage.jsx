@@ -5,7 +5,7 @@ import { authAPI } from '../services/api';
 import logoImg from '../assets/OneHubLogo.png';
 import AuthBackground from '../components/AuthBackground';
 
-const PAGE_WRAPPER = 'min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
+const PAGE_WRAPPER = 'min-h-screen bg-slate-50 dark:bg-gray-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden';
 
 const ResetPasswordPage = () => {
   const [searchParams] = useSearchParams();
@@ -68,7 +68,7 @@ const ResetPasswordPage = () => {
         <AuthBackground />
         <div className="sm:mx-auto sm:w-full sm:max-w-lg relative z-10">
           <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden text-center">
-            <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+            <div className="h-1 bg-brand-600" />
             <div className="py-10 px-8">
             <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-8 h-8 text-emerald-500" />
@@ -97,7 +97,7 @@ const ResetPasswordPage = () => {
         </div>
 
         <div className="bg-white dark:bg-gray-800/90 shadow-2xl rounded-2xl border border-gray-100 dark:border-gray-700/60 overflow-hidden">
-          <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
+          <div className="h-1 bg-brand-600" />
           <div className="py-8 px-8">
           {error && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex mb-6">
@@ -113,14 +113,14 @@ const ResetPasswordPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-blue-500" />
+                  <Lock className="h-5 w-5 text-brand-500" />
                 </div>
                 <input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
-                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all"
+                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 transition-all"
                   placeholder="Enter new password (min 6 characters)"
                   value={formData.password}
                   onChange={handleChange}
@@ -129,7 +129,7 @@ const ResetPasswordPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-blue-500 focus:outline-none transition-colors"
+                    className="text-gray-400 hover:text-brand-500 focus:outline-none transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -143,14 +143,14 @@ const ResetPasswordPage = () => {
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-blue-500" />
+                  <Lock className="h-5 w-5 text-brand-500" />
                 </div>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? 'text' : 'password'}
                   required
-                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all"
+                  className="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 transition-all"
                   placeholder="Confirm new password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -159,7 +159,7 @@ const ResetPasswordPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-gray-400 hover:text-blue-500 focus:outline-none transition-colors"
+                    className="text-gray-400 hover:text-brand-500 focus:outline-none transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
@@ -170,7 +170,7 @@ const ResetPasswordPage = () => {
             <button
               type="submit"
               disabled={loading || !token}
-              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
+              className="w-full flex justify-center py-3 px-5 rounded-xl shadow-md text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
               {loading ? (
                 <div className="flex items-center">
@@ -186,7 +186,7 @@ const ResetPasswordPage = () => {
           <div className="mt-6 text-center">
             <Link
               to="/login"
-              className="font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 transition-colors text-sm"
+              className="font-medium text-brand-600 hover:text-brand-700 dark:text-brand-400 transition-colors text-sm"
             >
               Back to Login
             </Link>

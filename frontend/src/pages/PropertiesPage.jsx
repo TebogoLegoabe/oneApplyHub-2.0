@@ -60,18 +60,18 @@ const PropertiesPage = () => {
   };
 
   const inputClass =
-    'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+    'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
           <div className="min-w-0">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700 dark:bg-blue-500/10 dark:text-blue-300">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
               <Home className="h-3.5 w-3.5" />
               Browse properties
             </div>
-            <h1 className="text-xl font-black tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
               Find accommodation
             </h1>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">
@@ -138,7 +138,7 @@ const PropertiesPage = () => {
               </button>
               <button
                 type="submit"
-                className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700"
+                className="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700"
               >
                 Search
               </button>
@@ -157,7 +157,7 @@ const PropertiesPage = () => {
 
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-base font-black text-slate-950 dark:text-white sm:text-lg">
+            <h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">
               {loading ? 'Loading properties' : `${properties.length} propert${properties.length === 1 ? 'y' : 'ies'} found`}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">Page {filters.page} of {totalPages}</p>
@@ -188,17 +188,17 @@ const PropertiesPage = () => {
               const amenities = parseAmenities(property.amenities);
               const reviewCount = property.review_count || 0;
               return (
-                <article key={property.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900">
-                  <div className="relative h-32 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-800 sm:h-36">
+                <article key={property.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
+                  <div className="relative h-32 overflow-hidden bg-brand-900 sm:h-36">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <span className="text-xs font-semibold text-white/50">Photos coming soon</span>
                     </div>
                     <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-black uppercase text-blue-700 shadow-sm">
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase text-brand-700 shadow-sm">
                         {property.university}
                       </span>
                       {property.nsfas_accredited && (
-                        <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-black text-white shadow-sm">NSFAS</span>
+                        <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">NSFAS</span>
                       )}
                     </div>
                     <div className="absolute right-3 top-3">
@@ -210,17 +210,17 @@ const PropertiesPage = () => {
 
                   <div className="flex flex-1 flex-col p-4">
                     <div className="mb-2 flex items-start justify-between gap-3">
-                      <h3 className="line-clamp-2 text-sm font-black leading-snug text-slate-950 group-hover:text-blue-700 dark:text-white dark:group-hover:text-blue-300">
+                      <h3 className="line-clamp-2 text-sm font-bold leading-snug text-slate-950 group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300">
                         {property.name}
                       </h3>
-                      <div className="flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 dark:bg-amber-500/10">
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                        <span className="text-xs font-black text-slate-700 dark:text-slate-200">{property.average_rating || 'New'}</span>
+                      <div className="flex shrink-0 items-center gap-1 rounded-full bg-gold-50 px-2 py-1 dark:bg-gold-500/10">
+                        <Star className="h-3.5 w-3.5 fill-gold-400 text-gold-400" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{property.average_rating || 'New'}</span>
                       </div>
                     </div>
 
                     <div className="mb-3 flex items-center text-slate-500 dark:text-slate-400">
-                      <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-blue-500" />
+                      <MapPin className="mr-1.5 h-3.5 w-3.5 shrink-0 text-brand-500" />
                       <span className="truncate text-xs">{property.address}</span>
                     </div>
 
@@ -243,7 +243,7 @@ const PropertiesPage = () => {
                     <div className="mt-auto border-t border-slate-100 pt-3 dark:border-slate-800">
                       <div className="mb-3 flex items-end justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-base font-black text-blue-600 dark:text-blue-400">
+                          <p className="text-base font-bold text-brand-600 dark:text-brand-400">
                             R{property.price_min.toLocaleString()} to R{property.price_max.toLocaleString()}
                           </p>
                           <p className="text-[11px] text-slate-500 dark:text-slate-400">per month</p>
@@ -251,7 +251,7 @@ const PropertiesPage = () => {
                         <p className="shrink-0 text-[11px] font-semibold text-slate-400">{reviewCount} review{reviewCount === 1 ? '' : 's'}</p>
                       </div>
 
-                      <Link to={`/properties/${property.id}`} className="block rounded-xl bg-blue-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-blue-700">
+                      <Link to={`/properties/${property.id}`} className="block rounded-xl bg-brand-600 px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-brand-700">
                         View details
                       </Link>
                     </div>
@@ -263,9 +263,9 @@ const PropertiesPage = () => {
         ) : (
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <Search className="mx-auto mb-4 h-9 w-9 text-slate-400" />
-            <h3 className="text-base font-black text-slate-950 dark:text-white">No properties found</h3>
+            <h3 className="text-base font-bold text-slate-950 dark:text-white">No properties found</h3>
             <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try changing your search, price range, university, or property type.</p>
-            <button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+            <button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">
               Clear filters
             </button>
           </div>
