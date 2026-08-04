@@ -16,6 +16,7 @@ class Property(db.Model):
     description = db.Column(db.Text)
     amenities = db.Column(db.Text)   # JSON string
     contact_info = db.Column(db.Text)
+    website = db.Column(db.String(500))
     university = db.Column(db.String(50))  # 'wits', 'uj', or 'both'
     approved = db.Column(db.Boolean, default=False, nullable=False)
     nsfas_accredited = db.Column(db.Boolean, default=False, nullable=False)
@@ -52,6 +53,7 @@ class Property(db.Model):
             'description': self.description,
             'amenities': self.amenities,
             'contact_info': self.contact_info,
+            'website': self.website,
             'university': self.university,
             'approved': self.approved,
             'nsfas_accredited': self.nsfas_accredited,
