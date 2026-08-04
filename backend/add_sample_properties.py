@@ -27,6 +27,7 @@ def add_sample_properties():
             description=prop['description'],
             amenities=json.dumps(prop['amenities']),  # convert list to JSON string
             contact_info=prop['contact_info'],
+            website=prop.get('website'),
             approved=prop['approved'],
         )
         db.session.add(new_property)

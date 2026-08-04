@@ -184,7 +184,8 @@ def create_property():
         name=data['name'].strip(), address=data['address'].strip(), property_type=data['property_type'],
         price_min=int(data['price_min']), price_max=int(data['price_max']), description=data.get('description', '').strip(),
         amenities=json.dumps(amenities) if isinstance(amenities, list) else amenities,
-        contact_info=data.get('contact_info', '').strip(), university=data['university'],
+        contact_info=data.get('contact_info', '').strip(), website=data.get('website', '').strip(),
+        university=data['university'],
         nsfas_accredited=bool(data.get('nsfas_accredited', False)), approved=True,
     )
     try:
@@ -211,7 +212,7 @@ def update_property(property_id):
     if not prop:
         return jsonify({'error': 'Property not found'}), 404
     data = request.get_json(silent=True) or {}
-    for field in ('name', 'address', 'property_type', 'description', 'contact_info', 'university'):
+    for field in ('name', 'address', 'property_type', 'description', 'contact_info', 'website', 'university'):
         if field in data:
             setattr(prop, field, str(data[field]).strip())
     if 'price_min' in data:
