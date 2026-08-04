@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Crown,
   Eye,
+  GraduationCap,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -231,56 +232,61 @@ const UsersTab = ({ currentUser, onToast }) => {
   );
 };
 
-const ApplicationReviewModal = ({ application, onClose, onSave, saving }) => {
-  const [status, setStatus] = useState(application.status || 'pending');
-  const [notes, setNotes] = useState(application.admin_notes || '');
-  const data = application.form_data || {};
-  const selectedProperties = application.selected_properties || [];
-  const documents = data.documents || {};
-  const documentNames = Object.keys(documents).filter((key) => documents[key]);
+const AccommodationReviewModal = ({ item, onClose, onSave, saving }) => {
+  const [status, setStatus] = useState(item.status || 'pending');
+  const [notes, setNotes] = useState(item.admin_notes || '');
+  const profile = item.applicant_profile;
+  const application = item.application;
+  const siblingProperties = application?.properties || [];
 
   const sections = useMemo(() => [
     {
       title: 'Applicant details',
       fields: [
-        ['First name', data.firstName || application.first_name],
-        ['Last name', data.lastName || application.last_name],
-        ['Email', data.email || application.applicant_email],
-        ['Phone', data.phoneNumber],
-        ['ID number', data.idNumber],
-        ['Nationality', data.nationality],
+        ['First name', profile?.first_name],
+        ['Last name', profile?.last_name],
+        ['Email', item.applicant_email],
+        ['Phone', profile?.phone_number],
+        ['ID number', profile?.id_number],
+        ['Nationality', profile?.nationality],
       ],
     },
     {
       title: 'Studies and funding',
       fields: [
-        ['University', (data.university || application.university || '').toUpperCase()],
-        ['Student number', data.studentNumber || application.student_number],
-        ['Faculty', data.faculty],
-        ['Year of study', data.yearOfStudy],
-        ['Degree programme', data.degreeProgram],
-        ['Financial aid', data.financialAid],
-        ['NSFAS applicant', data.nsfasApplicant ? 'Yes' : 'No'],
+        ['Student number', profile?.student_number],
+        ['Faculty', profile?.faculty],
+        ['Year of study', profile?.year_of_study],
+        ['Degree programme', profile?.degree_program],
+        ['Financial aid', profile?.financial_aid],
+        ['NSFAS applicant', profile?.nsfas_applicant ? 'Yes' : 'No'],
       ],
     },
     {
       title: 'Accommodation preferences',
       fields: [
-        ['Selected properties', selectedProperties.map((p) => p.name).join(', ') || '—'],
-        ['Room type', data.roomType],
-        ['Special requirements', data.specialRequirements],
+        ['Room type', application?.room_type],
+        ['Special requirements', application?.special_requirements],
       ],
     },
     {
       title: 'Parent / guardian',
       fields: [
-        ['Name', data.parentGuardianName],
-        ['ID number', data.parentGuardianIdNumber],
-        ['Phone', data.parentGuardianPhone],
-        ['Email', data.parentGuardianEmail],
+        ['Name', profile?.parent_guardian_name],
+        ['ID number', profile?.parent_guardian_id_number],
+        ['Phone', profile?.parent_guardian_phone],
+        ['Email', profile?.parent_guardian_email],
       ],
     },
-  ], [application, data, selectedProperties]);
+  ], [profile, application, item.applicant_email]);
+
+  const documentBadges = [
+    ['Student/applicant ID', profile?.has_student_id_document],
+    ['Parent/guardian ID', profile?.has_parent_guardian_id_document],
+    ['Proof of registration', application?.has_proof_of_registration],
+    ['Bank statement', application?.has_bank_statement],
+    ['NSFAS letter', application?.has_nsfas_letter],
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -288,23 +294,25 @@ const ApplicationReviewModal = ({ application, onClose, onSave, saving }) => {
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge color={statusColor(application.status)}>{application.status?.replace('_', ' ') || 'pending'}</Badge>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application.reference || `APP-${application.id}`}</span>
+              <Badge color={statusColor(item.status)}>{item.status?.replace('_', ' ') || 'pending'}</Badge>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application?.reference}</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Review application: {application.first_name} {application.last_name}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application.submitted_at)} · Last updated {fmt(application.updated_at)}</p>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Review for {item.property_name}: {item.applicant_name}</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application?.submitted_at)} · Your decision only affects this property</p>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
         </div>
 
         <div className="overflow-y-auto px-5 py-5">
-          <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 p-4 dark:border-brand-900/60 dark:bg-brand-500/10">
-            <p className="text-sm font-bold text-gray-950 dark:text-white">Managed property match</p>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This application appears here because the student selected at least one property that this admin can manage.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {selectedProperties.length ? selectedProperties.map((property) => <Badge key={property.id} color="blue">{property.name}</Badge>) : <Badge>No selected property data</Badge>}
+          {siblingProperties.length > 1 && (
+            <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 p-4 dark:border-brand-900/60 dark:bg-brand-500/10">
+              <p className="text-sm font-bold text-gray-950 dark:text-white">Also applied to</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This student selected {siblingProperties.length} properties. Each one reviews and decides independently — shown here for context only.</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {siblingProperties.map((p) => <Badge key={p.id} color={p.id === item.id ? 'blue' : 'gray'}>{p.property_name} · {p.status}</Badge>)}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-5">
             {sections.map((section) => (
@@ -318,7 +326,9 @@ const ApplicationReviewModal = ({ application, onClose, onSave, saving }) => {
 
             <div>
               <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Documents</h3>
-              {documentNames.length ? <div className="flex flex-wrap gap-2">{documentNames.map((name) => <Badge key={name} color="gray">{name}</Badge>)}</div> : <EmptyState text="No document metadata submitted yet." />}
+              <div className="flex flex-wrap gap-2">
+                {documentBadges.map(([name, provided]) => <Badge key={name} color={provided ? 'green' : 'gray'}>{name}: {provided ? 'Provided' : 'Not provided'}</Badge>)}
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
@@ -341,8 +351,8 @@ const ApplicationReviewModal = ({ application, onClose, onSave, saving }) => {
 
         <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-end">
           <button onClick={onClose} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Cancel</button>
-          <button onClick={() => onSave(application, status, notes)} disabled={saving === application.id} className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
-            <Save className="mr-2 h-4 w-4" />{saving === application.id ? 'Saving...' : 'Save review decision'}
+          <button onClick={() => onSave(item, status, notes)} disabled={saving === item.id} className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
+            <Save className="mr-2 h-4 w-4" />{saving === item.id ? 'Saving...' : 'Save review decision'}
           </button>
         </div>
       </div>
@@ -359,7 +369,7 @@ const ApplicationsTab = ({ onToast }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getApplications({ per_page: 100, status: 'all' });
+      const res = await adminAPI.getAccommodationApplications({ per_page: 100, status: 'all' });
       setItems(res.data.applications || []);
     } catch {
       onToast('Failed to load applications', 'error');
@@ -369,10 +379,10 @@ const ApplicationsTab = ({ onToast }) => {
   }, [onToast]);
   useEffect(() => { load(); }, [load]);
 
-  const updateStatus = async (app, status, notes = app.admin_notes || '') => {
-    setSaving(app.id);
+  const updateStatus = async (item, status, notes = item.admin_notes || '') => {
+    setSaving(item.id);
     try {
-      await adminAPI.updateApplicationStatus(app.id, { status, admin_notes: notes });
+      await adminAPI.updateAccommodationApplicationStatus(item.accommodation_application_id, item.property_id, { status, admin_notes: notes });
       onToast('Application reviewed and updated');
       setSelected(null);
       load();
@@ -386,12 +396,12 @@ const ApplicationsTab = ({ onToast }) => {
   if (loading) return <Loading />;
   return (
     <>
-      {selected && <ApplicationReviewModal application={selected} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
+      {selected && <AccommodationReviewModal item={selected} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
       <ShellCard className="overflow-hidden">
         <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-bold text-gray-950 dark:text-white">Applications</h2>
-            <p className="mt-1 text-xs text-gray-400">Open an application to review full student details before changing status.</p>
+            <h2 className="font-bold text-gray-950 dark:text-white">Accommodation Applications</h2>
+            <p className="mt-1 text-xs text-gray-400">Each row is one property's decision — reviewing it never affects other properties the student applied to.</p>
           </div>
           <Badge color="blue">{items.length} visible</Badge>
         </div>
@@ -399,16 +409,167 @@ const ApplicationsTab = ({ onToast }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
-                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Selected properties</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
+                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Property</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {items.map((app) => (
-                  <tr key={app.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{app.first_name} {app.last_name}</p><p className="text-xs text-gray-400">{app.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{app.reference}</p></td>
-                    <td className="px-4 py-3"><p className="max-w-sm truncate text-gray-600 dark:text-gray-300">{app.selected_properties?.map((p) => p.name).join(', ') || '—'}</p></td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(app.submitted_at)}</td>
-                    <td className="px-4 py-3"><Badge color={statusColor(app.status)}>{app.status?.replace('_', ' ') || 'pending'}</Badge></td>
-                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected(app)} className="inline-flex items-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
+                {items.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{item.applicant_name}</p><p className="text-xs text-gray-400">{item.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{item.application?.reference}</p></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{item.property_name}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(item.application?.submitted_at)}</td>
+                    <td className="px-4 py-3"><Badge color={statusColor(item.status)}>{item.status?.replace('_', ' ') || 'pending'}</Badge></td>
+                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected(item)} className="inline-flex items-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </ShellCard>
+    </>
+  );
+};
+
+const UniversityReviewModal = ({ application, choiceId, onClose, onSave, saving }) => {
+  const choice = (application.choices || []).find((c) => c.id === choiceId);
+  const [status, setStatus] = useState(choice?.status || 'pending');
+  const [notes, setNotes] = useState(choice?.admin_notes || '');
+  const profile = application.applicant_profile;
+
+  const grade11 = (profile?.academic_results || []).filter((r) => r.grade === 'grade_11');
+  const grade12June = (profile?.academic_results || []).filter((r) => r.grade === 'grade_12_june');
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900">
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+          <div>
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <Badge color={statusColor(choice?.status)}>{choice?.status?.replace('_', ' ') || 'pending'}</Badge>
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application.reference}</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Review for {choice?.university}: {application.applicant_name}</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application.submitted_at)}</p>
+          </div>
+          <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-5">
+          <div className="space-y-5">
+            <div>
+              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Applicant details</h3>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <DetailRow label="First name" value={profile?.first_name} />
+                <DetailRow label="Last name" value={profile?.last_name} />
+                <DetailRow label="Email" value={application.applicant_email} />
+                <DetailRow label="Phone" value={profile?.phone_number} />
+                <DetailRow label="ID number" value={profile?.id_number} />
+                <DetailRow label="Programme applied for" value={choice?.programme} />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Grade 11 final results</h3>
+              {grade11.length ? <div className="flex flex-wrap gap-2">{grade11.map((r) => <Badge key={r.id} color="gray">{r.subject}: {r.mark}%</Badge>)}</div> : <EmptyState text="No Grade 11 results captured." />}
+            </div>
+            <div>
+              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Grade 12 June results</h3>
+              {grade12June.length ? <div className="flex flex-wrap gap-2">{grade12June.map((r) => <Badge key={r.id} color="gray">{r.subject}: {r.mark}%</Badge>)}</div> : <EmptyState text="No Grade 12 June results captured." />}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Badge color={profile?.has_grade11_results_document ? 'green' : 'gray'}>Grade 11 slip: {profile?.has_grade11_results_document ? 'Provided' : 'Not provided'}</Badge>
+                <Badge color={profile?.has_grade12_june_results_document ? 'green' : 'gray'}>Grade 12 June slip: {profile?.has_grade12_june_results_document ? 'Provided' : 'Not provided'}</Badge>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
+              <div>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Decision status</label>
+                <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white">
+                  <option value="pending">Pending</option>
+                  <option value="under_review">Under review</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Admin notes</label>
+                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} placeholder="Notes about manual submission progress, missing info, etc..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-end">
+          <button onClick={onClose} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Cancel</button>
+          <button onClick={() => onSave(application, choiceId, status, notes)} disabled={saving === choiceId} className="inline-flex items-center justify-center rounded-xl bg-gold-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-gold-700 disabled:opacity-50">
+            <Save className="mr-2 h-4 w-4" />{saving === choiceId ? 'Saving...' : 'Save review decision'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const UniversityApplicationsTab = ({ onToast }) => {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(null);
+  const [selected, setSelected] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await adminAPI.getUniversityApplications({ per_page: 100 });
+      setItems(res.data.applications || []);
+    } catch {
+      onToast('Failed to load university applications', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [onToast]);
+  useEffect(() => { load(); }, [load]);
+
+  const updateStatus = async (application, choiceId, status, notes) => {
+    setSaving(choiceId);
+    try {
+      await adminAPI.updateUniversityChoiceStatus(application.id, choiceId, { status, admin_notes: notes });
+      onToast('Application reviewed and updated');
+      setSelected(null);
+      load();
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to update application', 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  if (loading) return <Loading />;
+  const rows = items.flatMap((application) => (application.choices || []).map((choice) => ({ application, choice })));
+  return (
+    <>
+      {selected && <UniversityReviewModal application={selected.application} choiceId={selected.choice.id} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
+      <ShellCard className="overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-bold text-gray-950 dark:text-white">University Applications</h2>
+            <p className="mt-1 text-xs text-gray-400">Internal tracking queue for manually submitting each applicant to the university's own system.</p>
+          </div>
+          <Badge color="purple">{rows.length} choices</Badge>
+        </div>
+        {!rows.length ? <EmptyState text="No university applications submitted yet." /> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
+                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">University</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {rows.map(({ application, choice }) => (
+                  <tr key={choice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{application.applicant_name}</p><p className="text-xs text-gray-400">{application.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{application.reference}</p></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{choice.programme ? `${choice.university} — ${choice.programme}` : choice.university}</td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(application.submitted_at)}</td>
+                    <td className="px-4 py-3"><Badge color={statusColor(choice.status)}>{choice.status?.replace('_', ' ') || 'pending'}</Badge></td>
+                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected({ application, choice })} className="inline-flex items-center rounded-xl bg-gold-600 px-4 py-2 text-xs font-bold text-white hover:bg-gold-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -426,6 +587,7 @@ const NAV = [
   { id: 'Reviews', label: 'Reviews', icon: MessageSquare },
   { id: 'Users', label: 'Users', icon: Users },
   { id: 'Applications', label: 'Applications', icon: ClipboardList },
+  { id: 'UniversityApplications', label: 'University Applications', icon: GraduationCap, superOnly: true },
   { id: 'PropertyAdmins', label: 'Property Admins', icon: UserCog, superOnly: true, route: '/admin/property-admins' },
 ];
 
@@ -467,6 +629,7 @@ const AdminDashboard = () => {
     Reviews: 'Moderate student reviews before publishing',
     Users: 'Manage registered students and admins',
     Applications: 'Review full student application details and process decisions',
+    UniversityApplications: 'Internal tracking queue for manual university submissions',
   };
 
   return (
@@ -502,6 +665,7 @@ const AdminDashboard = () => {
           {activeTab === 'Reviews' && <ReviewsTab onToast={showToast} />}
           {activeTab === 'Users' && <UsersTab currentUser={user} onToast={showToast} />}
           {activeTab === 'Applications' && <ApplicationsTab onToast={showToast} />}
+          {activeTab === 'UniversityApplications' && <UniversityApplicationsTab onToast={showToast} />}
         </main>
       </div>
       {toast && <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-lg ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>{toast.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}{toast.message}</div>}

@@ -108,8 +108,11 @@ export const reviewsAPI = {
 
 // Applications API
 export const applicationsAPI = {
-  submit: (formData) => api.post('/applications', formData),
-  getMyApplication: () => api.get('/applications/my'),
+  getProfile: () => api.get('/applications/profile'),
+  submitAccommodation: (formData) => api.post('/applications/accommodation', formData),
+  getMyAccommodation: () => api.get('/applications/accommodation/my'),
+  submitUniversity: (formData) => api.post('/applications/university', formData),
+  getMyUniversity: () => api.get('/applications/university/my'),
 };
 
 // Admin API
@@ -134,9 +137,14 @@ export const adminAPI = {
   getReviews: (params = {}) => api.get('/admin/reviews', { params }),
   approveReview: (id, approved) => api.patch(`/admin/reviews/${id}/approve`, { approved }),
   deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
-  // Applications
-  getApplications: (params = {}) => api.get('/admin/applications', { params }),
-  updateApplicationStatus: (id, data) => api.patch(`/admin/applications/${id}/status`, data),
+  // Accommodation applications
+  getAccommodationApplications: (params = {}) => api.get('/admin/accommodation-applications', { params }),
+  updateAccommodationApplicationStatus: (applicationId, propertyId, data) =>
+    api.patch(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}/status`, data),
+  // University applications
+  getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
+  updateUniversityChoiceStatus: (applicationId, choiceId, data) =>
+    api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
 };
 
 export default api;

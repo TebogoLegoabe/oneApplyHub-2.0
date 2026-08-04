@@ -9,7 +9,23 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db, limiter
-from app.models import HelpfulVote, Property, PropertyAdmin, PropertyImage, Review, User
+from app.models import (
+    AccommodationApplication,
+    AccommodationApplicationProperty,
+    ApplicantProfile,
+    HelpfulVote,
+    Property,
+    PropertyAdmin,
+    PropertyImage,
+    Review,
+    UniversityApplication,
+    UniversityApplicationChoice,
+    User,
+)
+from app.utils import utcnow
+
+ACCOMMODATION_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
+UNIVERSITY_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
@@ -75,41 +91,10 @@ def _can_manage_property(user, property_id):
     return PropertyAdmin.query.filter_by(admin_user_id=user.id, property_id=property_id).first() is not None
 
 
-def _application_property_ids(application):
-    try:
-        data = json.loads(application.form_data or '{}')
-    except Exception:
-        return []
-    values = data.get('selectedResidences') or data.get('selected_residences') or []
-    ids = []
-    for value in values:
-        try:
-            ids.append(int(value))
-        except (TypeError, ValueError):
-            continue
-    return ids
-
-
-def _application_visible_to(user, application):
-    assigned = _assigned_property_ids(user)
-    if assigned is None:
-        return True
-    return bool(set(assigned) & set(_application_property_ids(application)))
-
-
-def _application_dict(application, applicant=None):
-    data = application.to_dict(include_form_data=True)
-    property_ids = _application_property_ids(application)
-    data['selected_property_ids'] = property_ids
-    if property_ids:
-        props = Property.query.filter(Property.id.in_(property_ids)).all()
-        data['selected_properties'] = [p.to_dict() for p in props]
-    else:
-        data['selected_properties'] = []
-    if applicant:
-        data['applicant_email'] = applicant.email
-        data['applicant_name'] = applicant.name
-    return data
+def _applicant_display_name(applicant, profile):
+    if profile and (profile.first_name or profile.last_name):
+        return f'{profile.first_name} {profile.last_name}'.strip()
+    return applicant.name
 
 
 def _assign_properties_to_admin(admin_user, property_ids, assigned_by_user_id):
@@ -135,25 +120,29 @@ def _assign_properties_to_admin(admin_user, property_ids, assigned_by_user_id):
 @admin_bp.route('/stats', methods=['GET'])
 @admin_required
 def get_stats():
-    from app.models.application import Application
     user = _current_admin()
     assigned = _assigned_property_ids(user)
 
+    accommodation_query = AccommodationApplicationProperty.query
+    if assigned is not None:
+        accommodation_query = (
+            accommodation_query.filter(AccommodationApplicationProperty.property_id.in_(assigned))
+            if assigned else accommodation_query.filter(False)
+        )
+
     if assigned is None:
-        applications = Application.query.all()
         properties_query = Property.query
         reviews_query = Review.query
         user_count = User.query.count()
         verified_count = User.query.filter_by(verified=True).count()
     else:
-        applications = [app for app in Application.query.all() if _application_visible_to(user, app)]
         properties_query = Property.query.filter(Property.id.in_(assigned)) if assigned else Property.query.filter(False)
         reviews_query = Review.query.filter(Review.property_id.in_(assigned)) if assigned else Review.query.filter(False)
-        applicant_ids = [app.user_id for app in applications]
+        applicant_ids = [row.application.user_id for row in accommodation_query.all()]
         user_count = len(set(applicant_ids))
         verified_count = User.query.filter(User.id.in_(applicant_ids), User.verified == True).count() if applicant_ids else 0  # noqa: E712
 
-    return jsonify({
+    stats = {
         'scope': 'super_admin' if user.effective_is_super_admin else 'managing_admin',
         'managed_property_ids': assigned or [],
         'total_users': user_count,
@@ -164,12 +153,15 @@ def get_stats():
         'total_reviews': reviews_query.count(),
         'pending_reviews': reviews_query.filter_by(approved=False).count(),
         'approved_reviews': reviews_query.filter_by(approved=True).count(),
-        'total_applications': len(applications),
-        'pending_applications': sum(1 for app in applications if app.status == 'pending'),
-        'under_review_applications': sum(1 for app in applications if app.status == 'under_review'),
-        'approved_applications': sum(1 for app in applications if app.status == 'approved'),
-        'rejected_applications': sum(1 for app in applications if app.status == 'rejected'),
-    }), 200
+        'total_applications': accommodation_query.count(),
+        'pending_applications': accommodation_query.filter(AccommodationApplicationProperty.status == 'pending').count(),
+        'under_review_applications': accommodation_query.filter(AccommodationApplicationProperty.status == 'under_review').count(),
+        'approved_applications': accommodation_query.filter(AccommodationApplicationProperty.status == 'approved').count(),
+        'rejected_applications': accommodation_query.filter(AccommodationApplicationProperty.status == 'rejected').count(),
+    }
+    if user.effective_is_super_admin:
+        stats['total_university_applications'] = UniversityApplication.query.count()
+    return jsonify(stats), 200
 
 
 @admin_bp.route('/properties', methods=['GET'])
@@ -291,9 +283,12 @@ def delete_property(property_id):
 def list_users():
     current = _current_admin()
     if not current.effective_is_super_admin:
-        from app.models.application import Application
-        visible_apps = [app for app in Application.query.all() if _application_visible_to(current, app)]
-        ids = list({app.user_id for app in visible_apps})
+        assigned = _assigned_property_ids(current)
+        rows = (
+            AccommodationApplicationProperty.query.filter(AccommodationApplicationProperty.property_id.in_(assigned)).all()
+            if assigned else []
+        )
+        ids = list({row.application.user_id for row in rows})
         users = User.query.filter(User.id.in_(ids)).order_by(User.created_at.desc()).all() if ids else []
         return jsonify({'users': [u.to_dict() for u in users], 'total': len(users), 'pages': 1, 'current_page': 1}), 200
     page = request.args.get('page', 1, type=int)
@@ -519,46 +514,98 @@ def delete_review(review_id):
     return jsonify({'message': 'Review deleted'}), 200
 
 
-@admin_bp.route('/applications', methods=['GET'])
+@admin_bp.route('/accommodation-applications', methods=['GET'])
 @admin_required
-def list_applications():
-    from app.models.application import Application
+def list_accommodation_applications():
     user = _current_admin()
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
     status = request.args.get('status', 'all')
-    query = db.session.query(Application, User).join(User, Application.user_id == User.id)
+
+    query = (
+        db.session.query(AccommodationApplicationProperty, AccommodationApplication, User)
+        .join(AccommodationApplication, AccommodationApplicationProperty.accommodation_application_id == AccommodationApplication.id)
+        .join(User, AccommodationApplication.user_id == User.id)
+    )
+    assigned = _assigned_property_ids(user)
+    if assigned is not None:
+        query = query.filter(AccommodationApplicationProperty.property_id.in_(assigned)) if assigned else query.filter(False)
     if status != 'all':
-        query = query.filter(Application.status == status)
-    rows = query.order_by(Application.submitted_at.desc()).all()
-    visible = [(app, applicant) for app, applicant in rows if _application_visible_to(user, app)]
-    total = len(visible)
-    start = (page - 1) * per_page
-    items = visible[start:start + per_page]
-    applications = [_application_dict(app, applicant) for app, applicant in items]
-    pages = (total + per_page - 1) // per_page if total else 1
-    return jsonify({'applications': applications, 'total': total, 'pages': pages, 'current_page': page}), 200
+        query = query.filter(AccommodationApplicationProperty.status == status)
+
+    results = query.order_by(AccommodationApplicationProperty.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+    items = []
+    for app_property, application, applicant in results.items:
+        profile = ApplicantProfile.query.filter_by(user_id=applicant.id).first()
+        item = app_property.to_dict()
+        item['application'] = application.to_dict()
+        item['applicant_profile'] = profile.to_dict() if profile else None
+        item['applicant_email'] = applicant.email
+        item['applicant_name'] = _applicant_display_name(applicant, profile)
+        items.append(item)
+
+    return jsonify({'applications': items, 'total': results.total, 'pages': results.pages, 'current_page': page}), 200
 
 
-@admin_bp.route('/applications/<int:app_id>/status', methods=['PATCH'])
+@admin_bp.route('/accommodation-applications/<int:application_id>/properties/<int:property_id>/status', methods=['PATCH'])
 @admin_required
-def update_application_status(app_id):
-    from app.models.application import Application
-    from app.utils import utcnow
+def update_accommodation_application_property_status(application_id, property_id):
     current = _current_admin()
-    application = db.session.get(Application, app_id)
-    if not application:
-        return jsonify({'error': 'Application not found'}), 404
-    if not _application_visible_to(current, application):
+    if not _can_manage_property(current, property_id):
         return jsonify({'error': 'You can only manage applications for assigned properties'}), 403
+    row = AccommodationApplicationProperty.query.filter_by(
+        accommodation_application_id=application_id, property_id=property_id,
+    ).first()
+    if not row:
+        return jsonify({'error': 'Application not found for this property'}), 404
     data = request.get_json(silent=True) or {}
     new_status = data.get('status')
-    valid_statuses = ['pending', 'under_review', 'approved', 'rejected']
-    if new_status not in valid_statuses:
-        return jsonify({'error': f'Invalid status. Must be one of: {", ".join(valid_statuses)}'}), 400
-    application.status = new_status
+    if new_status not in ACCOMMODATION_VALID_STATUSES:
+        return jsonify({'error': f'Invalid status. Must be one of: {", ".join(ACCOMMODATION_VALID_STATUSES)}'}), 400
+    row.status = new_status
     if 'admin_notes' in data:
-        application.admin_notes = data['admin_notes']
-    application.updated_at = utcnow()
+        row.admin_notes = data['admin_notes']
+    row.reviewed_by_user_id = current.id
+    row.reviewed_at = utcnow()
     db.session.commit()
-    return jsonify({'application': _application_dict(application)}), 200
+    return jsonify({'application_property': row.to_dict()}), 200
+
+
+@admin_bp.route('/university-applications', methods=['GET'])
+@super_admin_required
+def list_university_applications():
+    page = request.args.get('page', 1, type=int)
+    per_page = min(request.args.get('per_page', 20, type=int), 100)
+    query = db.session.query(UniversityApplication, User).join(User, UniversityApplication.user_id == User.id)
+    results = query.order_by(UniversityApplication.submitted_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
+
+    items = []
+    for application, applicant in results.items:
+        profile = ApplicantProfile.query.filter_by(user_id=applicant.id).first()
+        data = application.to_dict()
+        data['applicant_profile'] = profile.to_dict() if profile else None
+        data['applicant_email'] = applicant.email
+        data['applicant_name'] = _applicant_display_name(applicant, profile)
+        items.append(data)
+
+    return jsonify({'applications': items, 'total': results.total, 'pages': results.pages, 'current_page': page}), 200
+
+
+@admin_bp.route('/university-applications/<int:application_id>/choices/<int:choice_id>/status', methods=['PATCH'])
+@super_admin_required
+def update_university_choice_status(application_id, choice_id):
+    choice = UniversityApplicationChoice.query.filter_by(id=choice_id, university_application_id=application_id).first()
+    if not choice:
+        return jsonify({'error': 'Choice not found'}), 404
+    data = request.get_json(silent=True) or {}
+    new_status = data.get('status')
+    if new_status not in UNIVERSITY_VALID_STATUSES:
+        return jsonify({'error': f'Invalid status. Must be one of: {", ".join(UNIVERSITY_VALID_STATUSES)}'}), 400
+    choice.status = new_status
+    if 'admin_notes' in data:
+        choice.admin_notes = data['admin_notes']
+    choice.reviewed_by_user_id = int(get_jwt_identity())
+    choice.reviewed_at = utcnow()
+    db.session.commit()
+    return jsonify({'choice': choice.to_dict()}), 200

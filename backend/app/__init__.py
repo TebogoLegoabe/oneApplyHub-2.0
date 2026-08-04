@@ -58,6 +58,9 @@ def create_app():
 
     from app.models import User, Property, Review, PropertyImage, HelpfulVote, PropertyAdmin  # noqa: F401
     from app.models.application import Application  # noqa: F401
+    from app.models.applicant_profile import ApplicantProfile, AcademicResult  # noqa: F401
+    from app.models.accommodation_application import AccommodationApplication, AccommodationApplicationProperty  # noqa: F401
+    from app.models.university_application import UniversityApplication, UniversityApplicationChoice  # noqa: F401
 
     from app.routes.auth import auth_bp
     from app.routes.properties import properties_bp
