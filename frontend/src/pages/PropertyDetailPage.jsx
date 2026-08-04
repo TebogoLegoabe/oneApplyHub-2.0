@@ -80,7 +80,7 @@ const PropertyDetailPage = () => {
           </p>
           <Link
             to="/properties"
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold"
+            className="bg-brand-600 text-white px-6 py-3 rounded-xl hover:bg-brand-700 transition-colors font-semibold"
           >
             Back to Properties
           </Link>
@@ -97,9 +97,9 @@ const PropertyDetailPage = () => {
 
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-4">
-          <Link to="/" className="hover:text-blue-600 transition-colors">Home</Link>
+          <Link to="/" className="hover:text-brand-600 transition-colors">Home</Link>
           <span>/</span>
-          <Link to="/properties" className="hover:text-blue-600 transition-colors">Properties</Link>
+          <Link to="/properties" className="hover:text-brand-600 transition-colors">Properties</Link>
           <span>/</span>
           <span className="text-gray-900 dark:text-white font-medium">{property.name}</span>
         </nav>
@@ -107,7 +107,7 @@ const PropertyDetailPage = () => {
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center text-blue-600 hover:text-blue-700 mb-8 transition-colors font-medium"
+          className="flex items-center text-brand-600 hover:text-brand-700 mb-8 transition-colors font-medium"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Properties
@@ -120,11 +120,11 @@ const PropertyDetailPage = () => {
 
             {/* Hero Image */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-              <div className="h-56 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center relative">
+              <div className="h-56 bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center relative">
                 <Camera className="w-16 h-16 text-white/40" />
                 <span className="text-white/80 text-xl font-semibold ml-4">Photos Coming Soon</span>
                 <div className="absolute top-5 left-5 flex gap-2">
-                  <span className="bg-white text-blue-700 px-3 py-1.5 rounded-full text-sm font-bold">
+                  <span className="bg-white text-brand-700 px-3 py-1.5 rounded-full text-sm font-bold">
                     {property.university.toUpperCase()}
                   </span>
                   {property.nsfas_accredited && (
@@ -145,7 +145,7 @@ const PropertyDetailPage = () => {
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm p-5">
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">{property.name}</h1>
               <div className="flex items-center text-gray-500 dark:text-gray-400 mb-4">
-                <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+                <MapPin className="w-4 h-4 mr-2 flex-shrink-0 text-brand-500" />
                 <span className="text-sm">{property.address}</span>
               </div>
               <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">About This Property</h3>
@@ -160,7 +160,7 @@ const PropertyDetailPage = () => {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {amenities.map((amenity, i) => (
                     <div key={i} className="flex items-center space-x-3 p-3.5 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                      <div className="text-blue-600 flex-shrink-0">{renderAmenityIcon(amenity, 'w-5 h-5')}</div>
+                      <div className="text-brand-600 flex-shrink-0">{renderAmenityIcon(amenity, 'w-5 h-5')}</div>
                       <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">{amenity}</span>
                     </div>
                   ))}
@@ -177,7 +177,7 @@ const PropertyDetailPage = () => {
                 {isAuthenticated && (
                   <Link
                     to={`/properties/${id}/review`}
-                    className="bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
+                    className="bg-brand-600 text-white px-5 py-2.5 rounded-xl hover:bg-brand-700 transition-colors font-semibold text-sm"
                   >
                     Write a Review
                   </Link>
@@ -200,7 +200,7 @@ const PropertyDetailPage = () => {
                     <div key={review.id} className="border-b border-gray-100 dark:border-gray-700 pb-6 last:border-b-0">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-11 h-11 bg-gradient-to-br from-brand-500 to-brand-700 rounded-full flex items-center justify-center flex-shrink-0">
                             <span className="text-white font-semibold text-sm">
                               {review.author.charAt(0)}
                             </span>
@@ -245,7 +245,7 @@ const PropertyDetailPage = () => {
                         <span className={`font-medium ${review.recommend ? 'text-emerald-600' : 'text-red-500'}`}>
                           {review.recommend ? '✓ Recommends' : "✗ Doesn't Recommend"}
                         </span>
-                        <button className="flex items-center space-x-1.5 text-gray-400 hover:text-blue-600 transition-colors">
+                        <button className="flex items-center space-x-1.5 text-gray-400 hover:text-brand-600 transition-colors">
                           <ThumbsUp className="w-4 h-4" />
                           <span>{review.helpful_count} helpful</span>
                         </button>
@@ -261,7 +261,7 @@ const PropertyDetailPage = () => {
                   {isAuthenticated && (
                     <Link
                       to={`/properties/${id}/review`}
-                      className="inline-flex items-center bg-blue-600 text-white px-5 py-2.5 rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
+                      className="inline-flex items-center bg-brand-600 text-white px-5 py-2.5 rounded-xl hover:bg-brand-700 transition-colors font-semibold text-sm"
                     >
                       Write the First Review
                     </Link>
@@ -278,7 +278,7 @@ const PropertyDetailPage = () => {
               {/* Pricing Card */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <div className="text-center mb-4">
-                  <div className="text-xl font-bold text-blue-600 mb-1">
+                  <div className="text-xl font-bold text-brand-600 mb-1">
                     R{property.price_min.toLocaleString()} – R{property.price_max.toLocaleString()}
                   </div>
                   <div className="text-gray-500 dark:text-gray-400 text-sm">per month</div>
@@ -319,7 +319,7 @@ const PropertyDetailPage = () => {
                 <div className="space-y-3">
                   <button
                     onClick={handleCopyContact}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-xl hover:bg-blue-700 transition-colors font-semibold text-sm"
+                    className="w-full bg-brand-600 text-white py-3 px-4 rounded-xl hover:bg-brand-700 transition-colors font-semibold text-sm"
                   >
                     Copy Contact Details
                   </button>

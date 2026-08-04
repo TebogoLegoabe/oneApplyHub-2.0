@@ -14,7 +14,7 @@ const NAV_LINKS = [
 const UserAvatar = ({ user, size = 'sm' }) => {
   const sizeClass = size === 'md' ? 'h-9 w-9 text-sm' : 'h-8 w-8 text-xs';
   return (
-    <div className={`${sizeClass} overflow-hidden bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center shadow-sm flex-shrink-0`}>
+    <div className={`${sizeClass} overflow-hidden bg-brand-700 rounded-full flex items-center justify-center shadow-sm flex-shrink-0`}>
       {user?.profile_picture_url ? (
         <img src={user.profile_picture_url} alt={user?.name || 'Profile'} className="h-full w-full object-cover" />
       ) : (
@@ -46,8 +46,8 @@ const Header = () => {
     </button>
   );
 
-  const navLinkClass = (to) => `px-3 py-2 rounded-lg font-medium text-sm transition-all ${isActive(to) ? 'text-blue-700 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'}`;
-  const mobileNavLinkClass = (to) => `block py-2.5 px-4 rounded-xl font-medium text-sm transition-all ${isActive(to) ? 'text-blue-700 bg-blue-50' : 'text-slate-700 hover:bg-slate-50'}`;
+  const navLinkClass = (to) => `px-3 py-2 rounded-lg font-medium text-sm transition-all ${isActive(to) ? 'text-brand-700 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'}`;
+  const mobileNavLinkClass = (to) => `block py-2.5 px-4 rounded-xl font-medium text-sm transition-all ${isActive(to) ? 'text-brand-700 bg-brand-50' : 'text-slate-700 hover:bg-slate-50'}`;
 
   return (
     <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
@@ -65,7 +65,7 @@ const Header = () => {
             {isAuthenticated && <Link to="/dashboard" className={navLinkClass('/dashboard')}><span className="flex items-center gap-1.5"><LayoutDashboard className="w-3.5 h-3.5" />Dashboard</span></Link>}
             {NAV_LINKS.map(({ to, label }) => <Link key={to} to={to} className={navLinkClass(to)}>{label}</Link>)}
             {isAuthenticated && <Link to="/application" className={navLinkClass('/application')}><span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" />Apply</span></Link>}
-            {isAuthenticated && user?.is_admin && <Link to="/admin" className={navLinkClass('/admin')}><span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-amber-500" />Admin</span></Link>}
+            {isAuthenticated && user?.is_admin && <Link to="/admin" className={navLinkClass('/admin')}><span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-gold-500" />Admin</span></Link>}
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
@@ -85,7 +85,7 @@ const Header = () => {
             ) : (
               <>
                 <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-50 transition-all">Login</Link>
-                <Link to="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-sm transition-colors">Sign Up</Link>
+                <Link to="/register" className="bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-sm transition-colors">Sign Up</Link>
               </>
             )}
           </div>
@@ -103,7 +103,7 @@ const Header = () => {
             {isAuthenticated && <Link to="/dashboard" className={mobileNavLinkClass('/dashboard')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</span></Link>}
             {NAV_LINKS.map(({ to, label }) => <Link key={to} to={to} className={mobileNavLinkClass(to)} onClick={closeMobileMenu}>{label}</Link>)}
             {isAuthenticated && <Link to="/application" className={mobileNavLinkClass('/application')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><FileText className="w-4 h-4" />Application</span></Link>}
-            {isAuthenticated && user?.is_admin && <Link to="/admin" className={mobileNavLinkClass('/admin')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><Shield className="w-4 h-4 text-amber-500" />Admin</span></Link>}
+            {isAuthenticated && user?.is_admin && <Link to="/admin" className={mobileNavLinkClass('/admin')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><Shield className="w-4 h-4 text-gold-500" />Admin</span></Link>}
 
             <div className="pt-3 mt-1 border-t border-slate-100 dark:border-slate-700 px-2">
               {isAuthenticated ? (
@@ -120,7 +120,7 @@ const Header = () => {
               ) : (
                 <div className="flex flex-col gap-2">
                   <Link to="/login" className="block text-center py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all" onClick={closeMobileMenu}>Login</Link>
-                  <Link to="/register" className="block text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors" onClick={closeMobileMenu}>Sign Up Free</Link>
+                  <Link to="/register" className="block text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 transition-colors" onClick={closeMobileMenu}>Sign Up Free</Link>
                 </div>
               )}
             </div>

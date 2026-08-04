@@ -54,7 +54,7 @@ const SocialLink = ({ href, label, icon: Icon }) => (
     target="_blank"
     rel="noopener noreferrer"
     aria-label={`oneApplyHub on ${label}`}
-    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-300 transition-all hover:-translate-y-0.5 hover:border-blue-400/40 hover:bg-blue-500/10 hover:text-white"
+    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-slate-300 transition-colors hover:border-brand-400/40 hover:bg-brand-500/10 hover:text-white"
   >
     <Icon className="h-4 w-4" />
   </a>
@@ -62,11 +62,7 @@ const SocialLink = ({ href, label, icon: Icon }) => (
 
 const Footer = () => (
   <footer className="relative overflow-hidden bg-slate-950 text-white">
-    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-blue-500 via-indigo-400 to-cyan-400" />
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute -top-28 left-10 h-72 w-72 rounded-full bg-blue-600/10 blur-3xl" />
-      <div className="absolute -bottom-32 right-10 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl" />
-    </div>
+    <div className="absolute inset-x-0 top-0 h-px bg-brand-500/40" />
 
     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-[1.35fr_0.75fr_0.75fr_1fr]">
@@ -74,7 +70,7 @@ const Footer = () => (
           <Link to="/" className="inline-flex items-center gap-3">
             <img src={logoImg} alt="oneApplyHub logo" className="h-11 w-11 object-contain" />
             <div>
-              <p className="text-lg font-black tracking-tight">oneApplyHub</p>
+              <p className="text-lg font-bold tracking-tight">oneApplyHub</p>
               <p className="text-xs text-slate-500">All Your Options. One Platform.</p>
             </div>
           </Link>
@@ -106,11 +102,11 @@ const Footer = () => (
           <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Contact</h3>
           <div className="space-y-3 text-sm text-slate-400">
             <a href="mailto:info@oneapplyhub.co.za" className="flex items-center gap-2.5 hover:text-white transition-colors">
-              <Mail className="h-4 w-4 text-blue-300" />
+              <Mail className="h-4 w-4 text-brand-300" />
               info@oneapplyhub.co.za
             </a>
             <div className="flex items-center gap-2.5">
-              <MapPin className="h-4 w-4 text-blue-300" />
+              <MapPin className="h-4 w-4 text-brand-300" />
               Johannesburg, South Africa
             </div>
           </div>
