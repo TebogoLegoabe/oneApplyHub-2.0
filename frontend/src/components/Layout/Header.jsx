@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Menu, X, FileText, LayoutDashboard, Shield, Sun, Moon } from 'lucide-react';
-import logoImg from '../../assets/OneHubLogo.png';
 import { useTheme } from '../../context/ThemeContext';
 
 const NAV_LINKS = [
@@ -54,7 +53,6 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-2 group" onClick={closeMobileMenu}>
-            <img src={logoImg} alt="oneApplyHub logo" className="h-14 w-14 sm:h-16 sm:w-16 object-contain" />
             <div className="flex flex-col leading-none">
               <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">oneApplyHub</span>
               <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">All Your Options. One Platform.</span>

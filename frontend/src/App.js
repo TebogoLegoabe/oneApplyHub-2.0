@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Menu } from 'lucide-react';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Header from './components/Layout/Header';
@@ -27,6 +27,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import PropertyAdminsPage from './pages/PropertyAdminsPage';
 import MFASetupPage from './pages/MFASetupPage';
 import LegalPage from './pages/LegalPage';
+import ForcedPasswordChangePage from './pages/ForcedPasswordChangePage';
 import logoImg from './assets/OneHubLogo.png';
 
 const AUTH_ROUTES = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
@@ -43,6 +44,7 @@ const isPublicRoute = (pathname) => (
 
 const AppLayout = () => {
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = location.pathname;
   const isAuth = AUTH_ROUTES.includes(pathname);
@@ -51,6 +53,10 @@ const AppLayout = () => {
   const isHome = pathname === '/';
   const showSidebar = hasSession && !isHome && !isAuth && !isAdmin;
   const showPublicShell = isHome || (!hasSession && isPublicRoute(pathname) && !isAuth);
+
+  if (isAuthenticated && user?.must_change_password) {
+    return <ForcedPasswordChangePage />;
+  }
 
   const routes = (
     <Routes>

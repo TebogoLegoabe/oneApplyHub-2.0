@@ -1,6 +1,8 @@
 import json
 import logging
 import re
+import secrets
+import string
 from functools import wraps
 
 from flask import Blueprint, jsonify, request
@@ -14,6 +16,19 @@ admin_bp = Blueprint('admin', __name__)
 
 
 EMAIL_RE = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
+
+
+def _generate_temp_password() -> str:
+    """A random, one-time password for an admin account the super admin creates.
+
+    Guarantees at least one letter and one digit so it always passes
+    validate_password, without letting a human pick (and reuse) it.
+    """
+    alphabet = string.ascii_letters + string.digits
+    while True:
+        pwd = ''.join(secrets.choice(alphabet) for _ in range(14))
+        if re.search(r'[A-Za-z]', pwd) and re.search(r'\d', pwd):
+            return pwd
 
 
 def _current_admin():
@@ -38,6 +53,11 @@ def super_admin_required(fn):
         user = _current_admin()
         if not user or not user.effective_is_super_admin:
             return jsonify({'error': 'Super admin access required'}), 403
+        if not user.mfa_enabled:
+            return jsonify({
+                'error': 'Enable two-factor authentication on your account before managing admins.',
+                'mfa_setup_required': True,
+            }), 403
         return fn(*args, **kwargs)
     return wrapper
 
@@ -304,7 +324,7 @@ def create_admin_user():
     data = request.get_json(silent=True) or {}
     email = str(data.get('email', '')).strip().lower()
     name = str(data.get('name', '')).strip()
-    password = str(data.get('password', '')).strip()
+    reset_password = bool(data.get('reset_password', False))
     property_ids = data.get('property_ids') or []
 
     if not EMAIL_RE.match(email):
@@ -316,11 +336,15 @@ def create_admin_user():
 
     user = User.query.filter(db.func.lower(User.email) == email).first()
     creating = user is None
-    if creating and (len(password) < 8 or not re.search(r'[A-Za-z]', password) or not re.search(r'\d', password)):
-        return jsonify({'error': 'Password must be at least 8 characters and contain letters and numbers'}), 400
+    temp_password = None
 
     try:
         if creating:
+            # The password is always generated here, never supplied by the caller —
+            # letting a human type (and reuse) a password for someone else's
+            # account is exactly how these temp passwords end up identical
+            # across admins.
+            temp_password = _generate_temp_password()
             user = User(
                 email=email,
                 name=name,
@@ -330,16 +354,19 @@ def create_admin_user():
                 verified=True,
                 is_admin=True,
                 is_super_admin=False,
+                must_change_password=True,
             )
-            user.set_password(password)
+            user.set_password(temp_password)
             db.session.add(user)
             db.session.flush()
         else:
             user.name = name or user.name
             user.verified = True
             user.is_admin = True
-            if password:
-                user.set_password(password)
+            if reset_password:
+                temp_password = _generate_temp_password()
+                user.set_password(temp_password)
+                user.must_change_password = True
 
         assignments = _assign_properties_to_admin(user, property_ids, int(get_jwt_identity()))
         db.session.commit()
@@ -355,6 +382,8 @@ def create_admin_user():
         'message': 'Admin created and assigned' if creating else 'Admin updated and assigned',
         'user': user.to_dict(),
         'assignments': [assignment.to_dict() for assignment in assignments],
+        # Only ever returned once, right after generation — never stored in plaintext or retrievable again.
+        'temporary_password': temp_password,
     }), 201 if creating else 200
 
 
