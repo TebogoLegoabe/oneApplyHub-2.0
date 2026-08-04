@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, MapPin, Star, Phone, MessageSquare, ThumbsUp, Camera,
+  ArrowLeft, MapPin, Star, Phone, MessageSquare, ThumbsUp, Camera, Globe, ExternalLink,
 } from 'lucide-react';
 import { propertiesAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -302,6 +302,19 @@ const PropertyDetailPage = () => {
                           <span>{property.contact_info}</span>
                         </div>
                       )}
+                      {property.website && (
+                        <div className="flex items-center space-x-3 text-sm text-gray-600 dark:text-gray-300">
+                          <Globe className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          <a
+                            href={property.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-brand-600 hover:text-brand-700 dark:text-brand-400 truncate"
+                          >
+                            {property.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')}
+                          </a>
+                        </div>
+                      )}
                       <div className="flex items-start space-x-3 text-sm text-gray-600 dark:text-gray-300">
                         <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
                         <span>{property.address}</span>
@@ -317,9 +330,20 @@ const PropertyDetailPage = () => {
                 )}
 
                 <div className="space-y-3">
+                  {property.website && (
+                    <a
+                      href={property.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-2 bg-brand-600 text-white py-3 px-4 rounded-xl hover:bg-brand-700 transition-colors font-semibold text-sm"
+                    >
+                      Visit Official Website
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
                   <button
                     onClick={handleCopyContact}
-                    className="w-full bg-brand-600 text-white py-3 px-4 rounded-xl hover:bg-brand-700 transition-colors font-semibold text-sm"
+                    className="w-full border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-3 px-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-semibold text-sm"
                   >
                     Copy Contact Details
                   </button>
