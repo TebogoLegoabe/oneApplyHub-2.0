@@ -25,6 +25,7 @@ import BursaryPage from './pages/BursaryPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PropertyAdminsPage from './pages/PropertyAdminsPage';
+import PropertyRoomsPage from './pages/PropertyRoomsPage';
 import MFASetupPage from './pages/MFASetupPage';
 import LegalPage from './pages/LegalPage';
 import ForcedPasswordChangePage from './pages/ForcedPasswordChangePage';
@@ -78,6 +79,7 @@ const AppLayout = () => {
       <Route path="/mfa-setup" element={<ProtectedRoute><MFASetupPage /></ProtectedRoute>} />
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/admin/property-admins" element={<AdminRoute><PropertyAdminsPage /></AdminRoute>} />
+      <Route path="/admin/properties/:id/rooms" element={<AdminRoute><PropertyRoomsPage /></AdminRoute>} />
     </Routes>
   );
 

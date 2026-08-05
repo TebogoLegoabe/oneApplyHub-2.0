@@ -145,6 +145,21 @@ export const adminAPI = {
   getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
   updateUniversityChoiceStatus: (applicationId, choiceId, data) =>
     api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
+  // Room inventory
+  getFloors: (propertyId) => api.get(`/admin/properties/${propertyId}/floors`),
+  createFloor: (propertyId, data) => api.post(`/admin/properties/${propertyId}/floors`, data),
+  updateFloor: (floorId, data) => api.patch(`/admin/floors/${floorId}`, data),
+  deleteFloor: (floorId) => api.delete(`/admin/floors/${floorId}`),
+  getRooms: (propertyId) => api.get(`/admin/properties/${propertyId}/rooms`),
+  createRoom: (propertyId, data) => api.post(`/admin/properties/${propertyId}/rooms`, data),
+  updateRoom: (roomId, data) => api.patch(`/admin/rooms/${roomId}`, data),
+  deleteRoom: (roomId) => api.delete(`/admin/rooms/${roomId}`),
+  getUnallocated: (propertyId) => api.get(`/admin/properties/${propertyId}/unallocated`),
+  allocateRoom: (roomId, accommodationApplicationPropertyId) =>
+    api.post(`/admin/rooms/${roomId}/allocate`, { accommodation_application_property_id: accommodationApplicationPropertyId }),
+  autoAllocate: (propertyId) => api.post(`/admin/properties/${propertyId}/auto-allocate`),
+  vacateAllocation: (allocationId) => api.post(`/admin/allocations/${allocationId}/vacate`),
+  exportRoomsCsv: (propertyId) => api.get('/admin/rooms/export', { params: propertyId ? { property_id: propertyId } : {}, responseType: 'blob' }),
 };
 
 export default api;

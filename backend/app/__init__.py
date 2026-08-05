@@ -61,18 +61,21 @@ def create_app():
     from app.models.applicant_profile import ApplicantProfile, AcademicResult  # noqa: F401
     from app.models.accommodation_application import AccommodationApplication, AccommodationApplicationProperty  # noqa: F401
     from app.models.university_application import UniversityApplication, UniversityApplicationChoice  # noqa: F401
+    from app.models.room import Floor, Room, RoomAllocation  # noqa: F401
 
     from app.routes.auth import auth_bp
     from app.routes.properties import properties_bp
     from app.routes.reviews import reviews_bp
     from app.routes.admin import admin_bp
     from app.routes.applications import applications_bp
+    from app.routes.rooms import rooms_bp
 
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
     app.register_blueprint(properties_bp, url_prefix='/api/properties')
     app.register_blueprint(reviews_bp, url_prefix='/api/reviews')
     app.register_blueprint(admin_bp, url_prefix='/api/admin')
     app.register_blueprint(applications_bp, url_prefix='/api/applications')
+    app.register_blueprint(rooms_bp, url_prefix='/api/admin')
 
     @app.route('/')
     def health():
