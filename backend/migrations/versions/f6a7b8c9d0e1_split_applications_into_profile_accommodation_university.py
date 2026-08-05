@@ -90,7 +90,7 @@ def upgrade():
         sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
         sa.UniqueConstraint('accommodation_application_id', 'property_id', name='uq_accommodation_application_property'),
     )
-    op.create_index('ix_accommodation_application_property_accommodation_application_id', 'accommodation_application_property', ['accommodation_application_id'])
+    op.create_index('ix_aap_accommodation_application_id', 'accommodation_application_property', ['accommodation_application_id'])
     op.create_index('ix_accommodation_application_property_property_id', 'accommodation_application_property', ['property_id'])
 
     op.create_table(
