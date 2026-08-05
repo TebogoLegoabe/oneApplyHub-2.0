@@ -184,7 +184,7 @@ def _backfill_from_old_applications():
             'parent_guardian_email': data.get('parentGuardianEmail'),
             'submitted_at': row.submitted_at,
             'updated_at': row.updated_at,
-        }).scalar()
+        })
 
         accommodation_id = bind.execute(sa.text('''
             INSERT INTO accommodation_application (
