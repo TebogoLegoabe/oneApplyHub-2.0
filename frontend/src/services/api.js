@@ -69,6 +69,7 @@ export const authAPI = {
   updateProfile: (data) => api.patch('/auth/profile', data),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (data) => api.post('/auth/reset-password', data),
+  changePassword: (data) => api.post('/auth/change-password', data),
   sendVerificationCode: (email) => api.post('/auth/send-verification', { email }),
   verifyEmail: (email, code) => api.post('/auth/verify-email', { email, code }),
   googleVerify: (token) => api.post('/auth/google/verify', { access_token: token }),
@@ -107,8 +108,11 @@ export const reviewsAPI = {
 
 // Applications API
 export const applicationsAPI = {
-  submit: (formData) => api.post('/applications', formData),
-  getMyApplication: () => api.get('/applications/my'),
+  getProfile: () => api.get('/applications/profile'),
+  submitAccommodation: (formData) => api.post('/applications/accommodation', formData),
+  getMyAccommodation: () => api.get('/applications/accommodation/my'),
+  submitUniversity: (formData) => api.post('/applications/university', formData),
+  getMyUniversity: () => api.get('/applications/university/my'),
 };
 
 // Admin API
@@ -133,9 +137,29 @@ export const adminAPI = {
   getReviews: (params = {}) => api.get('/admin/reviews', { params }),
   approveReview: (id, approved) => api.patch(`/admin/reviews/${id}/approve`, { approved }),
   deleteReview: (id) => api.delete(`/admin/reviews/${id}`),
-  // Applications
-  getApplications: (params = {}) => api.get('/admin/applications', { params }),
-  updateApplicationStatus: (id, data) => api.patch(`/admin/applications/${id}/status`, data),
+  // Accommodation applications
+  getAccommodationApplications: (params = {}) => api.get('/admin/accommodation-applications', { params }),
+  updateAccommodationApplicationStatus: (applicationId, propertyId, data) =>
+    api.patch(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}/status`, data),
+  // University applications
+  getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
+  updateUniversityChoiceStatus: (applicationId, choiceId, data) =>
+    api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
+  // Room inventory
+  getFloors: (propertyId) => api.get(`/admin/properties/${propertyId}/floors`),
+  createFloor: (propertyId, data) => api.post(`/admin/properties/${propertyId}/floors`, data),
+  updateFloor: (floorId, data) => api.patch(`/admin/floors/${floorId}`, data),
+  deleteFloor: (floorId) => api.delete(`/admin/floors/${floorId}`),
+  getRooms: (propertyId) => api.get(`/admin/properties/${propertyId}/rooms`),
+  createRoom: (propertyId, data) => api.post(`/admin/properties/${propertyId}/rooms`, data),
+  updateRoom: (roomId, data) => api.patch(`/admin/rooms/${roomId}`, data),
+  deleteRoom: (roomId) => api.delete(`/admin/rooms/${roomId}`),
+  getUnallocated: (propertyId) => api.get(`/admin/properties/${propertyId}/unallocated`),
+  allocateRoom: (roomId, accommodationApplicationPropertyId) =>
+    api.post(`/admin/rooms/${roomId}/allocate`, { accommodation_application_property_id: accommodationApplicationPropertyId }),
+  autoAllocate: (propertyId) => api.post(`/admin/properties/${propertyId}/auto-allocate`),
+  vacateAllocation: (allocationId) => api.post(`/admin/allocations/${allocationId}/vacate`),
+  exportRoomsCsv: (propertyId) => api.get('/admin/rooms/export', { params: propertyId ? { property_id: propertyId } : {}, responseType: 'blob' }),
 };
 
 export default api;

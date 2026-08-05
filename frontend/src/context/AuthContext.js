@@ -125,6 +125,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const response = await authAPI.changePassword({ current_password: currentPassword, new_password: newPassword });
+      _storeUser(response.data.user);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Failed to change password' };
+    }
+  };
+
   const updateProfilePicture = async (profilePictureUrl) => {
     try {
       const response = await authAPI.updateProfile({ profile_picture_url: profilePictureUrl });
@@ -157,6 +167,7 @@ export const AuthProvider = ({ children }) => {
     googleLogin,
     refreshUser,
     updateProfilePicture,
+    changePassword,
   };
 
   return (

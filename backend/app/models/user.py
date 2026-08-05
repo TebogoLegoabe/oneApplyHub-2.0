@@ -20,6 +20,7 @@ class User(db.Model):
     verified = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_super_admin = db.Column(db.Boolean, default=False, nullable=False)
+    must_change_password = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
     # Password reset (token is single-use and expiring)
@@ -76,6 +77,7 @@ class User(db.Model):
             'verified': self.verified,
             'is_admin': self.effective_is_admin,
             'is_super_admin': self.effective_is_super_admin,
+            'must_change_password': self.must_change_password,
             'oauth_provider': self.oauth_provider,
             'mfa_enabled': self.mfa_enabled,
             'created_at': self.created_at.isoformat() if self.created_at else None,

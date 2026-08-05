@@ -201,6 +201,40 @@ def update_profile():
     return jsonify({'message': 'Profile updated', 'user': user.to_dict()}), 200
 
 
+@auth_bp.route('/change-password', methods=['POST'])
+@jwt_required()
+@limiter.limit('10 per minute')
+def change_password():
+    user = db.session.get(User, int(get_jwt_identity()))
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    current_password = data.get('current_password') or ''
+    new_password = data.get('new_password') or ''
+
+    if not user.check_password(current_password):
+        return jsonify({'error': 'Current password is incorrect'}), 401
+
+    pw_error = validate_password(new_password)
+    if pw_error:
+        return jsonify({'error': pw_error}), 400
+    if new_password == current_password:
+        return jsonify({'error': 'Choose a different password from your current one'}), 400
+
+    user.set_password(new_password)
+    user.must_change_password = False
+
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('DB error during change-password for %s', user.email)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to change password'}), 500
+
+    return jsonify({'message': 'Password changed successfully', 'user': user.to_dict()}), 200
+
+
 @auth_bp.route('/send-verification', methods=['POST'])
 @limiter.limit('3 per minute; 10 per hour')
 def send_verification():

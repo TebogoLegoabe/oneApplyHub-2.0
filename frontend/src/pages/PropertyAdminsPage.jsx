@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   Building2,
   CheckCircle,
+  Copy,
   KeyRound,
   Mail,
   Plus,
@@ -48,7 +49,9 @@ const PropertyAdminsPage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
-  const [form, setForm] = useState({ name: '', email: '', password: '', propertyIds: [] });
+  const [generatedCredentials, setGeneratedCredentials] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', propertyIds: [] });
 
   const isSuperAdmin = user?.is_super_admin;
 
@@ -106,21 +109,33 @@ const PropertyAdminsPage = () => {
     event.preventDefault();
     setSaving(true);
     setMessage(null);
+    setGeneratedCredentials(null);
     try {
-      await adminAPI.createAdminUser({
+      const response = await adminAPI.createAdminUser({
         name: form.name,
         email: form.email,
-        password: form.password,
         property_ids: form.propertyIds,
       });
-      setForm({ name: '', email: '', password: '', propertyIds: [] });
-      setMessage({ type: 'success', text: 'Admin created and assigned to selected properties.' });
+      setForm({ name: '', email: '', propertyIds: [] });
+      if (response.data.temporary_password) {
+        setGeneratedCredentials({ email: response.data.user.email, password: response.data.temporary_password });
+      } else {
+        setMessage({ type: 'success', text: 'Admin updated and assigned to selected properties.' });
+      }
       await load();
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to create admin.' });
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleCopyCredentials = () => {
+    if (!generatedCredentials) return;
+    navigator.clipboard.writeText(`Email: ${generatedCredentials.email}\nTemporary password: ${generatedCredentials.password}`).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   const handleAssignExisting = async () => {
@@ -201,6 +216,25 @@ const PropertyAdminsPage = () => {
           </div>
         )}
 
+        {generatedCredentials && (
+          <div className="mb-4 rounded-2xl border border-gold-200 bg-gold-50 p-4 dark:border-gold-500/30 dark:bg-gold-500/10">
+            <div className="flex items-start gap-2">
+              <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-gold-700 dark:text-gold-300" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-gold-800 dark:text-gold-200">Admin created — copy this password now</p>
+                <p className="mt-1 text-xs text-gold-700 dark:text-gold-300">It won't be shown again. Share it with {generatedCredentials.email} outside this app; they'll be required to set their own password on first login.</p>
+                <div className="mt-2 flex items-center gap-2 rounded-xl border border-gold-200 bg-white px-3 py-2 dark:border-gold-500/30 dark:bg-slate-900">
+                  <code className="flex-1 truncate font-mono text-sm text-slate-900 dark:text-white">{generatedCredentials.password}</code>
+                  <button type="button" onClick={handleCopyCredentials} className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-gold-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-gold-700">
+                    <Copy className="h-3 w-3" /> {copied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+              <button type="button" onClick={() => setGeneratedCredentials(null)} className="shrink-0 text-xs font-bold text-gold-700 hover:underline dark:text-gold-300">Dismiss</button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[1.1fr_0.9fr]">
           <form onSubmit={handleCreateAdmin} className={`${cardClass} p-5`}>
             <div className="mb-5 flex items-start justify-between gap-3">
@@ -218,12 +252,8 @@ const PropertyAdminsPage = () => {
               <Field label="Admin email">
                 <input type="email" value={form.email} onChange={(event) => set('email', event.target.value)} className={inputClass} placeholder="admin@example.com" />
               </Field>
-              <div className="md:col-span-2">
-                <Field label="Temporary password">
-                  <input type="password" value={form.password} onChange={(event) => set('password', event.target.value)} className={inputClass} placeholder="At least 8 characters, letters and numbers" />
-                </Field>
-              </div>
             </div>
+            <p className="mt-3 text-xs text-slate-400">A random temporary password is generated automatically and shown once after creation — the new admin must set their own password on first login.</p>
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between">
