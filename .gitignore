@@ -23,6 +23,9 @@ Thumbs.db
 .env.test.local
 .env.production.local
 
+# Local docker overrides
+docker-compose.override.yml
+
 # Logs
 *.log
 npm-debug.log*
