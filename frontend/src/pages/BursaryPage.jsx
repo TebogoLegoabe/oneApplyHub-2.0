@@ -42,7 +42,13 @@ const FUNDER_BADGE = {
   professional: 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300',
 };
 
-const INITIAL_FILTERS = { field: 'all', funder: 'all', level: 'all', search: '' };
+const INITIAL_FILTERS = { field: 'all', funder: 'all', level: 'all', status: 'all', search: '' };
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'open', label: 'Open' },
+  { value: 'closing-soon', label: 'Closing soon' },
+  { value: 'expired', label: 'Expired' },
+];
 const SELECT_CLASS = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
 
 const OPPORTUNITY_TYPES = [
@@ -146,6 +152,12 @@ const BursaryPage = () => {
     if (filters.field !== 'all' && b.field !== filters.field) return false;
     if (filters.funder !== 'all' && b.funder !== filters.funder) return false;
     if (filters.level !== 'all' && !b.level.includes(filters.level)) return false;
+    if (filters.status !== 'all') {
+      const d = daysUntil(b.deadline);
+      if (filters.status === 'expired' && d > 0) return false;
+      if (filters.status === 'closing-soon' && !(d > 0 && d <= 30)) return false;
+      if (filters.status === 'open' && d <= 0) return false;
+    }
     if (filters.search) {
       const q = filters.search.toLowerCase();
       if (!b.title.toLowerCase().includes(q) && !b.provider.toLowerCase().includes(q) && !b.field.toLowerCase().includes(q)) return false;
@@ -170,12 +182,37 @@ const BursaryPage = () => {
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[{ value: filtered.length, label: 'Found' }, { value: openCount, label: 'Open now' }, { value: urgentCount, label: 'Closing soon' }, { value: bursaries.length, label: 'Total listed' }].map(({ value, label }) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div><div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div></div>)}
+          {[
+            { value: filtered.length, label: 'Found' },
+            { value: openCount, label: 'Open now', status: 'open' },
+            { value: urgentCount, label: 'Closing soon', status: 'closing-soon' },
+            { value: bursaries.length, label: 'Total listed' },
+          ].map(({ value, label, status }) => {
+            const clickable = Boolean(status);
+            const active = clickable && filters.status === status;
+            const Tag = clickable ? 'button' : 'div';
+            return (
+              <Tag
+                key={label}
+                type={clickable ? 'button' : undefined}
+                onClick={clickable ? () => handleFilter('status', active ? 'all' : status) : undefined}
+                className={`rounded-2xl border p-3.5 text-left shadow-sm transition ${active ? 'border-brand-300 bg-brand-50 dark:border-brand-500/40 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'} ${clickable ? 'cursor-pointer hover:border-brand-300 dark:hover:border-brand-500/40' : ''}`}
+              >
+                <div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div>
+                <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div>
+              </Tag>
+            );
+          })}
+        </div>
+
+        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Status</p>
+          <div className="flex flex-wrap gap-2">{STATUS_OPTIONS.map(({ value, label }) => <button key={value} type="button" onClick={() => handleFilter('status', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.status === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>{label}</button>)}</div>
         </div>
 
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Field of study</p>
-          <div className="flex flex-wrap gap-2">{FIELDS.map(({ value, label, icon: Icon }) => <button key={value} onClick={() => handleFilter('field', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.field === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
+          <div className="flex flex-wrap gap-2">{FIELDS.map(({ value, label, icon: Icon }) => <button key={value} type="button" onClick={() => handleFilter('field', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.field === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
         </div>
 
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">

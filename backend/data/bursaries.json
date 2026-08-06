@@ -489,5 +489,84 @@
     ],
     "applicationUrl": "https://scholarships.goldenkey.org/",
     "status": "Open"
+  },
+  {
+    "title": "Absa Bursary Programme",
+    "provider": "Absa Group",
+    "funder": "corporate",
+    "field": "business",
+    "amount": "Full tuition + accommodation + allowances",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students pursuing degrees relevant to Absa's business, including finance, economics, data science, and commerce. Includes mentorship and vacation work exposure.",
+    "requirements": [
+      "South African citizen",
+      "Commerce / Finance / Economics / Data Science or related field",
+      "Academic average ≥ 60%",
+      "Financial need"
+    ],
+    "applicationUrl": "https://bursaries.feenix.org/absa/apply-now/",
+    "status": "Open"
+  },
+  {
+    "title": "Sanlam Bursary Programme (Actuarial Science)",
+    "provider": "Sanlam",
+    "funder": "corporate",
+    "field": "business",
+    "amount": "Full tuition + accommodation + book allowance + exam support",
+    "amountValue": 0,
+    "deadline": "2026-08-31",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students pursuing an Actuarial Science qualification. Includes support towards actuarial board exams, vacation work, and guaranteed employment on graduation.",
+    "requirements": [
+      "Actuarial Science degree",
+      "Completed first year of actuarial studies",
+      "Academic average ≥ 70%",
+      "South African citizen"
+    ],
+    "applicationUrl": "https://www.sanlam.co.za/careers/pages/bursaries.aspx",
+    "status": "Open"
+  },
+  {
+    "title": "Exxaro Student Bursary",
+    "provider": "Exxaro Resources",
+    "funder": "corporate",
+    "field": "engineering",
+    "amount": "Full tuition + accommodation + allowances",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students in Engineering, Information Technology, Geology, and business support disciplines relevant to the mining sector, with a focus on host-community candidates.",
+    "requirements": [
+      "Engineering / IT / Geology or related field",
+      "South African citizen",
+      "Academic average ≥ 60%",
+      "Financial need"
+    ],
+    "applicationUrl": "https://www.exxaro.com/careers/student-hub/",
+    "status": "Open"
+  },
+  {
+    "title": "Toyota South Africa Bursary",
+    "provider": "Toyota South Africa Motors",
+    "funder": "corporate",
+    "field": "engineering",
+    "amount": "Full tuition + allowance",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students studying Engineering, Commerce, or Business fields, with structured internship and graduate programme exposure at Toyota SA.",
+    "requirements": [
+      "Engineering / Commerce / Business",
+      "South African citizen",
+      "Academic average ≥ 60%"
+    ],
+    "applicationUrl": "https://jobs.toyota.co.za/content/Bursary-Opportunity/?locale=en_GB",
+    "status": "Open"
   }
 ]
