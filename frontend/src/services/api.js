@@ -94,6 +94,11 @@ export const propertiesAPI = {
   getProperty: (id) => api.get(`/properties/${id}`),
 };
 
+// Bursaries API
+export const bursariesAPI = {
+  getBursaries: () => api.get('/bursaries'),
+};
+
 // Reviews API
 export const reviewsAPI = {
   getReviews: (propertyId, params = {}) =>

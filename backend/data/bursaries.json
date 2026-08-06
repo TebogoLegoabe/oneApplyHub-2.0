@@ -1,6 +1,5 @@
 [
   {
-    "id": 1,
     "title": "NSFAS Bursary",
     "provider": "National Student Financial Aid Scheme",
     "funder": "government",
@@ -20,7 +19,6 @@
     "status": "Open"
   },
   {
-    "id": 2,
     "title": "Funza Lushaka Teaching Bursary",
     "provider": "Department of Basic Education",
     "funder": "government",
@@ -40,7 +38,6 @@
     "status": "Open"
   },
   {
-    "id": 3,
     "title": "NRF Freestanding Scholarship",
     "provider": "National Research Foundation",
     "funder": "government",
@@ -61,7 +58,6 @@
     "status": "Open"
   },
   {
-    "id": 4,
     "title": "Eskom Scholarship",
     "provider": "Eskom",
     "funder": "corporate",
@@ -82,7 +78,6 @@
     "status": "Open"
   },
   {
-    "id": 5,
     "title": "Anglo American Bursary",
     "provider": "Anglo American",
     "funder": "corporate",
@@ -103,7 +98,6 @@
     "status": "Open"
   },
   {
-    "id": 6,
     "title": "Sasol Bursary Programme",
     "provider": "Sasol",
     "funder": "corporate",
@@ -124,7 +118,6 @@
     "status": "Open"
   },
   {
-    "id": 7,
     "title": "Transnet Bursary",
     "provider": "Transnet SOC",
     "funder": "government",
@@ -145,7 +138,6 @@
     "status": "Open"
   },
   {
-    "id": 8,
     "title": "BHP Bursary (South Africa)",
     "provider": "BHP",
     "funder": "corporate",
@@ -165,7 +157,6 @@
     "status": "Open"
   },
   {
-    "id": 9,
     "title": "MTN Bursary Programme",
     "provider": "MTN Group",
     "funder": "corporate",
@@ -186,7 +177,6 @@
     "status": "Open"
   },
   {
-    "id": 10,
     "title": "Vodacom e-School Bursary",
     "provider": "Vodacom",
     "funder": "corporate",
@@ -206,7 +196,6 @@
     "status": "Open"
   },
   {
-    "id": 11,
     "title": "Standard Bank IT Bursary",
     "provider": "Standard Bank",
     "funder": "corporate",
@@ -227,7 +216,6 @@
     "status": "Open"
   },
   {
-    "id": 12,
     "title": "Department of Health Bursary",
     "provider": "National Department of Health",
     "funder": "government",
@@ -248,7 +236,6 @@
     "status": "Open"
   },
   {
-    "id": 13,
     "title": "Discovery Health Bursary",
     "provider": "Discovery Health",
     "funder": "corporate",
@@ -269,7 +256,6 @@
     "status": "Open"
   },
   {
-    "id": 14,
     "title": "Netcare Bursary (Nursing)",
     "provider": "Netcare",
     "funder": "corporate",
@@ -289,7 +275,6 @@
     "status": "Open"
   },
   {
-    "id": 15,
     "title": "FirstRand Bursary",
     "provider": "FirstRand Group (FNB, RMB, WesBank)",
     "funder": "corporate",
@@ -310,7 +295,6 @@
     "status": "Open"
   },
   {
-    "id": 16,
     "title": "Investec Bursary",
     "provider": "Investec",
     "funder": "corporate",
@@ -331,7 +315,6 @@
     "status": "Open"
   },
   {
-    "id": 17,
     "title": "Old Mutual Actuarial Bursary",
     "provider": "Old Mutual",
     "funder": "corporate",
@@ -351,7 +334,6 @@
     "status": "Open"
   },
   {
-    "id": 18,
     "title": "Mastercard Foundation Scholars",
     "provider": "Mastercard Foundation",
     "funder": "international",
@@ -372,7 +354,6 @@
     "status": "Open"
   },
   {
-    "id": 19,
     "title": "SAICA CA(SA) Bursary",
     "provider": "South African Institute of Chartered Accountants",
     "funder": "professional",
@@ -393,7 +374,6 @@
     "status": "Open"
   },
   {
-    "id": 20,
     "title": "PwC Bursary",
     "provider": "PricewaterhouseCoopers",
     "funder": "corporate",
@@ -413,7 +393,6 @@
     "status": "Open"
   },
   {
-    "id": 21,
     "title": "Deloitte Bursary",
     "provider": "Deloitte",
     "funder": "corporate",
@@ -434,7 +413,6 @@
     "status": "Open"
   },
   {
-    "id": 22,
     "title": "KPMG Bursary",
     "provider": "KPMG South Africa",
     "funder": "corporate",
@@ -454,7 +432,6 @@
     "status": "Open"
   },
   {
-    "id": 23,
     "title": "Allan Gray Orbis Foundation",
     "provider": "Allan Gray Orbis Foundation",
     "funder": "private",
@@ -475,7 +452,6 @@
     "status": "Open"
   },
   {
-    "id": 24,
     "title": "Legal Aid SA Bursary",
     "provider": "Legal Aid South Africa",
     "funder": "government",
@@ -496,7 +472,6 @@
     "status": "Open"
   },
   {
-    "id": 26,
     "title": "Golden Key Merit Scholarship",
     "provider": "Golden Key International Honour Society",
     "funder": "private",

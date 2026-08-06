@@ -1,13 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   Search, Filter, ExternalLink, BookOpen, Award, Clock,
   CheckCircle, AlertCircle, Building, Cpu, HeartPulse,
   Briefcase, Scale, FlaskConical, HardHat, GraduationCap,
-  Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark,
+  Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark, Loader2,
 } from 'lucide-react';
-import BURSARIES from '../data/bursaries.json';
+import { bursariesAPI } from '../services/api';
 
 const FIELDS = [
   { value: 'all', label: 'All Fields', icon: BookOpen },
@@ -127,7 +127,22 @@ const BursaryPage = () => {
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const handleFilter = (key, value) => setFilters((p) => ({ ...p, [key]: value }));
 
-  const filtered = useMemo(() => BURSARIES.filter((b) => {
+  const [bursaries, setBursaries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError('');
+    bursariesAPI.getBursaries()
+      .then((res) => { if (!cancelled) setBursaries(res.data.bursaries || []); })
+      .catch(() => { if (!cancelled) setError('Could not load opportunities. Please try again later.'); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const filtered = useMemo(() => bursaries.filter((b) => {
     if (filters.field !== 'all' && b.field !== filters.field) return false;
     if (filters.funder !== 'all' && b.funder !== filters.funder) return false;
     if (filters.level !== 'all' && !b.level.includes(filters.level)) return false;
@@ -136,7 +151,7 @@ const BursaryPage = () => {
       if (!b.title.toLowerCase().includes(q) && !b.provider.toLowerCase().includes(q) && !b.field.toLowerCase().includes(q)) return false;
     }
     return true;
-  }), [filters]);
+  }), [bursaries, filters]);
 
   const openCount = filtered.filter((b) => daysUntil(b.deadline) > 0).length;
   const urgentCount = filtered.filter((b) => { const d = daysUntil(b.deadline); return d > 0 && d <= 30; }).length;
@@ -155,7 +170,7 @@ const BursaryPage = () => {
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[{ value: filtered.length, label: 'Found' }, { value: openCount, label: 'Open now' }, { value: urgentCount, label: 'Closing soon' }, { value: BURSARIES.length, label: 'Total listed' }].map(({ value, label }) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div><div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div></div>)}
+          {[{ value: filtered.length, label: 'Found' }, { value: openCount, label: 'Open now' }, { value: urgentCount, label: 'Closing soon' }, { value: bursaries.length, label: 'Total listed' }].map(({ value, label }) => <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900"><div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div><div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div></div>)}
         </div>
 
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -175,7 +190,17 @@ const BursaryPage = () => {
 
         <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">{filters.field !== 'all' ? FIELDS.find((f) => f.value === filters.field)?.label : 'All bursaries'} ({filtered.length})</h2><p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p></div><div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Soonest first</div></div>
 
-        {filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((b) => <BursaryCard key={b.id} bursary={b} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your field or filters.</p><button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>}
+        {loading ? (
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <Loader2 className="mx-auto mb-4 h-9 w-9 animate-spin text-brand-500" />
+            <h3 className="text-base font-bold text-slate-950 dark:text-white">Loading opportunities…</h3>
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-12 text-center shadow-sm dark:border-red-500/20 dark:bg-red-500/10">
+            <AlertCircle className="mx-auto mb-4 h-9 w-9 text-red-500" />
+            <h3 className="text-base font-bold text-slate-950 dark:text-white">{error}</h3>
+          </div>
+        ) : filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((b) => <BursaryCard key={b.id} bursary={b} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your field or filters.</p><button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>}
 
         <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5"><h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Application checklist</h3><div className="grid grid-cols-1 gap-3 md:grid-cols-3">{[{ icon: Bookmark, title: 'Save opportunities', text: 'Keep a shortlist of bursaries and deadlines.' }, { icon: GraduationCap, title: 'Prepare documents', text: 'Keep ID, transcript, proof of registration, and CV ready.' }, { icon: Building, title: 'Apply early', text: 'Corporate bursaries often close months before funding starts.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"><Icon className="h-4 w-4" /></div><div><h4 className="text-xs font-bold text-slate-950 dark:text-white">{title}</h4><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p></div></div>)}</div></div>
 
