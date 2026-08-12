@@ -146,6 +146,8 @@ export const adminAPI = {
   getAccommodationApplications: (params = {}) => api.get('/admin/accommodation-applications', { params }),
   updateAccommodationApplicationStatus: (applicationId, propertyId, data) =>
     api.patch(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}/status`, data),
+  deleteAccommodationApplication: (applicationId, propertyId) =>
+    api.delete(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}`),
   // University applications
   getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
   updateUniversityChoiceStatus: (applicationId, choiceId, data) =>

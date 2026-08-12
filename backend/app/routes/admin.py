@@ -572,6 +572,35 @@ def update_accommodation_application_property_status(application_id, property_id
     return jsonify({'application_property': row.to_dict()}), 200
 
 
+@admin_bp.route('/accommodation-applications/<int:application_id>/properties/<int:property_id>', methods=['DELETE'])
+@admin_required
+def delete_accommodation_application_property(application_id, property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage applications for assigned properties'}), 403
+    row = AccommodationApplicationProperty.query.filter_by(
+        accommodation_application_id=application_id, property_id=property_id,
+    ).first()
+    if not row:
+        return jsonify({'error': 'Application not found for this property'}), 404
+
+    db.session.delete(row)
+    db.session.flush()
+
+    # If that was the student's last property row, the shared parent
+    # submission (documents, profile snapshot) has nothing left to serve.
+    remaining = AccommodationApplicationProperty.query.filter_by(
+        accommodation_application_id=application_id,
+    ).count()
+    if remaining == 0:
+        parent = db.session.get(AccommodationApplication, application_id)
+        if parent:
+            db.session.delete(parent)
+
+    db.session.commit()
+    return jsonify({'message': 'Application deleted'}), 200
+
+
 @admin_bp.route('/university-applications', methods=['GET'])
 @super_admin_required
 def list_university_applications():

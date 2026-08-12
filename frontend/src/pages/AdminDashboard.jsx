@@ -393,6 +393,20 @@ const ApplicationsTab = ({ onToast }) => {
     }
   };
 
+  const remove = async (item) => {
+    if (!window.confirm(`Delete ${item.applicant_name}'s application for ${item.property_name}? This cannot be undone.`)) return;
+    setSaving(item.id);
+    try {
+      await adminAPI.deleteAccommodationApplication(item.accommodation_application_id, item.property_id);
+      onToast('Application deleted');
+      load();
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to delete application', 'error');
+    } finally {
+      setSaving(null);
+    }
+  };
+
   if (loading) return <Loading />;
   return (
     <>
@@ -409,7 +423,7 @@ const ApplicationsTab = ({ onToast }) => {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
-                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Property</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
+                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Property</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {items.map((item) => (
@@ -418,7 +432,12 @@ const ApplicationsTab = ({ onToast }) => {
                     <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{item.property_name}</td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(item.application?.submitted_at)}</td>
                     <td className="px-4 py-3"><Badge color={statusColor(item.status)}>{item.status?.replace('_', ' ') || 'pending'}</Badge></td>
-                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected(item)} className="inline-flex items-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => setSelected(item)} className="inline-flex items-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button>
+                        <button onClick={() => remove(item)} disabled={saving === item.id} title="Delete application" className="inline-flex items-center rounded-xl px-2.5 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-500/10"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
