@@ -129,6 +129,9 @@ export const adminAPI = {
   updateProperty: (id, data) => api.put(`/admin/properties/${id}`, data),
   toggleApproval: (id, approved) => api.patch(`/admin/properties/${id}/approve`, { approved }),
   deleteProperty: (id) => api.delete(`/admin/properties/${id}`),
+  addPropertyImage: (propertyId, data) => api.post(`/admin/properties/${propertyId}/images`, data),
+  updatePropertyImage: (propertyId, imageId, data) => api.patch(`/admin/properties/${propertyId}/images/${imageId}`, data),
+  deletePropertyImage: (propertyId, imageId) => api.delete(`/admin/properties/${propertyId}/images/${imageId}`),
   // Users
   getUsers: (params = {}) => api.get('/admin/users', { params }),
   createAdminUser: (data) => api.post('/admin/admin-users', data),

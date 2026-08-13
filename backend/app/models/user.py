@@ -20,6 +20,7 @@ class User(db.Model):
     verified = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     is_super_admin = db.Column(db.Boolean, default=False, nullable=False)
+    can_manage_university_applications = db.Column(db.Boolean, default=False, nullable=False)
     must_change_password = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
@@ -57,6 +58,10 @@ class User(db.Model):
     def effective_is_admin(self) -> bool:
         return bool(self.is_admin or self.effective_is_super_admin)
 
+    @property
+    def effective_can_manage_university_applications(self) -> bool:
+        return bool(self.can_manage_university_applications or self.effective_is_super_admin)
+
     def set_password(self, password: str) -> None:
         self.password_hash = generate_password_hash(password)
 
@@ -77,6 +82,7 @@ class User(db.Model):
             'verified': self.verified,
             'is_admin': self.effective_is_admin,
             'is_super_admin': self.effective_is_super_admin,
+            'can_manage_university_applications': self.effective_can_manage_university_applications,
             'must_change_password': self.must_change_password,
             'oauth_provider': self.oauth_provider,
             'mfa_enabled': self.mfa_enabled,

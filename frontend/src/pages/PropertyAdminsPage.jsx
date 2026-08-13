@@ -51,7 +51,7 @@ const PropertyAdminsPage = () => {
   const [message, setMessage] = useState(null);
   const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', propertyIds: [] });
+  const [form, setForm] = useState({ name: '', email: '', propertyIds: [], grantUniAccess: false });
 
   const isSuperAdmin = user?.is_super_admin;
 
@@ -77,6 +77,7 @@ const PropertyAdminsPage = () => {
   useEffect(() => { if (isSuperAdmin) load(); }, [isSuperAdmin]);
 
   const assignableUsers = useMemo(() => users.filter((item) => !item.is_super_admin), [users]);
+  const universityAdmins = useMemo(() => users.filter((item) => item.can_manage_university_applications && !item.is_super_admin), [users]);
   const adminCount = useMemo(() => new Set(assignments.map((item) => item.admin_user_id)).size, [assignments]);
   const coveredProperties = useMemo(() => new Set(assignments.map((item) => item.property_id)).size, [assignments]);
 
@@ -115,8 +116,9 @@ const PropertyAdminsPage = () => {
         name: form.name,
         email: form.email,
         property_ids: form.propertyIds,
+        can_manage_university_applications: form.grantUniAccess,
       });
-      setForm({ name: '', email: '', propertyIds: [] });
+      setForm({ name: '', email: '', propertyIds: [], grantUniAccess: false });
       if (response.data.temporary_password) {
         setGeneratedCredentials({ email: response.data.user.email, password: response.data.temporary_password });
       } else {
@@ -153,6 +155,20 @@ const PropertyAdminsPage = () => {
       await load();
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to assign admin.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRevokeUniAccess = async (adminUser) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      await adminAPI.updateUser(adminUser.id, { can_manage_university_applications: false });
+      setMessage({ type: 'success', text: `Revoked university applications access for ${adminUser.name}.` });
+      await load();
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to update admin.' });
     } finally {
       setSaving(false);
     }
@@ -279,6 +295,14 @@ const PropertyAdminsPage = () => {
               </div>
             </div>
 
+            <label className="mt-4 flex items-start gap-3 rounded-2xl border border-gold-200 bg-gold-50 p-4 dark:border-gold-500/30 dark:bg-gold-500/10">
+              <input type="checkbox" checked={form.grantUniAccess} onChange={(event) => set('grantUniAccess', event.target.checked)} className="mt-0.5" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">
+                <b>Grant university applications access</b><br />
+                Lets this admin view and decide on all university applications, separate from any property assignment. A university-applications admin doesn't need any properties selected above.
+              </span>
+            </label>
+
             <button type="submit" disabled={saving} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
               <Plus className="mr-2 h-4 w-4" /> {saving ? 'Saving...' : 'Create admin and assign'}
             </button>
@@ -316,6 +340,33 @@ const PropertyAdminsPage = () => {
               </ul>
             </div>
           </div>
+        </div>
+
+        <div className={`${cardClass} mt-5 overflow-hidden`}>
+          <div className="flex flex-col gap-2 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">University applications admins</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Admins with access to view and decide on university applications.</p>
+            </div>
+            <Badge color="purple">{universityAdmins.length} with access</Badge>
+          </div>
+          {universityAdmins.length ? (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {universityAdmins.map((admin) => (
+                <div key={admin.id} className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-slate-950 dark:text-white">{admin.name}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">{admin.email}</p>
+                  </div>
+                  <button onClick={() => handleRevokeUniAccess(admin)} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Revoke
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-center text-sm text-slate-400">No admins have university applications access yet.</div>
+          )}
         </div>
 
         <div className={`${cardClass} mt-5 overflow-hidden`}>

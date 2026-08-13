@@ -78,6 +78,17 @@ def super_admin_required(fn):
     return wrapper
 
 
+def university_applications_admin_required(fn):
+    @wraps(fn)
+    @admin_required
+    def wrapper(*args, **kwargs):
+        user = _current_admin()
+        if not user or not user.effective_can_manage_university_applications:
+            return jsonify({'error': 'University applications access required'}), 403
+        return fn(*args, **kwargs)
+    return wrapper
+
+
 def _assigned_property_ids(user):
     if user.effective_is_super_admin:
         return None
@@ -278,6 +289,83 @@ def delete_property(property_id):
     return jsonify({'message': f'Property "{prop.name}" deleted'}), 200
 
 
+@admin_bp.route('/properties/<int:property_id>/images', methods=['POST'])
+@admin_required
+def add_property_image(property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    prop = db.session.get(Property, property_id)
+    if not prop:
+        return jsonify({'error': 'Property not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    image_url = (data.get('image_url') or '').strip()
+    if not image_url:
+        return jsonify({'error': 'image_url is required'}), 400
+    if not (image_url.startswith('http://') or image_url.startswith('https://')):
+        return jsonify({'error': 'image_url must be a valid http(s) URL'}), 400
+    if len(image_url) > 500:
+        return jsonify({'error': 'image_url is too long (max 500 characters)'}), 400
+
+    is_primary = bool(data.get('is_primary', False))
+    image = PropertyImage(
+        property_id=property_id, image_url=image_url,
+        caption=(data.get('caption') or '').strip() or None, is_primary=is_primary,
+    )
+    try:
+        if is_primary:
+            PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        db.session.add(image)
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to add image for property %s', property_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to add image'}), 500
+    return jsonify({'message': 'Image added', 'image': image.to_dict()}), 201
+
+
+@admin_bp.route('/properties/<int:property_id>/images/<int:image_id>', methods=['PATCH'])
+@admin_required
+def update_property_image(property_id, image_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    image = PropertyImage.query.filter_by(id=image_id, property_id=property_id).first()
+    if not image:
+        return jsonify({'error': 'Image not found for this property'}), 404
+
+    data = request.get_json(silent=True) or {}
+    if 'caption' in data:
+        image.caption = (data.get('caption') or '').strip() or None
+    if data.get('is_primary'):
+        PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        image.is_primary = True
+    elif 'is_primary' in data:
+        image.is_primary = False
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to update image %s', image_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update image'}), 500
+    return jsonify({'image': image.to_dict()}), 200
+
+
+@admin_bp.route('/properties/<int:property_id>/images/<int:image_id>', methods=['DELETE'])
+@admin_required
+def delete_property_image(property_id, image_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    image = PropertyImage.query.filter_by(id=image_id, property_id=property_id).first()
+    if not image:
+        return jsonify({'error': 'Image not found for this property'}), 404
+    db.session.delete(image)
+    db.session.commit()
+    return jsonify({'message': 'Image deleted'}), 200
+
+
 @admin_bp.route('/users', methods=['GET'])
 @admin_required
 def list_users():
@@ -321,13 +409,16 @@ def create_admin_user():
     name = str(data.get('name', '')).strip()
     reset_password = bool(data.get('reset_password', False))
     property_ids = data.get('property_ids') or []
+    grant_university_applications = bool(data.get('can_manage_university_applications', False))
 
     if not EMAIL_RE.match(email):
         return jsonify({'error': 'A valid admin email is required'}), 400
     if not name:
         return jsonify({'error': 'Admin name is required'}), 400
-    if not isinstance(property_ids, list) or not property_ids:
-        return jsonify({'error': 'Select at least one property for this admin'}), 400
+    if not isinstance(property_ids, list):
+        return jsonify({'error': 'Invalid property selection'}), 400
+    if not property_ids and not grant_university_applications:
+        return jsonify({'error': 'Select at least one property or grant university applications access'}), 400
 
     user = User.query.filter(db.func.lower(User.email) == email).first()
     creating = user is None
@@ -349,6 +440,7 @@ def create_admin_user():
                 verified=True,
                 is_admin=True,
                 is_super_admin=False,
+                can_manage_university_applications=grant_university_applications,
                 must_change_password=True,
             )
             user.set_password(temp_password)
@@ -358,6 +450,8 @@ def create_admin_user():
             user.name = name or user.name
             user.verified = True
             user.is_admin = True
+            if 'can_manage_university_applications' in data:
+                user.can_manage_university_applications = grant_university_applications
             if reset_password:
                 temp_password = _generate_temp_password()
                 user.set_password(temp_password)
@@ -400,6 +494,8 @@ def update_user(user_id):
         user.is_super_admin = bool(data['is_super_admin'])
         if user.is_super_admin:
             user.is_admin = True
+    if 'can_manage_university_applications' in data:
+        user.can_manage_university_applications = bool(data['can_manage_university_applications'])
     db.session.commit()
     return jsonify({'user': user.to_dict()}), 200
 
@@ -602,7 +698,7 @@ def delete_accommodation_application_property(application_id, property_id):
 
 
 @admin_bp.route('/university-applications', methods=['GET'])
-@super_admin_required
+@university_applications_admin_required
 def list_university_applications():
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
@@ -622,7 +718,7 @@ def list_university_applications():
 
 
 @admin_bp.route('/university-applications/<int:application_id>/choices/<int:choice_id>/status', methods=['PATCH'])
-@super_admin_required
+@university_applications_admin_required
 def update_university_choice_status(application_id, choice_id):
     choice = UniversityApplicationChoice.query.filter_by(id=choice_id, university_application_id=application_id).first()
     if not choice:

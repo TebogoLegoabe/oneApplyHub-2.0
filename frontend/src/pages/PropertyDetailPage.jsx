@@ -19,6 +19,7 @@ const PropertyDetailPage = () => {
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState('');
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const showToast = (msg) => {
     setToast(msg);
@@ -120,9 +121,19 @@ const PropertyDetailPage = () => {
 
             {/* Hero Image */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-              <div className="h-56 bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center relative">
-                <Camera className="w-16 h-16 text-white/40" />
-                <span className="text-white/80 text-xl font-semibold ml-4">Photos Coming Soon</span>
+              <div className="h-56 relative">
+                {property.images?.length ? (
+                  <img
+                    src={property.images[Math.min(activeImageIndex, property.images.length - 1)].image_url}
+                    alt={property.images[Math.min(activeImageIndex, property.images.length - 1)].caption || property.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
+                    <Camera className="w-16 h-16 text-white/40" />
+                    <span className="text-white/80 text-xl font-semibold ml-4">Photos Coming Soon</span>
+                  </div>
+                )}
                 <div className="absolute top-5 left-5 flex gap-2">
                   <span className="bg-white text-brand-700 px-3 py-1.5 rounded-full text-sm font-bold">
                     {property.university.toUpperCase()}
@@ -139,6 +150,19 @@ const PropertyDetailPage = () => {
                   </span>
                 </div>
               </div>
+              {property.images?.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto p-3">
+                  {property.images.map((img, i) => (
+                    <button
+                      key={img.id}
+                      onClick={() => setActiveImageIndex(i)}
+                      className={`h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors ${i === activeImageIndex ? 'border-brand-600' : 'border-transparent hover:border-brand-300'}`}
+                    >
+                      <img src={img.image_url} alt={img.caption || property.name} className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Property Info */}

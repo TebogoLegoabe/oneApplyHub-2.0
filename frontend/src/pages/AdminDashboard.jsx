@@ -7,12 +7,15 @@ import {
   Crown,
   Eye,
   GraduationCap,
+  Image,
   LayoutDashboard,
   LogOut,
   MessageSquare,
   Moon,
+  Plus,
   Save,
   Shield,
+  Star,
   Sun,
   Trash2,
   UserCog,
@@ -108,9 +111,110 @@ const Overview = ({ stats, user, onNav }) => {
   );
 };
 
+const PropertyImagesModal = ({ property, onClose, onToast }) => {
+  const [images, setImages] = useState(property.images || []);
+  const [url, setUrl] = useState('');
+  const [caption, setCaption] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [busyId, setBusyId] = useState(null);
+
+  const addImage = async () => {
+    const trimmed = url.trim();
+    if (!trimmed) return;
+    setSaving(true);
+    try {
+      const res = await adminAPI.addPropertyImage(property.id, { image_url: trimmed, caption: caption.trim() || undefined, is_primary: !images.length });
+      const added = res.data.image;
+      setImages((prev) => (added.is_primary ? [added, ...prev.map((img) => ({ ...img, is_primary: false }))] : [...prev, added]));
+      setUrl('');
+      setCaption('');
+      onToast('Image added');
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to add image', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const makePrimary = async (image) => {
+    setBusyId(image.id);
+    try {
+      await adminAPI.updatePropertyImage(property.id, image.id, { is_primary: true });
+      setImages((prev) => prev.map((img) => ({ ...img, is_primary: img.id === image.id })));
+      onToast('Primary photo updated');
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to update image', 'error');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const removeImage = async (image) => {
+    setBusyId(image.id);
+    try {
+      await adminAPI.deletePropertyImage(property.id, image.id);
+      setImages((prev) => prev.filter((img) => img.id !== image.id));
+      onToast('Image removed');
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to remove image', 'error');
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900">
+        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+          <div>
+            <h2 className="text-lg font-bold text-gray-950 dark:text-white">Photos: {property.name}</h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add image URLs and mark one as the primary (cover) photo.</p>
+          </div>
+          <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+
+        <div className="overflow-y-auto px-5 py-5">
+          <div className="mb-5 space-y-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Image URL</label>
+              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Caption (optional)</label>
+              <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="e.g. Exterior, Kitchen, Room" className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+            </div>
+            <button onClick={addImage} disabled={saving || !url.trim()} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50"><Plus className="h-4 w-4" />{saving ? 'Adding...' : 'Add image'}</button>
+          </div>
+
+          {!images.length ? <EmptyState text="No photos added yet." /> : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {images.map((image) => (
+                <div key={image.id} className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800">
+                  <div className="relative aspect-video bg-gray-100 dark:bg-gray-800">
+                    <img src={image.image_url} alt={image.caption || property.name} className="h-full w-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                    {image.is_primary && <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-brand-600 px-2 py-1 text-[10px] font-bold text-white"><Star className="h-3 w-3 fill-current" />Primary</span>}
+                  </div>
+                  <div className="flex items-center justify-between gap-2 p-2.5">
+                    <p className="min-w-0 truncate text-xs text-gray-500 dark:text-gray-400">{image.caption || 'No caption'}</p>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {!image.is_primary && <button onClick={() => makePrimary(image)} disabled={busyId === image.id} title="Make primary" className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-brand-600 disabled:opacity-50 dark:hover:bg-gray-800"><Star className="h-3.5 w-3.5" /></button>}
+                      <button onClick={() => removeImage(image)} disabled={busyId === image.id} title="Remove" className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 disabled:opacity-50 dark:hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const PropertiesTab = ({ onToast }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [imagesFor, setImagesFor] = useState(null);
   const load = useCallback(async () => {
     setLoading(true);
     try {
@@ -136,19 +240,43 @@ const PropertiesTab = ({ onToast }) => {
 
   if (loading) return <Loading />;
   return (
-    <ShellCard className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Properties</h2></div>
-      {!items.length ? <EmptyState text="No properties found." /> : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">Property</th><th className="px-4 py-3">University</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {items.map((p) => <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40"><td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{p.name}</p><p className="text-xs text-gray-400">{p.address}</p></td><td className="px-4 py-3"><Badge>{p.university?.toUpperCase()}</Badge></td><td className="px-4 py-3 text-gray-600 dark:text-gray-300">R{p.price_min?.toLocaleString()} - R{p.price_max?.toLocaleString()}</td><td className="px-4 py-3"><Badge color={p.approved ? 'green' : 'amber'}>{p.approved ? 'Approved' : 'Pending'}</Badge></td><td className="px-4 py-3 text-right"><div className="flex items-center justify-end gap-2"><a href={`/admin/properties/${p.id}/rooms`} className="rounded-lg px-3 py-1.5 text-xs font-bold text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-500/10">Manage rooms</a><button onClick={() => toggleApproval(p)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">Toggle approval</button></div></td></tr>)}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </ShellCard>
+    <>
+      {imagesFor && <PropertyImagesModal property={imagesFor} onToast={onToast} onClose={() => { setImagesFor(null); load(); }} />}
+      <ShellCard className="overflow-hidden">
+        <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Properties</h2></div>
+        {!items.length ? <EmptyState text="No properties found." /> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">Property</th><th className="px-4 py-3">University</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {items.map((p) => (
+                  <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                          {p.primary_image_url ? <img src={p.primary_image_url} alt={p.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-gray-300 dark:text-gray-600"><Image className="h-4 w-4" /></div>}
+                        </div>
+                        <div><p className="font-bold text-gray-950 dark:text-white">{p.name}</p><p className="text-xs text-gray-400">{p.address}</p></div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3"><Badge>{p.university?.toUpperCase()}</Badge></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">R{p.price_min?.toLocaleString()} - R{p.price_max?.toLocaleString()}</td>
+                    <td className="px-4 py-3"><Badge color={p.approved ? 'green' : 'amber'}>{p.approved ? 'Approved' : 'Pending'}</Badge></td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => setImagesFor(p)} className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10"><Image className="h-3.5 w-3.5" />Photos{p.images?.length ? ` (${p.images.length})` : ''}</button>
+                        <a href={`/admin/properties/${p.id}/rooms`} className="rounded-lg px-3 py-1.5 text-xs font-bold text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-500/10">Manage rooms</a>
+                        <button onClick={() => toggleApproval(p)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">Toggle approval</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </ShellCard>
+    </>
   );
 };
 
@@ -223,11 +351,47 @@ const UsersTab = ({ currentUser, onToast }) => {
     }
   };
 
+  const toggleUniversityAccess = async (u) => {
+    try {
+      await adminAPI.updateUser(u.id, { can_manage_university_applications: !u.can_manage_university_applications });
+      onToast('University applications access updated');
+      load();
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to update user', 'error');
+    }
+  };
+
   if (loading) return <Loading />;
   return (
     <ShellCard className="overflow-hidden">
       <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Users</h2></div>
-      {!items.length ? <EmptyState text="No users found." /> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">User</th><th className="px-4 py-3">Verified</th><th className="px-4 py-3">Role</th><th className="px-4 py-3 text-right">Actions</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{items.map((u) => <tr key={u.id}><td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{u.name}</p><p className="text-xs text-gray-400">{u.email}</p></td><td className="px-4 py-3"><Badge color={u.verified ? 'green' : 'amber'}>{u.verified ? 'Verified' : 'Unverified'}</Badge></td><td className="px-4 py-3"><Badge color={u.is_super_admin ? 'purple' : u.is_admin ? 'blue' : 'gray'}>{u.is_super_admin ? 'Super Admin' : u.is_admin ? 'Admin' : 'Student'}</Badge></td><td className="px-4 py-3 text-right">{currentUser?.is_super_admin && currentUser?.id !== u.id && !u.is_super_admin && <button onClick={() => promote(u)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">{u.is_admin ? 'Revoke admin' : 'Make admin'}</button>}</td></tr>)}</tbody></table></div>}
+      {!items.length ? <EmptyState text="No users found." /> : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">User</th><th className="px-4 py-3">Verified</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Uni. applications</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+              {items.map((u) => (
+                <tr key={u.id}>
+                  <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{u.name}</p><p className="text-xs text-gray-400">{u.email}</p></td>
+                  <td className="px-4 py-3"><Badge color={u.verified ? 'green' : 'amber'}>{u.verified ? 'Verified' : 'Unverified'}</Badge></td>
+                  <td className="px-4 py-3"><Badge color={u.is_super_admin ? 'purple' : u.is_admin ? 'blue' : 'gray'}>{u.is_super_admin ? 'Super Admin' : u.is_admin ? 'Admin' : 'Student'}</Badge></td>
+                  <td className="px-4 py-3"><Badge color={u.can_manage_university_applications ? 'green' : 'gray'}>{u.can_manage_university_applications ? 'Access' : 'No access'}</Badge></td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      {currentUser?.is_super_admin && currentUser?.id !== u.id && u.is_admin && !u.is_super_admin && (
+                        <button onClick={() => toggleUniversityAccess(u)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-500/10">{u.can_manage_university_applications ? 'Revoke uni. access' : 'Grant uni. access'}</button>
+                      )}
+                      {currentUser?.is_super_admin && currentUser?.id !== u.id && !u.is_super_admin && (
+                        <button onClick={() => promote(u)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">{u.is_admin ? 'Revoke admin' : 'Make admin'}</button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </ShellCard>
   );
 };
@@ -606,7 +770,7 @@ const NAV = [
   { id: 'Reviews', label: 'Reviews', icon: MessageSquare },
   { id: 'Users', label: 'Users', icon: Users },
   { id: 'Applications', label: 'Applications', icon: ClipboardList },
-  { id: 'UniversityApplications', label: 'University Applications', icon: GraduationCap, superOnly: true },
+  { id: 'UniversityApplications', label: 'University Applications', icon: GraduationCap, requiresUniAccess: true },
   { id: 'PropertyAdmins', label: 'Property Admins', icon: UserCog, superOnly: true, route: '/admin/property-admins' },
 ];
 
@@ -641,7 +805,7 @@ const AdminDashboard = () => {
   };
 
   const pendingCount = stats ? (stats.pending_properties || 0) + (stats.pending_reviews || 0) + (stats.pending_applications || 0) : 0;
-  const navItems = NAV.filter((item) => !item.superOnly || user?.is_super_admin);
+  const navItems = NAV.filter((item) => (!item.superOnly || user?.is_super_admin) && (!item.requiresUniAccess || user?.can_manage_university_applications));
   const subtitles = {
     Overview: 'Platform summary and quick links',
     Properties: 'Manage and approve accommodation listings',

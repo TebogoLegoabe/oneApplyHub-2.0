@@ -29,6 +29,21 @@ ALLOWED_DOCUMENT_PREFIXES = (
 )
 MAX_DOCUMENT_CHARS = 7_000_000  # roughly 5 MB after base64 encoding
 
+ACCOMMODATION_REQUIRED_FIELDS = (
+    ('phoneNumber', 'Phone number'),
+    ('studentNumber', 'Student number'),
+    ('faculty', 'Faculty / field'),
+    ('yearOfStudy', 'Year of study'),
+    ('financialAid', 'Financial aid'),
+    ('parentGuardianName', 'Parent/guardian name'),
+    ('parentGuardianIdNumber', 'Parent/guardian ID number'),
+    ('parentGuardianPhone', 'Parent/guardian phone'),
+)
+
+
+def _missing_required_fields(data, required_fields):
+    return [label for key, label in required_fields if not str(data.get(key, '')).strip()]
+
 
 def _gen_reference():
     chars = string.ascii_uppercase + string.digits
@@ -166,6 +181,10 @@ def submit_accommodation_application():
 
     if not data.get('roomType'):
         return jsonify({'error': 'Room type is required'}), 400
+
+    missing = _missing_required_fields(data, ACCOMMODATION_REQUIRED_FIELDS)
+    if missing:
+        return jsonify({'error': f'{", ".join(missing)} {"is" if len(missing) == 1 else "are"} required'}), 400
 
     profile = _get_or_create_profile(user_id)
     error = _apply_profile_fields(profile, data)

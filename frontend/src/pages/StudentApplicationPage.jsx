@@ -97,7 +97,8 @@ const profileToFormFields = (profile) => {
 const Field = ({ label, error, optional, children }) => (
   <div>
     <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
-      {label}{optional && <span className="ml-1 font-medium text-slate-400">Optional</span>}
+      {label}
+      {optional ? <span className="ml-1 font-medium text-slate-400">Optional</span> : <span className="ml-0.5 text-red-500" aria-hidden="true">*</span>}
     </label>
     {children}
     {error && <p className="mt-1 text-xs font-bold text-red-600">{error}</p>}
@@ -332,7 +333,7 @@ const StudentApplicationPage = () => {
 
   const renderPersonalStep = () => (
     <>
-      {stepHeader('Personal information', `Signed in as ${user?.email || ''}. Required fields are checked only on final submit.`, User)}
+      {stepHeader('Personal information', `Signed in as ${user?.email || ''}. Fields marked * are required.`, User)}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <TextInput label="First name" value={form.firstName} onChange={(e) => setValue('firstName', e.target.value)} error={errors.firstName} />
         <TextInput label="Last name" value={form.lastName} onChange={(e) => setValue('lastName', e.target.value)} error={errors.lastName} />
@@ -590,6 +591,11 @@ const StudentApplicationPage = () => {
       <>
         {stepHeader('University choices', 'Add up to three universities and programmes you want to apply to.', Home)}
         {errors.universityChoices && <p className="mb-3 text-xs font-bold text-red-600">{errors.universityChoices}</p>}
+        <div className="mb-1.5 hidden gap-2 sm:grid sm:grid-cols-[1fr_1fr_auto]">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">University name<span className="ml-0.5 text-red-500" aria-hidden="true">*</span></span>
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Programme<span className="ml-1 font-medium text-slate-400">Optional</span></span>
+          <span />
+        </div>
         <div className="space-y-3">
           {universityChoices.map((choice, i) => (
             <div key={i} className="grid grid-cols-1 gap-2 rounded-2xl border border-slate-200 p-3 dark:border-slate-800 sm:grid-cols-[1fr_1fr_auto]">
@@ -599,6 +605,7 @@ const StudentApplicationPage = () => {
             </div>
           ))}
         </div>
+        <p className="mt-2 text-xs text-slate-400">At least one university choice is required. You can add up to 3.</p>
         {universityChoices.length < 3 && (
           <button type="button" onClick={addUniversityChoice} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:underline"><Plus className="h-3.5 w-3.5" />Add another university</button>
         )}
@@ -709,7 +716,7 @@ const StudentApplicationPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold sm:text-3xl">{isAccommodation ? 'Accommodation' : 'University'} application</h1>
-              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Required fields are checked only on final submit.</p>
+              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Fields marked * are required — they're checked on final submit.</p>
             </div>
             <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white"><MapPin className="h-4 w-4" /> Step {step} of {STEPS.length}</div>
           </div>
