@@ -1,6 +1,7 @@
 import logging
 import os
 
+import cloudinary
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
@@ -55,6 +56,9 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
     limiter.init_app(app)
+
+    if os.environ.get('CLOUDINARY_URL'):
+        cloudinary.config(cloudinary_url=os.environ['CLOUDINARY_URL'])
 
     from app.models import User, Property, Review, PropertyImage, HelpfulVote, PropertyAdmin  # noqa: F401
     from app.models.application import Application  # noqa: F401

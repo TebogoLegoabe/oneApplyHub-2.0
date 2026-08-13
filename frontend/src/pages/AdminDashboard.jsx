@@ -111,12 +111,47 @@ const Overview = ({ stats, user, onNav }) => {
   );
 };
 
+const MAX_PROPERTY_IMAGE_BYTES = 8 * 1024 * 1024;
+
 const PropertyImagesModal = ({ property, onClose, onToast }) => {
   const [images, setImages] = useState(property.images || []);
   const [url, setUrl] = useState('');
   const [caption, setCaption] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [busyId, setBusyId] = useState(null);
+
+  const addUploadedImage = (added) => {
+    setImages((prev) => (added.is_primary ? [added, ...prev.map((img) => ({ ...img, is_primary: false }))] : [...prev, added]));
+    setUrl('');
+    setCaption('');
+  };
+
+  const handleUpload = async (file) => {
+    if (!file) return;
+    if (!['image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(file.type)) {
+      onToast('Use JPG, PNG, or WebP.', 'error');
+      return;
+    }
+    if (file.size > MAX_PROPERTY_IMAGE_BYTES) {
+      onToast('Image must be under 8 MB.', 'error');
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      if (caption.trim()) formData.append('caption', caption.trim());
+      formData.append('is_primary', String(!images.length));
+      const res = await adminAPI.uploadPropertyImage(property.id, formData);
+      addUploadedImage(res.data.image);
+      onToast('Image uploaded');
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to upload image', 'error');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const addImage = async () => {
     const trimmed = url.trim();
@@ -124,10 +159,7 @@ const PropertyImagesModal = ({ property, onClose, onToast }) => {
     setSaving(true);
     try {
       const res = await adminAPI.addPropertyImage(property.id, { image_url: trimmed, caption: caption.trim() || undefined, is_primary: !images.length });
-      const added = res.data.image;
-      setImages((prev) => (added.is_primary ? [added, ...prev.map((img) => ({ ...img, is_primary: false }))] : [...prev, added]));
-      setUrl('');
-      setCaption('');
+      addUploadedImage(res.data.image);
       onToast('Image added');
     } catch (err) {
       onToast(err.response?.data?.error || 'Failed to add image', 'error');
@@ -168,7 +200,7 @@ const PropertyImagesModal = ({ property, onClose, onToast }) => {
         <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
           <div>
             <h2 className="text-lg font-bold text-gray-950 dark:text-white">Photos: {property.name}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Add image URLs and mark one as the primary (cover) photo.</p>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Upload a photo and mark one as the primary (cover) photo.</p>
           </div>
           <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
         </div>
@@ -176,14 +208,24 @@ const PropertyImagesModal = ({ property, onClose, onToast }) => {
         <div className="overflow-y-auto px-5 py-5">
           <div className="mb-5 space-y-3 rounded-2xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-800 dark:bg-gray-950/60">
             <div>
-              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Image URL</label>
-              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
-            </div>
-            <div>
               <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Caption (optional)</label>
               <input value={caption} onChange={(e) => setCaption(e.target.value)} placeholder="e.g. Exterior, Kitchen, Room" className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
             </div>
-            <button onClick={addImage} disabled={saving || !url.trim()} className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50"><Plus className="h-4 w-4" />{saving ? 'Adding...' : 'Add image'}</button>
+            <input id="property-image-upload" type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={(e) => handleUpload(e.target.files?.[0])} />
+            <label htmlFor="property-image-upload" className="inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-700 aria-disabled:cursor-not-allowed aria-disabled:opacity-50" aria-disabled={uploading}>
+              <Plus className="h-4 w-4" />{uploading ? 'Uploading...' : 'Upload photo'}
+            </label>
+            <p className="text-[11px] text-gray-400">JPG, PNG, or WebP. Maximum size 8 MB.</p>
+
+            <div className="flex items-center gap-2 pt-1">
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
+              <span className="text-[11px] font-bold uppercase text-gray-400">Or paste a URL</span>
+              <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
+            </div>
+            <div className="flex gap-2">
+              <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
+              <button onClick={addImage} disabled={saving || !url.trim()} className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">{saving ? 'Adding...' : 'Add'}</button>
+            </div>
           </div>
 
           {!images.length ? <EmptyState text="No photos added yet." /> : (

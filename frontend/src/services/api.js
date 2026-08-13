@@ -130,6 +130,7 @@ export const adminAPI = {
   toggleApproval: (id, approved) => api.patch(`/admin/properties/${id}/approve`, { approved }),
   deleteProperty: (id) => api.delete(`/admin/properties/${id}`),
   addPropertyImage: (propertyId, data) => api.post(`/admin/properties/${propertyId}/images`, data),
+  uploadPropertyImage: (propertyId, formData) => api.post(`/admin/properties/${propertyId}/images/upload`, formData, { headers: { 'Content-Type': undefined } }),
   updatePropertyImage: (propertyId, imageId, data) => api.patch(`/admin/properties/${propertyId}/images/${imageId}`, data),
   deletePropertyImage: (propertyId, imageId) => api.delete(`/admin/properties/${propertyId}/images/${imageId}`),
   // Users

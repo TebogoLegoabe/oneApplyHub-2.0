@@ -5,6 +5,7 @@ import secrets
 import string
 from functools import wraps
 
+import cloudinary.uploader
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -26,6 +27,9 @@ from app.utils import utcnow
 
 ACCOMMODATION_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
 UNIVERSITY_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
+
+ALLOWED_IMAGE_MIMETYPES = {'image/jpeg', 'image/jpg', 'image/png', 'image/webp'}
+MAX_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
@@ -323,6 +327,56 @@ def add_property_image(property_id):
         db.session.rollback()
         return jsonify({'error': 'Failed to add image'}), 500
     return jsonify({'message': 'Image added', 'image': image.to_dict()}), 201
+
+
+@admin_bp.route('/properties/<int:property_id>/images/upload', methods=['POST'])
+@admin_required
+def upload_property_image(property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    prop = db.session.get(Property, property_id)
+    if not prop:
+        return jsonify({'error': 'Property not found'}), 404
+
+    file = request.files.get('image')
+    if not file or not file.filename:
+        return jsonify({'error': 'No image file provided'}), 400
+    if file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return jsonify({'error': 'Image must be JPG, PNG, or WebP'}), 400
+
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    if size > MAX_IMAGE_UPLOAD_BYTES:
+        return jsonify({'error': 'Image must be under 8 MB'}), 400
+
+    if not cloudinary.config().cloud_name:
+        return jsonify({'error': 'Image uploads are not configured on this server'}), 503
+
+    try:
+        result = cloudinary.uploader.upload(
+            file, folder='oneapplyhub/properties', resource_type='image',
+        )
+    except Exception:
+        logger.exception('Cloudinary upload failed for property %s', property_id)
+        return jsonify({'error': 'Failed to upload image. Please try again.'}), 502
+
+    is_primary = request.form.get('is_primary', 'false').lower() == 'true'
+    caption = (request.form.get('caption') or '').strip() or None
+    image = PropertyImage(
+        property_id=property_id, image_url=result['secure_url'], caption=caption, is_primary=is_primary,
+    )
+    try:
+        if is_primary:
+            PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        db.session.add(image)
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to save uploaded image for property %s', property_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to save image'}), 500
+    return jsonify({'message': 'Image uploaded', 'image': image.to_dict()}), 201
 
 
 @admin_bp.route('/properties/<int:property_id>/images/<int:image_id>', methods=['PATCH'])
