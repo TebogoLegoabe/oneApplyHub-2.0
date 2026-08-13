@@ -189,9 +189,9 @@ const PropertiesPage = () => {
               const reviewCount = property.review_count || 0;
               return (
                 <article key={property.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
-                  <div className="relative h-32 overflow-hidden bg-brand-900 sm:h-36">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-brand-900">
                     {property.primary_image_url ? (
-                      <img src={property.primary_image_url} alt={property.name} className="absolute inset-0 h-full w-full object-cover" />
+                      <img src={property.primary_image_url} alt={property.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <span className="text-xs font-semibold text-white/50">Photos coming soon</span>

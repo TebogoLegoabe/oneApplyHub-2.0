@@ -41,6 +41,8 @@ def get_properties():
             or_(Property.name.ilike(term), Property.address.ilike(term))
         )
 
+    query = query.order_by(Property.name.asc())
+
     try:
         results = query.paginate(page=page, per_page=per_page, error_out=False)
     except Exception:

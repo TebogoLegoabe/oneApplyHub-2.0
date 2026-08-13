@@ -40,6 +40,14 @@ ACCOMMODATION_REQUIRED_FIELDS = (
     ('parentGuardianPhone', 'Parent/guardian phone'),
 )
 
+UNIVERSITY_REQUIRED_FIELDS = (
+    ('phoneNumber', 'Phone number'),
+    ('homeLanguage', 'Home language'),
+    ('residentialAddress', 'Residential address'),
+    ('nextOfKinName', 'Next of kin name'),
+    ('nextOfKinPhone', 'Next of kin phone'),
+)
+
 
 def _missing_required_fields(data, required_fields):
     return [label for key, label in required_fields if not str(data.get(key, '')).strip()]
@@ -93,11 +101,14 @@ def _apply_profile_fields(profile, data):
     profile.id_number = id_number or profile.id_number
     for field, key in (
         ('phone_number', 'phoneNumber'), ('nationality', 'nationality'),
+        ('home_language', 'homeLanguage'), ('residential_address', 'residentialAddress'),
         ('student_number', 'studentNumber'), ('faculty', 'faculty'),
         ('year_of_study', 'yearOfStudy'), ('degree_program', 'degreeProgram'),
         ('financial_aid', 'financialAid'),
         ('parent_guardian_name', 'parentGuardianName'), ('parent_guardian_id_number', 'parentGuardianIdNumber'),
         ('parent_guardian_phone', 'parentGuardianPhone'), ('parent_guardian_email', 'parentGuardianEmail'),
+        ('next_of_kin_name', 'nextOfKinName'), ('next_of_kin_relationship', 'nextOfKinRelationship'),
+        ('next_of_kin_phone', 'nextOfKinPhone'), ('next_of_kin_email', 'nextOfKinEmail'),
     ):
         if key in data:
             setattr(profile, field, (data.get(key) or '').strip() or None)
@@ -271,6 +282,10 @@ def submit_university_application():
             'university': university,
             'programme': str((choice or {}).get('programme', '')).strip() or None,
         })
+
+    missing = _missing_required_fields(data, UNIVERSITY_REQUIRED_FIELDS)
+    if missing:
+        return jsonify({'error': f'{", ".join(missing)} {"is" if len(missing) == 1 else "are"} required'}), 400
 
     profile = _get_or_create_profile(user_id)
     error = _apply_profile_fields(profile, data)

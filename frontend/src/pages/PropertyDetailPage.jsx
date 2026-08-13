@@ -121,7 +121,7 @@ const PropertyDetailPage = () => {
 
             {/* Hero Image */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
-              <div className="h-56 relative">
+              <div className="aspect-[16/9] relative">
                 {property.images?.length ? (
                   <img
                     src={property.images[Math.min(activeImageIndex, property.images.length - 1)].image_url}
