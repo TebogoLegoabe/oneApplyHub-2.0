@@ -50,8 +50,8 @@ const EmptyState = ({ text }) => <div className="rounded-2xl border border-dashe
 const ShellCard = ({ children, className = '' }) => <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 ${className}`}>{children}</div>;
 
 const statusColor = (status) => status === 'approved' ? 'green' : status === 'rejected' ? 'red' : status === 'under_review' ? 'blue' : 'amber';
-const fmt = (value) => value ? new Date(value).toLocaleDateString('en-ZA') : '—';
-const show = (value) => value || '—';
+const fmt = (value) => value ? new Date(value).toLocaleDateString('en-ZA') : 'N/A';
+const show = (value) => value || 'N/A';
 
 const DetailRow = ({ label, value }) => (
   <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/60">
@@ -260,7 +260,7 @@ const PropertiesTab = ({ onToast }) => {
                       </div>
                     </td>
                     <td className="px-4 py-3"><Badge>{p.university?.toUpperCase()}</Badge></td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">R{p.price_min?.toLocaleString()} - R{p.price_max?.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">R{p.price_min?.toLocaleString()} to R{p.price_max?.toLocaleString()}</td>
                     <td className="px-4 py-3"><Badge color={p.approved ? 'green' : 'amber'}>{p.approved ? 'Approved' : 'Pending'}</Badge></td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -471,7 +471,7 @@ const AccommodationReviewModal = ({ item, onClose, onSave, saving }) => {
           {siblingProperties.length > 1 && (
             <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 p-4 dark:border-brand-900/60 dark:bg-brand-500/10">
               <p className="text-sm font-bold text-gray-950 dark:text-white">Also applied to</p>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This student selected {siblingProperties.length} properties. Each one reviews and decides independently — shown here for context only.</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This student selected {siblingProperties.length} properties. Each one reviews and decides independently. Shown here for context only.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {siblingProperties.map((p) => <Badge key={p.id} color={p.id === item.id ? 'blue' : 'gray'}>{p.property_name} · {p.status}</Badge>)}
               </div>
@@ -579,7 +579,7 @@ const ApplicationsTab = ({ onToast }) => {
         <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-bold text-gray-950 dark:text-white">Accommodation Applications</h2>
-            <p className="mt-1 text-xs text-gray-400">Each row is one property's decision — reviewing it never affects other properties the student applied to.</p>
+            <p className="mt-1 text-xs text-gray-400">Each row is one property's decision. Reviewing it never affects other properties the student applied to.</p>
           </div>
           <Badge color="blue">{items.length} visible</Badge>
         </div>
@@ -749,7 +749,7 @@ const UniversityApplicationsTab = ({ onToast }) => {
                 {rows.map(({ application, choice }) => (
                   <tr key={choice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
                     <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{application.applicant_name}</p><p className="text-xs text-gray-400">{application.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{application.reference}</p></td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{choice.programme ? `${choice.university} — ${choice.programme}` : choice.university}</td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{choice.programme ? `${choice.university} (${choice.programme})` : choice.university}</td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(application.submitted_at)}</td>
                     <td className="px-4 py-3"><Badge color={statusColor(choice.status)}>{choice.status?.replace('_', ' ') || 'pending'}</Badge></td>
                     <td className="px-4 py-3 text-right"><button onClick={() => setSelected({ application, choice })} className="inline-flex items-center rounded-xl bg-gold-600 px-4 py-2 text-xs font-bold text-white hover:bg-gold-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>

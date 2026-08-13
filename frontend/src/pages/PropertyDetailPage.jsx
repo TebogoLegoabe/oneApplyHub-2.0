@@ -303,7 +303,7 @@ const PropertyDetailPage = () => {
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <div className="text-center mb-4">
                   <div className="text-xl font-bold text-brand-600 mb-1">
-                    R{property.price_min.toLocaleString()} – R{property.price_max.toLocaleString()}
+                    R{property.price_min.toLocaleString()} to R{property.price_max.toLocaleString()}
                   </div>
                   <div className="text-gray-500 dark:text-gray-400 text-sm">per month</div>
                 </div>

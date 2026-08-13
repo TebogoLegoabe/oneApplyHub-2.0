@@ -169,7 +169,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
         <div className="mb-6 rounded-3xl bg-slate-950 p-6 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
           <p className="mb-2 inline-flex rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-200 ring-1 ring-brand-400/20">My Applications</p>
           <h1 className="text-2xl font-bold sm:text-3xl">Choose application type</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">Apply for accommodation, university admission, or both — your personal details only need to be entered once.</p>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300">Apply for accommodation, university admission, or both. Your personal details only need to be entered once.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -696,7 +696,7 @@ const StudentApplicationPage = () => {
               <div className="mt-4 space-y-2">
                 {rows.map((row) => (
                   <div key={row.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-3 dark:border-slate-800">
-                    <p className="text-sm font-bold text-slate-950 dark:text-white">{isAccommodation ? row.property_name : (row.programme ? `${row.university} — ${row.programme}` : row.university)}</p>
+                    <p className="text-sm font-bold text-slate-950 dark:text-white">{isAccommodation ? row.property_name : (row.programme ? `${row.university} (${row.programme})` : row.university)}</p>
                     <StatusBadge status={row.status} />
                   </div>
                 ))}
@@ -716,7 +716,7 @@ const StudentApplicationPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold sm:text-3xl">{isAccommodation ? 'Accommodation' : 'University'} application</h1>
-              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Fields marked * are required — they're checked on final submit.</p>
+              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Fields marked * are required. They're checked on final submit.</p>
             </div>
             <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white"><MapPin className="h-4 w-4" /> Step {step} of {STEPS.length}</div>
           </div>

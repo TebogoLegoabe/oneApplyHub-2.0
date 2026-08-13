@@ -237,7 +237,7 @@ const PropertyAdminsPage = () => {
             <div className="flex items-start gap-2">
               <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-gold-700 dark:text-gold-300" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-gold-800 dark:text-gold-200">Admin created — copy this password now</p>
+                <p className="text-sm font-bold text-gold-800 dark:text-gold-200">Admin created. Copy this password now</p>
                 <p className="mt-1 text-xs text-gold-700 dark:text-gold-300">It won't be shown again. Share it with {generatedCredentials.email} outside this app; they'll be required to set their own password on first login.</p>
                 <div className="mt-2 flex items-center gap-2 rounded-xl border border-gold-200 bg-white px-3 py-2 dark:border-gold-500/30 dark:bg-slate-900">
                   <code className="flex-1 truncate font-mono text-sm text-slate-900 dark:text-white">{generatedCredentials.password}</code>
@@ -269,7 +269,7 @@ const PropertyAdminsPage = () => {
                 <input type="email" value={form.email} onChange={(event) => set('email', event.target.value)} className={inputClass} placeholder="admin@example.com" />
               </Field>
             </div>
-            <p className="mt-3 text-xs text-slate-400">A random temporary password is generated automatically and shown once after creation — the new admin must set their own password on first login.</p>
+            <p className="mt-3 text-xs text-slate-400">A random temporary password is generated automatically and shown once after creation. The new admin must set their own password on first login.</p>
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between">
@@ -323,7 +323,7 @@ const PropertyAdminsPage = () => {
               <Field label="Admin user">
                 <select value={selectedUser} onChange={(event) => setSelectedUser(event.target.value)} className={inputClass}>
                   <option value="">Select admin</option>
-                  {assignableUsers.map((item) => <option key={item.id} value={item.id}>{item.name} — {item.email}</option>)}
+                  {assignableUsers.map((item) => <option key={item.id} value={item.id}>{item.name} ({item.email})</option>)}
                 </select>
               </Field>
               <button type="button" onClick={handleAssignExisting} disabled={saving} className="inline-flex w-full items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 py-3 text-sm font-bold text-brand-700 hover:bg-brand-100 disabled:opacity-50 dark:border-brand-900 dark:bg-brand-500/10 dark:text-brand-300">
