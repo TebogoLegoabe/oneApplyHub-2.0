@@ -5,7 +5,7 @@ import {
   Search, Filter, ExternalLink, BookOpen, Award, Clock,
   CheckCircle, AlertCircle, Building, Cpu, HeartPulse,
   Briefcase, Scale, FlaskConical, HardHat, GraduationCap,
-  Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark, Loader2,
+  Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark, Loader2, MapPin,
 } from 'lucide-react';
 import { bursariesAPI, opportunitiesAPI } from '../services/api';
 
