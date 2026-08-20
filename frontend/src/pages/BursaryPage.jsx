@@ -70,24 +70,76 @@ const FieldIcon = ({ field, className = 'w-5 h-5' }) => {
   return <Icon className={className} />;
 };
 
-const BursaryCard = ({ bursary }) => {
+const OpportunityCard = ({ item }) => {
   const [expanded, setExpanded] = useState(false);
-  const days = daysUntil(bursary.deadline);
+  const days = daysUntil(item.deadline);
   const isUrgent = days <= 30 && days > 0;
   const expired = days <= 0;
-  const fieldLabel = FIELDS.find((f) => f.value === bursary.field)?.label || bursary.field;
-  const fieldColor = FIELD_COLORS[bursary.field] || FIELD_COLORS.general;
+  const isBursary = item.funder !== undefined;
+
+  if (isBursary) {
+    const fieldLabel = FIELDS.find((f) => f.value === item.field)?.label || item.field;
+    const fieldColor = FIELD_COLORS[item.field] || FIELD_COLORS.general;
+    return (
+      <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 gap-3">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${fieldColor}`}>
+              <FieldIcon field={item.field} className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold leading-snug text-slate-950 dark:text-white">{item.title}</h3>
+              <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{item.provider}</p>
+            </div>
+          </div>
+          <div className={`shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold ${expired ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : isUrgent ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
+            <div className="flex items-center gap-1">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{expired ? 'Expired' : `${days} days left`}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${fieldColor}`}>{fieldLabel}</span>
+          <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${FUNDER_BADGE[item.funder] || FUNDER_BADGE.corporate}`}>{item.funder}</span>
+          {item.level?.map((l) => <span key={l} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold capitalize text-slate-600 dark:bg-slate-800 dark:text-slate-300">{l}</span>)}
+        </div>
+
+        <p className="mt-3 text-xs font-bold text-emerald-600 dark:text-emerald-400">{item.amount}</p>
+        <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{item.description}</p>
+
+        <button onClick={() => setExpanded((p) => !p)} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">
+          {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          {expanded ? 'Hide requirements' : 'View requirements'}
+        </button>
+
+        {expanded && item.requirements && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {item.requirements.map((req, i) => <span key={i} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><CheckCircle className="h-3 w-3 text-emerald-500" />{req}</span>)}
+          </div>
+        )}
+
+        <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Deadline: {new Date(item.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          <a href={item.applicationUrl || item.application_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700">
+            Apply now <ExternalLink className="h-3.5 w-3.5" />
+          </a>
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${fieldColor}`}>
-            <FieldIcon field={bursary.field} className="h-5 w-5" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
+            <Briefcase className="h-5 w-5" />
           </div>
           <div className="min-w-0">
-            <h3 className="text-sm font-bold leading-snug text-slate-950 dark:text-white">{bursary.title}</h3>
-            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{bursary.provider}</p>
+            <h3 className="text-sm font-bold leading-snug text-slate-950 dark:text-white">{item.title}</h3>
+            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{item.provider}</p>
           </div>
         </div>
         <div className={`shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold ${expired ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : isUrgent ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
@@ -99,28 +151,29 @@ const BursaryCard = ({ bursary }) => {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${fieldColor}`}>{fieldLabel}</span>
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${FUNDER_BADGE[bursary.funder] || FUNDER_BADGE.corporate}`}>{bursary.funder}</span>
-        {bursary.level.map((l) => <span key={l} className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold capitalize text-slate-600 dark:bg-slate-800 dark:text-slate-300">{l}</span>)}
+        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{item.opportunity_type === 'internship' ? 'Internship' : 'Graduate'}</span>
+        {item.field && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{item.field}</span>}
+        {item.location && <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><MapPin className="h-3 w-3" />{item.location}</span>}
       </div>
 
-      <p className="mt-3 text-xs font-bold text-emerald-600 dark:text-emerald-400">{bursary.amount}</p>
-      <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{bursary.description}</p>
+      {item.salary_range && <p className="mt-3 text-xs font-bold text-emerald-600 dark:text-emerald-400">{item.salary_range}</p>}
+      <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{item.description}</p>
 
       <button onClick={() => setExpanded((p) => !p)} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">
         {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        {expanded ? 'Hide requirements' : 'View requirements'}
+        {expanded ? 'Hide details' : 'View details'}
       </button>
 
-      {expanded && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {bursary.requirements.map((req, i) => <span key={i} className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><CheckCircle className="h-3 w-3 text-emerald-500" />{req}</span>)}
+      {expanded && item.requirements && (
+        <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+          <p className="text-xs font-bold text-slate-950 dark:text-white">Requirements:</p>
+          <p className="text-xs text-slate-600 dark:text-slate-300">{item.requirements}</p>
         </div>
       )}
 
       <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-slate-500 dark:text-slate-400">Deadline: {new Date(bursary.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-        <a href={bursary.applicationUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700">
+        <p className="text-xs text-slate-500 dark:text-slate-400">Deadline: {new Date(item.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+        <a href={item.application_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700">
           Apply now <ExternalLink className="h-3.5 w-3.5" />
         </a>
       </div>
@@ -262,7 +315,7 @@ const BursaryPage = () => {
             <AlertCircle className="mx-auto mb-4 h-9 w-9 text-red-500" />
             <h3 className="text-base font-bold text-slate-950 dark:text-white">{error}</h3>
           </div>
-        ) : filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((b) => <BursaryCard key={b.id} bursary={b} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your field or filters.</p><button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>}
+        ) : filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((b) => <OpportunityCard key={b.id} item={b} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your field or filters.</p><button onClick={() => setFilters(INITIAL_FILTERS)} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>}
 
         <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5"><h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Application checklist</h3><div className="grid grid-cols-1 gap-3 md:grid-cols-3">{[{ icon: Bookmark, title: 'Save opportunities', text: 'Keep a shortlist of bursaries and deadlines.' }, { icon: GraduationCap, title: 'Prepare documents', text: 'Keep ID, transcript, proof of registration, and CV ready.' }, { icon: Building, title: 'Apply early', text: 'Corporate bursaries often close months before funding starts.' }].map(({ icon: Icon, title, text }) => <div key={title} className="flex gap-3"><div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"><Icon className="h-4 w-4" /></div><div><h4 className="text-xs font-bold text-slate-950 dark:text-white">{title}</h4><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p></div></div>)}</div></div>
 
