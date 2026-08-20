@@ -7,7 +7,7 @@ import {
   Briefcase, Scale, FlaskConical, HardHat, GraduationCap,
   Landmark, Globe, ChevronDown, ChevronUp, Target, Bookmark, Loader2,
 } from 'lucide-react';
-import { bursariesAPI } from '../services/api';
+import { bursariesAPI, opportunitiesAPI } from '../services/api';
 
 const FIELDS = [
   { value: 'all', label: 'All Fields', icon: BookOpen },
@@ -130,10 +130,12 @@ const BursaryCard = ({ bursary }) => {
 
 const BursaryPage = () => {
   const { isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState('bursaries');
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const handleFilter = (key, value) => setFilters((p) => ({ ...p, [key]: value }));
 
   const [bursaries, setBursaries] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -141,32 +143,48 @@ const BursaryPage = () => {
     let cancelled = false;
     setLoading(true);
     setError('');
-    bursariesAPI.getBursaries()
-      .then((res) => { if (!cancelled) setBursaries(res.data.bursaries || []); })
+    Promise.all([
+      bursariesAPI.getBursaries(),
+      opportunitiesAPI.getOpportunities(),
+    ])
+      .then(([bRes, oRes]) => {
+        if (!cancelled) {
+          setBursaries(bRes.data.bursaries || []);
+          setOpportunities(oRes.data.opportunities || []);
+        }
+      })
       .catch(() => { if (!cancelled) setError('Could not load opportunities. Please try again later.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
-  const filtered = useMemo(() => bursaries.filter((b) => {
-    if (filters.field !== 'all' && b.field !== filters.field) return false;
-    if (filters.funder !== 'all' && b.funder !== filters.funder) return false;
-    if (filters.level !== 'all' && !b.level.includes(filters.level)) return false;
+  const currentData = activeTab === 'bursaries' ? bursaries : opportunities.filter(o => {
+    if (activeTab === 'internships') return o.opportunity_type === 'internship';
+    if (activeTab === 'graduate') return o.opportunity_type === 'graduate';
+    return false;
+  });
+
+  const filtered = useMemo(() => currentData.filter((item) => {
+    if (activeTab === 'bursaries') {
+      if (filters.field !== 'all' && item.field !== filters.field) return false;
+      if (filters.funder !== 'all' && item.funder !== filters.funder) return false;
+      if (filters.level !== 'all' && !item.level.includes(filters.level)) return false;
+    }
     if (filters.status !== 'all') {
-      const d = daysUntil(b.deadline);
+      const d = daysUntil(item.deadline);
       if (filters.status === 'expired' && d > 0) return false;
       if (filters.status === 'closing-soon' && !(d > 0 && d <= 30)) return false;
       if (filters.status === 'open' && d <= 0) return false;
     }
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      if (!b.title.toLowerCase().includes(q) && !b.provider.toLowerCase().includes(q) && !b.field.toLowerCase().includes(q)) return false;
+      if (!item.title.toLowerCase().includes(q) && !item.provider.toLowerCase().includes(q)) return false;
     }
     return true;
-  }), [bursaries, filters]);
+  }), [currentData, filters, activeTab]);
 
-  const openCount = filtered.filter((b) => daysUntil(b.deadline) > 0).length;
-  const urgentCount = filtered.filter((b) => { const d = daysUntil(b.deadline); return d > 0 && d <= 30; }).length;
+  const openCount = filtered.filter((item) => daysUntil(item.deadline) > 0).length;
+  const urgentCount = filtered.filter((item) => { const d = daysUntil(item.deadline); return d > 0 && d <= 30; }).length;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -178,7 +196,11 @@ const BursaryPage = () => {
         </div>
 
         <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {OPPORTUNITY_TYPES.map(({ title, text, icon: Icon, active }) => <div key={title} className={`rounded-2xl border p-4 shadow-sm ${active ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'}`}><div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-600 shadow-sm dark:bg-slate-900 dark:text-brand-300"><Icon className="h-5 w-5" /></div><h3 className="text-sm font-bold text-slate-950 dark:text-white">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p>{!active && <p className="mt-2 text-[11px] font-bold text-slate-400">Coming soon</p>}</div>)}
+          {OPPORTUNITY_TYPES.map(({ title, text, icon: Icon }) => {
+            const isActive = (title === 'Bursaries' && activeTab === 'bursaries') || (title === 'Internships' && activeTab === 'internships') || (title === 'Graduate roles' && activeTab === 'graduate');
+            const isComingSoon = title === 'Competitions';
+            return <button key={title} onClick={() => !isComingSoon && setActiveTab(title === 'Bursaries' ? 'bursaries' : title === 'Internships' ? 'internships' : 'graduate')} disabled={isComingSoon} className={`rounded-2xl border p-4 shadow-sm transition ${isActive ? 'border-brand-200 bg-brand-50 dark:border-brand-900 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900'} ${!isComingSoon ? 'cursor-pointer hover:border-brand-200' : 'opacity-60'}`}><div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-brand-600 shadow-sm dark:bg-slate-900 dark:text-brand-300"><Icon className="h-5 w-5" /></div><h3 className="text-sm font-bold text-slate-950 dark:text-white">{title}</h3><p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{text}</p>{isComingSoon && <p className="mt-2 text-[11px] font-bold text-slate-400">Coming soon</p>}</button>;
+          })}
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -210,10 +232,12 @@ const BursaryPage = () => {
           <div className="flex flex-wrap gap-2">{STATUS_OPTIONS.map(({ value, label }) => <button key={value} type="button" onClick={() => handleFilter('status', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.status === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>{label}</button>)}</div>
         </div>
 
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Field of study</p>
-          <div className="flex flex-wrap gap-2">{FIELDS.map(({ value, label, icon: Icon }) => <button key={value} type="button" onClick={() => handleFilter('field', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.field === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
-        </div>
+        {activeTab === 'bursaries' && (
+          <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Field of study</p>
+            <div className="flex flex-wrap gap-2">{FIELDS.map(({ value, label, icon: Icon }) => <button key={value} type="button" onClick={() => handleFilter('field', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.field === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}><Icon className="h-3.5 w-3.5" />{label}</button>)}</div>
+          </div>
+        )}
 
         <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
@@ -225,7 +249,7 @@ const BursaryPage = () => {
 
         {!isAuthenticated && <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-900 dark:bg-brand-500/10"><div className="flex gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" /><div><p className="text-sm font-bold text-brand-950 dark:text-brand-200">Track saved opportunities</p><p className="mt-1 text-xs text-brand-700 dark:text-brand-300">Create an account to save opportunities and manage application deadlines.</p><div className="mt-3 flex gap-2"><Link to="/register" className="rounded-xl bg-brand-600 px-3 py-2 text-xs font-bold text-white hover:bg-brand-700">Create account</Link><Link to="/login" className="rounded-xl border border-brand-300 px-3 py-2 text-xs font-bold text-brand-700 hover:bg-brand-100 dark:text-brand-300">Login</Link></div></div></div></div>}
 
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">{filters.field !== 'all' ? FIELDS.find((f) => f.value === filters.field)?.label : 'All bursaries'} ({filtered.length})</h2><p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p></div><div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Soonest first</div></div>
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">{activeTab === 'bursaries' ? (filters.field !== 'all' ? FIELDS.find((f) => f.value === filters.field)?.label : 'All bursaries') : activeTab === 'internships' ? 'Internships' : 'Graduate programs'} ({filtered.length})</h2><p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p></div><div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Soonest first</div></div>
 
         {loading ? (
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
