@@ -819,3 +819,124 @@ def seed_opportunities():
     except Exception as e:
         logger.exception('Failed to seed opportunities')
         return jsonify({'error': f'Failed to seed opportunities: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities', methods=['GET'])
+@admin_required
+def get_all_opportunities():
+    try:
+        opps = Opportunity.query.order_by(Opportunity.deadline.asc()).all()
+        return jsonify({'opportunities': [o.to_dict() for o in opps]}), 200
+    except Exception as e:
+        logger.exception('Failed to fetch opportunities')
+        return jsonify({'error': f'Failed to fetch opportunities: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities', methods=['POST'])
+@admin_required
+def create_opportunity():
+    try:
+        data = request.get_json(silent=True) or {}
+        title = data.get('title', '').strip()
+        provider = data.get('provider', '').strip()
+        opp_type = data.get('opportunity_type', '').strip()
+
+        if not title or not provider or not opp_type:
+            return jsonify({'error': 'title, provider, and opportunity_type are required'}), 400
+        if opp_type not in ('internship', 'graduate'):
+            return jsonify({'error': 'opportunity_type must be internship or graduate'}), 400
+
+        from datetime import datetime
+        deadline = None
+        if data.get('deadline'):
+            try:
+                deadline = datetime.fromisoformat(data['deadline'].replace('Z', '+00:00'))
+            except:
+                return jsonify({'error': 'Invalid deadline format. Use ISO 8601 (e.g., 2026-12-31T23:59:59Z)'}), 400
+
+        opp = Opportunity(
+            title=title,
+            provider=provider,
+            opportunity_type=opp_type,
+            location=data.get('location', '').strip() or None,
+            duration=data.get('duration', '').strip() or None,
+            field=data.get('field', '').strip() or None,
+            description=data.get('description', '').strip() or None,
+            requirements=data.get('requirements', '').strip() or None,
+            salary_range=data.get('salary_range', '').strip() or None,
+            application_url=data.get('application_url', '').strip() or 'https://example.com',
+            deadline=deadline,
+            status=data.get('status', 'open'),
+        )
+        db.session.add(opp)
+        db.session.commit()
+        return jsonify({'opportunity': opp.to_dict()}), 201
+    except Exception as e:
+        logger.exception('Failed to create opportunity')
+        return jsonify({'error': f'Failed to create opportunity: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities/<int:opportunity_id>', methods=['PATCH'])
+@admin_required
+def update_opportunity(opportunity_id):
+    try:
+        opp = db.session.get(Opportunity, opportunity_id)
+        if not opp:
+            return jsonify({'error': 'Opportunity not found'}), 404
+
+        data = request.get_json(silent=True) or {}
+
+        if 'title' in data:
+            opp.title = data['title'].strip()
+        if 'provider' in data:
+            opp.provider = data['provider'].strip()
+        if 'opportunity_type' in data:
+            if data['opportunity_type'] not in ('internship', 'graduate'):
+                return jsonify({'error': 'opportunity_type must be internship or graduate'}), 400
+            opp.opportunity_type = data['opportunity_type']
+        if 'location' in data:
+            opp.location = data['location'].strip() or None
+        if 'duration' in data:
+            opp.duration = data['duration'].strip() or None
+        if 'field' in data:
+            opp.field = data['field'].strip() or None
+        if 'description' in data:
+            opp.description = data['description'].strip() or None
+        if 'requirements' in data:
+            opp.requirements = data['requirements'].strip() or None
+        if 'salary_range' in data:
+            opp.salary_range = data['salary_range'].strip() or None
+        if 'application_url' in data:
+            opp.application_url = data['application_url'].strip() or 'https://example.com'
+        if 'deadline' in data:
+            from datetime import datetime
+            if data['deadline']:
+                try:
+                    opp.deadline = datetime.fromisoformat(data['deadline'].replace('Z', '+00:00'))
+                except:
+                    return jsonify({'error': 'Invalid deadline format'}), 400
+            else:
+                opp.deadline = None
+        if 'status' in data:
+            opp.status = data['status']
+
+        db.session.commit()
+        return jsonify({'opportunity': opp.to_dict()}), 200
+    except Exception as e:
+        logger.exception('Failed to update opportunity')
+        return jsonify({'error': f'Failed to update opportunity: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities/<int:opportunity_id>', methods=['DELETE'])
+@admin_required
+def delete_opportunity(opportunity_id):
+    try:
+        opp = db.session.get(Opportunity, opportunity_id)
+        if not opp:
+            return jsonify({'error': 'Opportunity not found'}), 404
+        db.session.delete(opp)
+        db.session.commit()
+        return jsonify({'message': 'Opportunity deleted'}), 200
+    except Exception as e:
+        logger.exception('Failed to delete opportunity')
+        return jsonify({'error': f'Failed to delete opportunity: {str(e)}'}), 500

@@ -163,6 +163,10 @@ export const adminAPI = {
     api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
   // Opportunities
   seedOpportunities: () => api.post('/admin/opportunities/seed'),
+  getOpportunitiesAdmin: () => api.get('/admin/opportunities'),
+  createOpportunity: (data) => api.post('/admin/opportunities', data),
+  updateOpportunity: (id, data) => api.patch(`/admin/opportunities/${id}`, data),
+  deleteOpportunity: (id) => api.delete(`/admin/opportunities/${id}`),
   // Room inventory
   getFloors: (propertyId) => api.get(`/admin/properties/${propertyId}/floors`),
   createFloor: (propertyId, data) => api.post(`/admin/properties/${propertyId}/floors`, data),

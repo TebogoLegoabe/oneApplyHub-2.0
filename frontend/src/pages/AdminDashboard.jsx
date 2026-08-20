@@ -821,6 +821,146 @@ const UniversityApplicationsTab = ({ onToast }) => {
   );
 };
 
+const OpportunitiesTab = ({ onToast }) => {
+  const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    title: '',
+    provider: '',
+    opportunity_type: 'internship',
+    location: '',
+    duration: '',
+    field: '',
+    description: '',
+    requirements: '',
+    salary_range: '',
+    application_url: '',
+    deadline: '',
+    status: 'open',
+  });
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await adminAPI.getOpportunitiesAdmin();
+      setOpportunities(res.data.opportunities || []);
+    } catch {
+      onToast('Failed to load opportunities', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [onToast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.title.trim() || !formData.provider.trim()) {
+      onToast('Title and provider are required', 'error');
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminAPI.createOpportunity(formData);
+      onToast('Opportunity created successfully');
+      setFormData({
+        title: '',
+        provider: '',
+        opportunity_type: 'internship',
+        location: '',
+        duration: '',
+        field: '',
+        description: '',
+        requirements: '',
+        salary_range: '',
+        application_url: '',
+        deadline: '',
+        status: 'open',
+      });
+      setShowForm(false);
+      load();
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to create opportunity', 'error');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this opportunity?')) return;
+    try {
+      await adminAPI.deleteOpportunity(id);
+      onToast('Opportunity deleted');
+      load();
+    } catch (err) {
+      onToast(err.response?.data?.error || 'Failed to delete opportunity', 'error');
+    }
+  };
+
+  if (loading) return <Loading />;
+
+  return (
+    <div className="space-y-4">
+      {showForm && (
+        <ShellCard className="p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-bold text-gray-950 dark:text-white">Create new opportunity</h2>
+            <button onClick={() => setShowForm(false)} className="rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800"><X className="h-5 w-5" /></button>
+          </div>
+          <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2">
+            <input type="text" placeholder="Title*" value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" required />
+            <input type="text" placeholder="Provider*" value={formData.provider} onChange={(e) => setFormData({...formData, provider: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" required />
+            <select value={formData.opportunity_type} onChange={(e) => setFormData({...formData, opportunity_type: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900">
+              <option value="internship">Internship</option>
+              <option value="graduate">Graduate Program</option>
+            </select>
+            <input type="text" placeholder="Location" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <input type="text" placeholder="Duration (e.g., 6 months)" value={formData.duration} onChange={(e) => setFormData({...formData, duration: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <input type="text" placeholder="Field" value={formData.field} onChange={(e) => setFormData({...formData, field: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <input type="text" placeholder="Salary range" value={formData.salary_range} onChange={(e) => setFormData({...formData, salary_range: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <input type="url" placeholder="Application URL" value={formData.application_url} onChange={(e) => setFormData({...formData, application_url: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <input type="datetime-local" placeholder="Deadline" value={formData.deadline} onChange={(e) => setFormData({...formData, deadline: e.target.value})} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" />
+            <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} className="sm:col-span-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" rows="3" />
+            <textarea placeholder="Requirements" value={formData.requirements} onChange={(e) => setFormData({...formData, requirements: e.target.value})} className="sm:col-span-2 rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-gray-800 dark:bg-gray-900" rows="3" />
+            <button type="submit" disabled={saving} className="sm:col-span-2 rounded-xl bg-brand-600 px-4 py-2.5 font-bold text-white hover:bg-brand-700 disabled:opacity-60"><Save className="mr-1.5 inline h-4 w-4" />{saving ? 'Creating...' : 'Create opportunity'}</button>
+          </form>
+        </ShellCard>
+      )}
+      <ShellCard className="overflow-hidden">
+        <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-bold text-gray-950 dark:text-white">Opportunities</h2>
+            <p className="mt-1 text-xs text-gray-400">Manage internships and graduate programs</p>
+          </div>
+          {!showForm && <button onClick={() => setShowForm(true)} className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Plus className="h-3.5 w-3.5" />Add opportunity</button>}
+        </div>
+        {!opportunities.length ? <EmptyState text="No opportunities yet. Create one to get started." /> : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
+                <tr><th className="px-4 py-3">Title</th><th className="px-4 py-3">Provider</th><th className="px-4 py-3">Type</th><th className="px-4 py-3">Deadline</th><th className="px-4 py-3 text-right">Actions</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                {opportunities.map((opp) => (
+                  <tr key={opp.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
+                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{opp.title}</p></td>
+                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{opp.provider}</td>
+                    <td className="px-4 py-3"><Badge color={opp.opportunity_type === 'internship' ? 'blue' : 'purple'}>{opp.opportunity_type}</Badge></td>
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(opp.deadline)}</td>
+                    <td className="px-4 py-3 text-right"><button onClick={() => handleDelete(opp.id)} className="inline-flex items-center rounded-xl bg-red-100 px-3 py-1.5 text-xs font-bold text-red-700 hover:bg-red-200 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20"><Trash2 className="mr-1 h-3.5 w-3.5" />Delete</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </ShellCard>
+    </div>
+  );
+};
+
 const NAV = [
   { id: 'Overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'Properties', label: 'Properties', icon: Building2 },
@@ -828,6 +968,7 @@ const NAV = [
   { id: 'Users', label: 'Users', icon: Users },
   { id: 'Applications', label: 'Applications', icon: ClipboardList },
   { id: 'UniversityApplications', label: 'University Applications', icon: GraduationCap, requiresUniAccess: true },
+  { id: 'Opportunities', label: 'Opportunities', icon: Briefcase, superOnly: true },
   { id: 'PropertyAdmins', label: 'Property Admins', icon: UserCog, superOnly: true, route: '/admin/property-admins' },
 ];
 
@@ -883,6 +1024,7 @@ const AdminDashboard = () => {
     Users: 'Manage registered students and admins',
     Applications: 'Review full student application details and process decisions',
     UniversityApplications: 'Internal tracking queue for manual university submissions',
+    Opportunities: 'Create and manage internships and graduate programs',
   };
 
   return (
@@ -919,6 +1061,7 @@ const AdminDashboard = () => {
           {activeTab === 'Users' && <UsersTab currentUser={user} onToast={showToast} />}
           {activeTab === 'Applications' && <ApplicationsTab onToast={showToast} />}
           {activeTab === 'UniversityApplications' && <UniversityApplicationsTab onToast={showToast} />}
+          {activeTab === 'Opportunities' && <OpportunitiesTab onToast={showToast} />}
         </main>
       </div>
       {toast && <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-lg ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>{toast.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}{toast.message}</div>}
