@@ -143,14 +143,15 @@ const BursaryPage = () => {
     let cancelled = false;
     setLoading(true);
     setError('');
+
     Promise.all([
-      bursariesAPI.getBursaries(),
-      opportunitiesAPI.getOpportunities(),
+      bursariesAPI.getBursaries().catch(() => ({ data: { bursaries: [] } })),
+      opportunitiesAPI.getOpportunities().catch(() => ({ data: { opportunities: [] } })),
     ])
       .then(([bRes, oRes]) => {
         if (!cancelled) {
-          setBursaries(bRes.data.bursaries || []);
-          setOpportunities(oRes.data.opportunities || []);
+          setBursaries(bRes.data?.bursaries || []);
+          setOpportunities(oRes.data?.opportunities || []);
         }
       })
       .catch(() => { if (!cancelled) setError('Could not load opportunities. Please try again later.'); })
