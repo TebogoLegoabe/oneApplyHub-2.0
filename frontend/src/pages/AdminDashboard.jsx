@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
+  Briefcase,
   Building2,
   CheckCircle,
   ClipboardList,
@@ -60,7 +61,7 @@ const DetailRow = ({ label, value }) => (
   </div>
 );
 
-const Overview = ({ stats, user, onNav }) => {
+const Overview = ({ stats, user, onNav, onSeedOpportunities, seedingOpportunities }) => {
   if (!stats) return <Loading />;
   const cards = [
     { label: 'Users', value: stats.total_users, sub: `${stats.verified_users} verified`, icon: Users, tab: 'Users', color: 'blue' },
@@ -85,18 +86,32 @@ const Overview = ({ stats, user, onNav }) => {
       </div>
 
       {user?.is_super_admin && (
-        <button onClick={() => { window.location.href = '/admin/property-admins'; }} className="w-full rounded-2xl bg-brand-800 p-6 text-left text-white shadow-sm transition-shadow hover:shadow-md">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
-                <UserCog className="h-3.5 w-3.5" /> Super admin action
+        <div className="space-y-4">
+          <button onClick={() => { window.location.href = '/admin/property-admins'; }} className="w-full rounded-2xl bg-brand-800 p-6 text-left text-white shadow-sm transition-shadow hover:shadow-md">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
+                  <UserCog className="h-3.5 w-3.5" /> Super admin action
+                </div>
+                <h2 className="text-xl font-bold">Create and assign property admins</h2>
+                <p className="mt-1 max-w-2xl text-sm text-brand-50">Give each property manager access only to their assigned properties, reviews, and applications.</p>
               </div>
-              <h2 className="text-xl font-bold">Create and assign property admins</h2>
-              <p className="mt-1 max-w-2xl text-sm text-brand-50">Give each property manager access only to their assigned properties, reviews, and applications.</p>
+              <span className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-700">Open Property Admins</span>
             </div>
-            <span className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-700">Open Property Admins</span>
-          </div>
-        </button>
+          </button>
+          <button onClick={onSeedOpportunities} disabled={seedingOpportunities} className="w-full rounded-2xl bg-amber-700 p-6 text-left text-white shadow-sm transition-shadow hover:shadow-md disabled:opacity-60">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
+                  <Briefcase className="h-3.5 w-3.5" /> Super admin action
+                </div>
+                <h2 className="text-xl font-bold">Reseed opportunities</h2>
+                <p className="mt-1 max-w-2xl text-sm text-amber-50">Reload internships and graduate programs from the default data file.</p>
+              </div>
+              <span className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-amber-700">{seedingOpportunities ? 'Seeding...' : 'Reseed'}</span>
+            </div>
+          </button>
+        </div>
       )}
 
       <ShellCard className="p-6">
@@ -823,9 +838,22 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [toast, setToast] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [seedingOpportunities, setSeedingOpportunities] = useState(false);
 
   const loadStats = useCallback(() => {
     adminAPI.getStats().then((res) => setStats(res.data)).catch(() => {});
+  }, []);
+
+  const handleSeedOpportunities = useCallback(async () => {
+    setSeedingOpportunities(true);
+    try {
+      await adminAPI.seedOpportunities();
+      setToast({ message: 'Opportunities reseeded successfully', type: 'success' });
+    } catch (err) {
+      setToast({ message: 'Failed to reseed opportunities', type: 'error' });
+    } finally {
+      setSeedingOpportunities(false);
+    }
   }, []);
 
   useEffect(() => { loadStats(); }, [loadStats]);
@@ -885,7 +913,7 @@ const AdminDashboard = () => {
           {pendingCount > 0 && <div className="ml-auto flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-500/10 dark:text-amber-300"><AlertCircle className="h-4 w-4" />{pendingCount} pending</div>}
         </header>
         <main className="flex-1 px-4 py-6 sm:px-6">
-          {activeTab === 'Overview' && <Overview stats={stats} user={user} onNav={navigate} />}
+          {activeTab === 'Overview' && <Overview stats={stats} user={user} onNav={navigate} onSeedOpportunities={handleSeedOpportunities} seedingOpportunities={seedingOpportunities} />}
           {activeTab === 'Properties' && <PropertiesTab onToast={showToast} />}
           {activeTab === 'Reviews' && <ReviewsTab onToast={showToast} />}
           {activeTab === 'Users' && <UsersTab currentUser={user} onToast={showToast} />}

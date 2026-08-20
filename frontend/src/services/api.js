@@ -161,6 +161,8 @@ export const adminAPI = {
   getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
   updateUniversityChoiceStatus: (applicationId, choiceId, data) =>
     api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
+  // Opportunities
+  seedOpportunities: () => api.post('/admin/opportunities/seed'),
   // Room inventory
   getFloors: (propertyId) => api.get(`/admin/properties/${propertyId}/floors`),
   createFloor: (propertyId, data) => api.post(`/admin/properties/${propertyId}/floors`, data),

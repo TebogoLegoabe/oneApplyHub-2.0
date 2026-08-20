@@ -15,6 +15,7 @@ from app.models import (
     AccommodationApplicationProperty,
     ApplicantProfile,
     HelpfulVote,
+    Opportunity,
     Property,
     PropertyAdmin,
     PropertyImage,
@@ -783,3 +784,38 @@ def update_university_choice_status(application_id, choice_id):
     choice.reviewed_at = utcnow()
     db.session.commit()
     return jsonify({'choice': choice.to_dict()}), 200
+
+
+@admin_bp.route('/opportunities/seed', methods=['POST'])
+@super_admin_required
+def seed_opportunities():
+    try:
+        import os
+        from datetime import datetime
+        data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'opportunities.json')
+        with open(data_path) as f:
+            data = json.load(f)
+        Opportunity.query.delete()
+        db.session.commit()
+        for item in data:
+            deadline = datetime.fromisoformat(item['deadline'].replace('Z', '+00:00')) if item.get('deadline') else None
+            opp = Opportunity(
+                title=item['title'],
+                provider=item['provider'],
+                opportunity_type=item['opportunity_type'],
+                location=item.get('location'),
+                duration=item.get('duration'),
+                field=item.get('field'),
+                description=item.get('description'),
+                requirements=item.get('requirements'),
+                salary_range=item.get('salary_range'),
+                application_url=item['application_url'],
+                deadline=deadline,
+                status=item.get('status', 'open'),
+            )
+            db.session.add(opp)
+        db.session.commit()
+        return jsonify({'message': f'Successfully seeded {len(data)} opportunities'}), 200
+    except Exception as e:
+        logger.exception('Failed to seed opportunities')
+        return jsonify({'error': f'Failed to seed opportunities: {str(e)}'}), 500
