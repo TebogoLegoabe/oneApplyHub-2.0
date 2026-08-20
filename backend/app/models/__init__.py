@@ -8,3 +8,4 @@ from .accommodation_application import AccommodationApplication, AccommodationAp
 from .university_application import UniversityApplication, UniversityApplicationChoice
 from .room import Floor, Room, RoomAllocation
 from .bursary import Bursary
+from .opportunity import Opportunity

@@ -73,11 +73,6 @@ def super_admin_required(fn):
         user = _current_admin()
         if not user or not user.effective_is_super_admin:
             return jsonify({'error': 'Super admin access required'}), 403
-        if not user.mfa_enabled:
-            return jsonify({
-                'error': 'Enable two-factor authentication on your account before managing admins.',
-                'mfa_setup_required': True,
-            }), 403
         return fn(*args, **kwargs)
     return wrapper
 

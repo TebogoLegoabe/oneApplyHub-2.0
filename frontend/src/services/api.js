@@ -36,7 +36,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries', '/privacy', '/terms'];
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries', '/opportunities', '/privacy', '/terms'];
 const isPublicPath = (pathname) => PUBLIC_PATHS.some((path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`)));
 
 // Response interceptor - handle expired/invalid sessions
@@ -97,6 +97,11 @@ export const propertiesAPI = {
 // Bursaries API
 export const bursariesAPI = {
   getBursaries: () => api.get('/bursaries'),
+};
+
+// Opportunities API
+export const opportunitiesAPI = {
+  getOpportunities: () => api.get('/opportunities'),
 };
 
 // Reviews API

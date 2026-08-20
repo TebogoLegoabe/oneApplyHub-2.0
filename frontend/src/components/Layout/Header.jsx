@@ -7,7 +7,8 @@ import { useTheme } from '../../context/ThemeContext';
 const NAV_LINKS = [
   { to: '/properties', label: 'Properties' },
   { to: '/reviews',    label: 'Reviews'    },
-  { to: '/bursaries',  label: 'OpportunitiesHub'  },
+  { to: '/bursaries',  label: 'Bursaries'  },
+  { to: '/opportunities', label: 'Internships & Programs' },
 ];
 
 const UserAvatar = ({ user, size = 'sm' }) => {
