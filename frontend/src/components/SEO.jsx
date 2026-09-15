@@ -40,8 +40,28 @@ const ROUTE_META = {
     robots: 'noindex, nofollow',
   },
   '/application': {
-    title: 'My Accommodation Application | oneApplyHub',
-    description: 'Submit and track your student accommodation application on oneApplyHub.',
+    title: 'My Applications | oneApplyHub',
+    description: 'Submit and track your accommodation and university applications on oneApplyHub.',
+    robots: 'noindex, nofollow',
+  },
+  '/mfa-setup': {
+    title: 'Two-Factor Authentication | oneApplyHub',
+    description: 'Secure your oneApplyHub account with an authenticator app.',
+    robots: 'noindex, nofollow',
+  },
+  '/forgot-password': {
+    title: 'Reset Password | oneApplyHub',
+    description: 'Request a password reset link for your oneApplyHub account.',
+    robots: 'noindex, nofollow',
+  },
+  '/reset-password': {
+    title: 'Choose a New Password | oneApplyHub',
+    description: 'Set a new password for your oneApplyHub account.',
+    robots: 'noindex, nofollow',
+  },
+  '/verify-email': {
+    title: 'Verify Email | oneApplyHub',
+    description: 'Enter the verification code sent to your email to activate your oneApplyHub account.',
     robots: 'noindex, nofollow',
   },
   '/privacy': {
@@ -79,7 +99,14 @@ const matchMeta = (pathname) => {
     };
   }
 
-  return ROUTE_META[pathname] || ROUTE_META['/'];
+  if (ROUTE_META[pathname]) return ROUTE_META[pathname];
+
+  // Unknown paths render the 404 page; keep them out of search indexes.
+  return {
+    title: 'Page Not Found | oneApplyHub',
+    description: 'The page you are looking for does not exist.',
+    robots: 'noindex, nofollow',
+  };
 };
 
 const upsertMeta = (selector, attrs) => {

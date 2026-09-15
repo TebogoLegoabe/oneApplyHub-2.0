@@ -9,21 +9,42 @@ export const useAuth = () => {
   return context;
 };
 
+// Restore the saved session synchronously so the first render already knows whether the
+// user is signed in. This avoids a flash of the public header before the sidebar shell appears.
+const readStoredUser = () => {
+  const token = localStorage.getItem('token');
+  const savedUser = localStorage.getItem('user');
+  if (!token || !savedUser) return null;
+  try {
+    return JSON.parse(savedUser);
+  } catch {
+    localStorage.removeItem('user');
+    return null;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(readStoredUser);
+  // Kept for API compatibility with route guards; the session is available on first render.
+  const loading = false;
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
+    // Refresh the cached profile in the background so role/verification changes made
+    // elsewhere (e.g. by an admin) are reflected without forcing a re-login.
+    if (!user) return;
+    authAPI.getProfile()
+      .then((response) => {
+        const fresh = response.data?.user;
+        if (fresh) {
+          localStorage.setItem('user', JSON.stringify(fresh));
+          setUser(fresh);
+        }
+      })
+      .catch((error) => {
+        // The API interceptor already cleared storage on 401; mirror that in memory.
+        if (error.response?.status === 401) setUser(null);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const _storeSession = (token, userData) => {

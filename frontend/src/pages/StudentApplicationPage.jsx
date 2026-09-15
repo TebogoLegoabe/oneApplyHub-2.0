@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
+  ClipboardList,
   GraduationCap,
   Home,
   MapPin,
@@ -18,6 +19,7 @@ import {
 import { applicationsAPI, propertiesAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { validateSAID } from '../utils/validateSAID';
+import { INPUT_CLASS, PageLoader, StatusBadge } from '../components/ui';
 
 const ACCOMMODATION_STEPS = [
   { id: 1, title: 'Personal', icon: User },
@@ -64,7 +66,7 @@ const STATUS_META = {
   rejected: { label: 'Rejected', className: 'border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-500/10 dark:text-red-300' },
 };
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+const inputClass = INPUT_CLASS;
 
 const readFileAsDataUrl = (file) => new Promise((resolve, reject) => {
   const reader = new FileReader();
@@ -96,7 +98,7 @@ const profileToFormFields = (profile) => {
 
 const Field = ({ label, error, optional, children }) => (
   <div>
-    <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300">
+    <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
       {label}{optional && <span className="ml-1 font-medium text-slate-400">Optional</span>}
     </label>
     {children}
@@ -127,11 +129,6 @@ const DocumentInput = ({ label, fileName, onUpload, onRemove, error }) => (
     </div>
   </Field>
 );
-
-const StatusBadge = ({ status }) => {
-  const meta = STATUS_META[status] || STATUS_META.pending;
-  return <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold capitalize ${meta.className}`}>{meta.label.replace('_', ' ')}</span>;
-};
 
 const ResultsEditor = ({ title, results, onChange, fileName, onUploadDocument, onRemoveDocument }) => {
   const addRow = () => onChange([...results, { subject: '', mark: '' }]);
@@ -164,15 +161,15 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-        <div className="mb-6 rounded-3xl bg-slate-950 p-6 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
+      <div className="mx-auto w-full max-w-6xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+        <div className="mb-6 rounded-2xl bg-slate-950 p-6 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
           <p className="mb-2 inline-flex rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-200 ring-1 ring-brand-400/20">My Applications</p>
           <h1 className="text-2xl font-bold sm:text-3xl">Choose application type</h1>
           <p className="mt-2 max-w-2xl text-sm text-slate-300">Apply for accommodation, university admission, or both — your personal details only need to be entered once.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <button onClick={() => navigate('/application?type=accommodation')} className="group overflow-hidden rounded-3xl border border-brand-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-brand-400 hover:shadow-xl dark:border-brand-900/60 dark:bg-slate-900">
+          <button onClick={() => navigate('/application?type=accommodation')} className="group overflow-hidden rounded-2xl border border-brand-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-brand-400 hover:shadow-xl dark:border-brand-900/60 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
                 <Home className="h-7 w-7" />
@@ -185,7 +182,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
             </p>
             {accommodationApp && (
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Reference</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Reference</p>
                 <p className="mt-1 font-mono text-sm font-bold text-slate-950 dark:text-white">{accommodationApp.reference}</p>
               </div>
             )}
@@ -194,7 +191,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
             </div>
           </button>
 
-          <button onClick={() => navigate('/application?type=university')} className="group overflow-hidden rounded-3xl border border-gold-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-gold-400 hover:shadow-xl dark:border-gold-900/60 dark:bg-slate-900">
+          <button onClick={() => navigate('/application?type=university')} className="group overflow-hidden rounded-2xl border border-gold-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-gold-400 hover:shadow-xl dark:border-gold-900/60 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300">
                 <GraduationCap className="h-7 w-7" />
@@ -207,7 +204,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
             </p>
             {universityApp && (
               <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Reference</p>
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Reference</p>
                 <p className="mt-1 font-mono text-sm font-bold text-slate-950 dark:text-white">{universityApp.reference}</p>
               </div>
             )}
@@ -669,7 +666,7 @@ const StudentApplicationPage = () => {
     };
 
   if (loadingSummary) {
-    return <div className="min-h-screen bg-slate-50 p-8 text-center text-slate-400 dark:bg-slate-950">Loading application...</div>;
+    return <PageLoader label="Loading your application…" />;
   }
 
   if (existingApplication) {
@@ -677,9 +674,9 @@ const StudentApplicationPage = () => {
     const rows = isAccommodation ? existingApplication.properties : existingApplication.choices;
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div className="mx-auto max-w-4xl px-4 py-6">
-          <button onClick={() => navigate('/application')} className="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-xs font-bold text-brand-600 shadow-sm dark:bg-slate-900 dark:text-brand-300"><ArrowLeft className="mr-1 h-3.5 w-3.5" />Application types</button>
-          <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mx-auto max-w-4xl px-4 py-4 sm:px-6 lg:py-6">
+          <button type="button" onClick={() => navigate('/application')} className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"><ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />All application types</button>
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10"><CheckCircle className="h-6 w-6" /></div>
             <h1 className="text-2xl font-bold text-slate-950 dark:text-white">{isAccommodation ? 'Accommodation' : 'University'} application submitted</h1>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Your application is saved. Each {isAccommodation ? 'property' : 'university'} reviews its own decision independently.</p>
@@ -703,18 +700,18 @@ const StudentApplicationPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 lg:px-6">
-        <button onClick={() => navigate('/application')} className="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-xs font-bold text-brand-600 shadow-sm dark:bg-slate-900 dark:text-brand-300"><ArrowLeft className="mr-1 h-3.5 w-3.5" />Application types</button>
-        <div className="mb-5 rounded-3xl bg-slate-950 p-6 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+        <button type="button" onClick={() => navigate('/application')} className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300"><ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />All application types</button>
+        <div className="mb-5 rounded-2xl bg-slate-950 p-6 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold sm:text-3xl">{isAccommodation ? 'Accommodation' : 'University'} application</h1>
               <p className="mt-2 text-sm text-slate-300">Browse sections freely. Required fields are checked only on final submit.</p>
             </div>
-            <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white"><MapPin className="h-4 w-4" /> Step {step} of {STEPS.length}</div>
+            <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white"><ClipboardList className="h-4 w-4" aria-hidden="true" /> Step {step} of {STEPS.length}</div>
           </div>
         </div>
-        <div className="mb-5 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="mb-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex items-center justify-between"><p className="text-sm font-bold text-slate-950 dark:text-white">{isAccommodation ? 'Accommodation' : 'University'}</p><p className={`text-xs font-bold ${theme.percentText}`}>{Math.round((step / STEPS.length) * 100)}% viewed</p></div>
           <div className="mb-5 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div className={`h-full rounded-full ${theme.progressBar}`} style={{ width: `${(step / STEPS.length) * 100}%` }} /></div>
           <div className={`grid grid-cols-2 gap-2 ${theme.stepsGridCols}`}>
@@ -725,7 +722,7 @@ const StudentApplicationPage = () => {
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           {isAccommodation ? renderAccommodationStep() : renderUniversityStep()}
           <div className="mt-8 flex flex-col gap-3 border-t border-slate-100 pt-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
             <button type="button" onClick={() => goToStep(Math.max(1, step - 1))} disabled={step === 1} className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"><ArrowLeft className="mr-2 h-4 w-4" />Previous</button>

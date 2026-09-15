@@ -156,7 +156,7 @@ const AppSidebar = ({ isOpen, onClose }) => {
                   <p className="truncate text-sm font-bold text-slate-900 dark:text-white sm:text-base">{user?.name || 'Student'}</p>
                   {user?.verified && <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-emerald-500 dark:text-emerald-300" />}
                 </div>
-                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Click to update profile</p>
+                <p className="mt-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Manage profile</p>
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
             </div>

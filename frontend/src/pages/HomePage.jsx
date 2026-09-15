@@ -1,124 +1,153 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, MapPin, Star, Shield, Users, Home, ArrowRight, CheckCircle, TrendingUp } from 'lucide-react';
+import {
+  Search, MapPin, Star, Shield, Users, Home, ArrowRight, CheckCircle2, TrendingUp,
+  ClipboardCheck, ScanSearch, FileText, BadgeCheck,
+} from 'lucide-react';
 import { propertiesAPI, statsAPI } from '../services/api';
+import { Button, Input, Select, Skeleton } from '../components/ui';
+import { cn } from '../utils/cn';
 
-const useFadeIn = () => {
+/** Fades an element in the first time it scrolls into view. */
+const useReveal = () => {
   const ref = useRef(null);
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    const element = ref.current;
+    if (!element) return undefined;
+    if (!('IntersectionObserver' in window)) {
+      element.style.opacity = '1';
+      element.style.transform = 'none';
+      return undefined;
+    }
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; } },
-      { threshold: 0.1 }
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          element.style.opacity = '1';
+          element.style.transform = 'none';
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
     );
-    observer.observe(el);
+    observer.observe(element);
     return () => observer.disconnect();
   }, []);
   return ref;
 };
 
+const REVEAL_STYLE = { opacity: 0, transform: 'translateY(16px)', transition: 'opacity 0.55s ease, transform 0.55s ease' };
+
 const STAT_CONFIGS = [
-  { icon: Home, key: 'properties', label: 'Verified Properties' },
-  { icon: Users, key: 'students', label: 'Happy Students' },
-  { icon: CheckCircle, key: 'reviews', label: 'Verified Reviews' },
-  { icon: TrendingUp, key: 'avg_rating', label: 'Average Rating' },
+  { icon: Home, key: 'properties', label: 'Verified properties', format: (value) => `${value}+` },
+  { icon: Users, key: 'students', label: 'Registered students', format: (value) => `${value}+` },
+  { icon: CheckCircle2, key: 'reviews', label: 'Verified reviews', format: (value) => `${value}` },
+  { icon: TrendingUp, key: 'avg_rating', label: 'Average rating', format: (value) => `${value} / 5` },
 ];
 
 const FEATURES = [
   {
     icon: Shield,
-    color: 'bg-brand-700',
-    title: 'Verified Properties',
-    description: 'Every listing is reviewed before students apply, so you spend less time guessing.',
+    tone: 'bg-brand-600',
+    title: 'Verified listings',
+    description: 'Every property is reviewed by our team before students can apply, so you spend less time second-guessing.',
   },
   {
     icon: Star,
-    color: 'bg-gold-500',
-    title: 'Authentic Reviews',
-    description: 'Read practical feedback from students on safety, value, location, and management.',
+    tone: 'bg-gold-500',
+    title: 'Honest student reviews',
+    description: 'Practical feedback from students on safety, value, location, cleanliness and management.',
   },
   {
-    icon: Users,
-    color: 'bg-emerald-600',
-    title: 'Simple Applications',
-    description: 'Apply once, keep your reference number, and track your accommodation progress.',
+    icon: FileText,
+    tone: 'bg-emerald-600',
+    title: 'One simple application',
+    description: 'Enter your details once, choose up to three residences, and track each decision from your dashboard.',
   },
 ];
 
-const TRUST_POINTS = ['Wits and UJ focused', 'NSFAS filters', 'Verified reviews', 'Admin moderated'];
+const STEPS = [
+  { icon: ScanSearch, title: 'Search', text: 'Filter by campus, budget, and NSFAS accreditation.' },
+  { icon: ClipboardCheck, title: 'Compare', text: 'Read verified reviews and shortlist your favourites.' },
+  { icon: BadgeCheck, title: 'Apply', text: 'Submit one application and track every decision.' },
+];
 
-const UNIV_BADGE = {
-  wits: 'bg-brand-100 text-brand-800',
-  uj: 'bg-teal-100 text-teal-800',
-  both: 'bg-gold-100 text-gold-800',
+const TRUST_POINTS = ['Wits & UJ focused', 'NSFAS filters', 'Verified reviews', 'Admin moderated'];
+
+const UNIVERSITY_BADGE = {
+  wits: 'bg-white text-brand-800',
+  uj: 'bg-white text-teal-800',
 };
 
 const PropertyCard = ({ property }) => {
-  const ref = useFadeIn();
+  const ref = useReveal();
+  const reviewCount = property.review_count || 0;
   return (
-    <div
+    <article
       ref={ref}
-      style={{ opacity: 0, transform: 'translateY(16px)', transition: 'opacity 0.5s ease, transform 0.5s ease' }}
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 group flex flex-col"
+      style={REVEAL_STYLE}
+      className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900"
     >
-      <div className="relative h-40 bg-brand-900 flex items-center justify-center overflow-hidden">
-        <Home className="w-10 h-10 text-white/25" />
-        <div className="absolute top-3 left-3 flex gap-1.5 z-10">
-          <span className={`${UNIV_BADGE[property.university] || UNIV_BADGE.both} px-2.5 py-1 rounded-full text-xs font-bold`}>
-            {property.university?.toUpperCase()}
+      <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" aria-hidden="true" />
+        <Home className="h-10 w-10 text-white/20" aria-hidden="true" />
+        <div className="absolute left-3 top-3 flex gap-1.5">
+          <span className={cn('rounded-full px-2.5 py-1 text-[11px] font-bold uppercase shadow-sm', UNIVERSITY_BADGE[property.university] || 'bg-white text-gold-800')}>
+            {property.university}
           </span>
           {property.nsfas_accredited && (
-            <span className="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-full text-xs font-bold">NSFAS</span>
+            <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">NSFAS</span>
           )}
         </div>
-        <div className="absolute top-3 right-3 z-10">
-          <span className="bg-black/40 text-white px-2.5 py-1 rounded-full text-xs font-medium capitalize">
-            {property.property_type}
-          </span>
-        </div>
+        <span className="absolute right-3 top-3 rounded-full bg-black/40 px-2.5 py-1 text-[11px] font-semibold capitalize text-white backdrop-blur">
+          {property.property_type}
+        </span>
       </div>
 
-      <div className="p-5 flex flex-col flex-1">
-        <div className="flex items-start justify-between mb-2 gap-3">
-          <h3 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors leading-snug">
+      <div className="flex flex-1 flex-col p-5">
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h3 className="line-clamp-2 text-base font-bold leading-snug text-slate-950 transition-colors group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300">
             {property.name}
           </h3>
-          <div className="flex items-center gap-1 bg-gold-50 border border-gold-100 px-2 py-1 rounded-lg flex-shrink-0">
-            <Star className="w-3.5 h-3.5 text-gold-500 fill-gold-500" />
-            <span className="font-bold text-gray-800 text-xs">{property.average_rating || 'New'}</span>
-          </div>
+          <span className="flex shrink-0 items-center gap-1 rounded-full bg-gold-50 px-2 py-1 text-xs font-bold text-slate-800 ring-1 ring-inset ring-gold-200/70 dark:bg-gold-500/10 dark:text-slate-100 dark:ring-gold-400/20">
+            <Star className="h-3.5 w-3.5 fill-gold-500 text-gold-500" aria-hidden="true" />
+            {property.average_rating || 'New'}
+          </span>
         </div>
 
-        <div className="flex items-center text-gray-500 dark:text-gray-400 mb-3">
-          <MapPin className="w-3.5 h-3.5 mr-1.5 text-brand-600 flex-shrink-0" />
-          <span className="text-xs truncate">{property.address}</span>
-        </div>
-
-        <p className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-2 leading-relaxed flex-1">
-          {property.description}
+        <p className="mb-3 flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+          <MapPin className="h-3.5 w-3.5 shrink-0 text-brand-500" aria-hidden="true" />
+          <span className="truncate">{property.address}</span>
         </p>
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700 mb-4">
+        <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{property.description}</p>
+
+        <div className="mb-4 flex items-end justify-between gap-3 border-t border-slate-100 pt-3 dark:border-slate-800">
           <div>
-            <div className="text-base font-bold text-brand-700 dark:text-brand-400">
-              R{property.price_min?.toLocaleString()} to R{property.price_max?.toLocaleString()}
-            </div>
-            <span className="text-gray-400 text-xs">per month</span>
+            <p className="text-base font-bold text-brand-700 dark:text-brand-300">
+              R{property.price_min?.toLocaleString()} – R{property.price_max?.toLocaleString()}
+            </p>
+            <p className="text-xs text-slate-400">per month</p>
           </div>
-          <span className="text-xs text-gray-400">{property.review_count} reviews</span>
+          <p className="text-xs font-medium text-slate-400">{reviewCount} review{reviewCount === 1 ? '' : 's'}</p>
         </div>
 
-        <Link
-          to={`/properties/${property.id}`}
-          className="w-full bg-brand-700 hover:bg-brand-800 text-white py-2.5 rounded-lg transition-colors font-semibold text-sm text-center block"
-        >
-          View Details
-        </Link>
+        <Button to={`/properties/${property.id}`} fullWidth>View details</Button>
       </div>
-    </div>
+    </article>
   );
 };
+
+const PropertyCardSkeleton = () => (
+  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+    <Skeleton className="h-40 rounded-none" />
+    <div className="space-y-3 p-5">
+      <Skeleton className="h-4 w-3/4" />
+      <Skeleton className="h-3 w-1/2" />
+      <Skeleton className="h-3 w-full" />
+      <Skeleton className="h-10 w-full" />
+    </div>
+  </div>
+);
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -128,167 +157,135 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
 
-  const featuredRef = useFadeIn();
-  const featuresRef = useFadeIn();
+  const featuredRef = useReveal();
+  const featuresRef = useReveal();
+  const stepsRef = useReveal();
 
   useEffect(() => {
     propertiesAPI.getProperties({ per_page: 6 })
-      .then((r) => setFeaturedProperties(r.data.properties))
+      .then((response) => setFeaturedProperties(response.data.properties))
       .catch(() => {})
       .finally(() => setLoading(false));
     statsAPI.getStats()
-      .then((r) => setStats(r.data))
+      .then((response) => setStats(response.data))
       .catch(() => {});
   }, []);
 
-  const handleSearch = () => {
+  const handleSearch = (event) => {
+    event?.preventDefault?.();
     const params = new URLSearchParams();
-    if (searchTerm) params.append('search', searchTerm);
-    if (selectedUniversity !== 'all') params.append('university', selectedUniversity);
-    navigate(`/properties?${params}`);
+    if (searchTerm.trim()) params.set('search', searchTerm.trim());
+    if (selectedUniversity !== 'all') params.set('university', selectedUniversity);
+    const query = params.toString();
+    navigate(query ? `/properties?${query}` : '/properties');
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <section className="relative py-16 md:py-24 text-white overflow-hidden bg-brand-950">
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.06),transparent_45%)]" />
+    <div className="bg-slate-50 dark:bg-slate-950">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-brand-950 py-16 text-white md:py-24">
+        <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.08),transparent_45%)]" />
+          <div className="absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-brand-600/30 blur-3xl" />
         </div>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 items-center">
+        <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
             <div>
-              <span
-                className="inline-flex items-center gap-2 bg-white/10 border border-white/15 text-white px-4 py-2 rounded-full text-xs font-semibold mb-5"
-                style={{ animation: 'fadeDown 0.6s ease forwards' }}
-              >
-                <Shield className="w-3.5 h-3.5" />
+              <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white animate-fade-down">
+                <Shield className="h-3.5 w-3.5" aria-hidden="true" />
                 All Your Options. One Platform.
               </span>
-              <h1
-                className="text-4xl md:text-6xl font-bold mb-5 leading-tight tracking-tight"
-                style={{ animation: 'fadeDown 0.7s ease 0.1s both' }}
-              >
+              <h1 className="mb-5 text-4xl font-bold leading-[1.1] tracking-tight animate-fade-down [animation-delay:80ms] md:text-6xl">
                 Find student accommodation without the stress
               </h1>
-              <p
-                className="text-base md:text-lg text-brand-100 max-w-2xl leading-relaxed"
-                style={{ animation: 'fadeDown 0.7s ease 0.2s both' }}
-              >
-                Search verified places near Wits and UJ, compare reviews, and start your application from one clean dashboard.
+              <p className="max-w-2xl text-base leading-relaxed text-brand-100 animate-fade-down [animation-delay:160ms] md:text-lg">
+                Search verified places near Wits and UJ, compare honest reviews, and submit one application from a single dashboard.
               </p>
 
-              <div className="flex flex-wrap gap-2 mt-6" style={{ animation: 'fadeDown 0.7s ease 0.25s both' }}>
+              <ul className="mt-7 flex flex-wrap gap-2 animate-fade-down [animation-delay:220ms]" aria-label="Highlights">
                 {TRUST_POINTS.map((point) => (
-                  <span key={point} className="bg-white/10 border border-white/15 px-3 py-1.5 rounded-full text-xs font-medium text-brand-50">
+                  <li key={point} className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-brand-50">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
                     {point}
-                  </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
-            <div className="bg-white/95 dark:bg-gray-900/95 text-gray-900 dark:text-white rounded-2xl p-5 md:p-6 shadow-2xl border border-white/30" style={{ animation: 'fadeUp 0.7s ease 0.3s both' }}>
-              <div className="flex items-center justify-between mb-5">
+            <form
+              onSubmit={handleSearch}
+              className="rounded-2xl border border-white/20 bg-white p-5 text-slate-900 shadow-2xl shadow-black/30 animate-fade-up [animation-delay:240ms] dark:border-slate-800 dark:bg-slate-900 dark:text-white md:p-6"
+            >
+              <div className="mb-5 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs font-bold text-brand-700 dark:text-brand-400 uppercase tracking-wide">Start here</p>
-                  <h2 className="text-xl font-bold">Search accommodation</h2>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">Start here</p>
+                  <h2 className="mt-0.5 text-xl font-bold">Search accommodation</h2>
                 </div>
-                <div className="w-11 h-11 bg-brand-100 text-brand-700 rounded-xl flex items-center justify-center">
-                  <Home className="w-5 h-5" />
-                </div>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+                  <Home className="h-5 w-5" aria-hidden="true" />
+                </span>
               </div>
 
               <div className="space-y-3">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by property name or area"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 text-sm"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  />
-                </div>
-                <select
-                  className="w-full px-4 py-3 border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent text-gray-900 text-sm"
-                  value={selectedUniversity}
-                  onChange={(e) => setSelectedUniversity(e.target.value)}
-                >
-                  <option value="all">All Universities</option>
+                <Input
+                  icon={Search}
+                  type="search"
+                  aria-label="Search by property name or area"
+                  placeholder="Search by property name or area"
+                  className="py-3"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
+                <Select aria-label="University" className="py-3" value={selectedUniversity} onChange={(event) => setSelectedUniversity(event.target.value)}>
+                  <option value="all">All universities</option>
                   <option value="wits">Wits University</option>
                   <option value="uj">University of Johannesburg</option>
-                </select>
+                </Select>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-3 mt-4">
-                <button
-                  onClick={handleSearch}
-                  className="bg-brand-700 hover:bg-brand-800 text-white px-5 py-3 rounded-xl transition-colors font-bold text-sm flex items-center justify-center gap-2 group shadow-sm"
-                >
-                  Browse Properties
-                  <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                </button>
-                <Link
-                  to="/register"
-                  className="border-2 border-brand-700 text-brand-700 dark:text-brand-400 hover:bg-brand-700 hover:text-white px-5 py-3 rounded-xl transition-colors font-bold text-sm text-center"
-                >
-                  Start Application
-                </Link>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                <Button type="submit" size="lg" className="group">
+                  Browse properties
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                </Button>
+                <Button to="/register" variant="secondary" size="lg">Start application</Button>
               </div>
 
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                <div className="rounded-xl bg-brand-50 dark:bg-brand-950/40 p-3">
-                  <p className="text-lg font-bold text-brand-700 dark:text-brand-300">1</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Search</p>
-                </div>
-                <div className="rounded-xl bg-emerald-50 dark:bg-emerald-950/40 p-3">
-                  <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">2</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Compare</p>
-                </div>
-                <div className="rounded-xl bg-gold-50 dark:bg-gold-950/40 p-3">
-                  <p className="text-lg font-bold text-gold-700 dark:text-gold-300">3</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Apply</p>
-                </div>
-              </div>
-            </div>
+              <ol className="mt-6 grid grid-cols-3 gap-2 border-t border-slate-100 pt-5 dark:border-slate-800">
+                {STEPS.map(({ icon: Icon, title }, index) => (
+                  <li key={title} className="flex flex-col items-center gap-1.5 text-center">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                      <span className="text-slate-400 dark:text-slate-500">{index + 1}. </span>{title}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </form>
           </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 overflow-hidden leading-none">
-          <svg viewBox="0 0 1440 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full dark:hidden">
-            <path d="M0 30 C360 0 1080 0 1440 30 L1440 30 L0 30 Z" fill="#F9FAFB" />
-          </svg>
-          <svg viewBox="0 0 1440 30" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full hidden dark:block">
-            <path d="M0 30 C360 0 1080 0 1440 30 L1440 30 L0 30 Z" fill="#111827" />
-          </svg>
         </div>
       </section>
 
-      <section className="bg-gray-50 dark:bg-gray-900 py-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {STAT_CONFIGS.map(({ icon: Icon, key, label }) => {
-              let value = 'N/A';
-              if (stats) {
-                const raw = stats[key];
-                if (key === 'avg_rating') value = raw != null ? `${raw}★` : 'N/A';
-                else if (key === 'reviews') value = raw != null ? `${raw}` : 'N/A';
-                else value = raw != null ? `${raw}+` : 'N/A';
-              }
+      {/* Stats */}
+      <section className="relative z-10 -mt-8 pb-4">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {STAT_CONFIGS.map(({ icon: Icon, key, label, format }) => {
+              const raw = stats?.[key];
+              const value = raw == null ? '—' : format(raw);
               return (
-                <div
-                  key={label}
-                  className="bg-white dark:bg-gray-800 rounded-xl px-4 py-4 flex items-center gap-3 border border-gray-100 dark:border-gray-700 shadow-sm"
-                >
-                  <div className="bg-brand-700 w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <div className="text-xl font-bold text-brand-700 dark:text-brand-400 leading-none">
-                      {stats ? value : <span className="inline-block w-10 h-4 bg-gray-200 animate-pulse rounded" />}
-                    </div>
-                    <div className="text-gray-500 dark:text-gray-400 text-xs mt-1">{label}</div>
+                <div key={key} className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xl font-bold leading-none text-slate-950 dark:text-white">
+                      {stats ? value : <Skeleton className="inline-block h-5 w-12" />}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{label}</p>
                   </div>
                 </div>
               );
@@ -297,122 +294,99 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="py-12 bg-white dark:bg-gray-900">
-        <div
-          ref={featuredRef}
-          style={{ opacity: 0, transform: 'translateY(20px)', transition: 'opacity 0.6s ease, transform 0.6s ease' }}
-          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="flex items-end justify-between mb-7 gap-4">
+      {/* Featured */}
+      <section className="py-14">
+        <div ref={featuredRef} style={REVEAL_STYLE} className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <span className="inline-block bg-brand-100 text-brand-700 px-3 py-1 rounded-full text-xs font-bold mb-2 uppercase tracking-wide">
-                Featured
-              </span>
-              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Top Rated Accommodations</h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Verified properties ranked by authentic student reviews.</p>
+              <p className="mb-2 inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">Featured</p>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Top-rated accommodation</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Verified properties ranked by authentic student reviews.</p>
             </div>
-            <Link
-              to="/properties"
-              className="inline-flex items-center gap-1.5 text-brand-700 hover:text-brand-800 dark:text-brand-400 font-semibold text-sm group flex-shrink-0"
-            >
+            <Link to="/properties" className="group inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-300 dark:hover:text-brand-200">
               View all
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </div>
 
-          {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-                  <div className="h-40 bg-gray-200" />
-                  <div className="p-5 space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-3/4" />
-                    <div className="h-3 bg-gray-200 rounded w-1/2" />
-                    <div className="h-10 bg-gray-200 rounded" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {featuredProperties.map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {loading
+              ? Array.from({ length: 6 }).map((_, index) => <PropertyCardSkeleton key={index} />)
+              : featuredProperties.map((property) => <PropertyCard key={property.id} property={property} />)}
+          </div>
+
+          {!loading && featuredProperties.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              New listings are being verified. Check back soon.
             </div>
           )}
         </div>
       </section>
 
-      <section className="py-12 bg-gray-50 dark:bg-gray-900">
-        <div
-          ref={featuresRef}
-          style={{ opacity: 0, transform: 'translateY(20px)', transition: 'opacity 0.6s ease, transform 0.6s ease' }}
-          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="text-center mb-8">
-            <span className="inline-block bg-brand-100 text-brand-700 px-3 py-1 rounded-full text-xs font-bold mb-2 uppercase tracking-wide">
-              Why oneApplyHub?
-            </span>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              Everything You Need to Find Home
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 max-w-lg mx-auto text-sm">
-              Safe, affordable accommodation near campus, verified for students, by students.
-            </p>
+      {/* How it works */}
+      <section className="border-y border-slate-200 bg-white py-14 dark:border-slate-800 dark:bg-slate-900/60">
+        <div ref={stepsRef} style={REVEAL_STYLE} className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <p className="mb-2 inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">How it works</p>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Three steps to your next home</h2>
+          </div>
+          <ol className="grid gap-6 md:grid-cols-3">
+            {STEPS.map(({ icon: Icon, title, text }, index) => (
+              <li key={title} className="relative flex gap-4">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-600 text-white shadow-sm">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Step {index + 1}</p>
+                  <h3 className="mt-0.5 text-base font-bold text-slate-950 dark:text-white">{title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-14">
+        <div ref={featuresRef} style={REVEAL_STYLE} className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="mb-10 text-center">
+            <p className="mb-2 inline-block rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">Why oneApplyHub</p>
+            <h2 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Everything you need to find home</h2>
+            <p className="mx-auto mt-2 max-w-lg text-sm text-slate-500 dark:text-slate-400">Safe, affordable accommodation near campus — verified for students, by students.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {FEATURES.map(({ icon: Icon, color, title, description }, i) => (
-              <div
-                key={title}
-                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-shadow duration-300"
-                style={{ transitionDelay: `${i * 80}ms` }}
-              >
-                <div className={`${color} w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 mb-4`}>
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">{title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">{description}</p>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            {FEATURES.map(({ icon: Icon, tone, title, description }) => (
+              <div key={title} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-card transition-shadow duration-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900">
+                <span className={cn('mb-4 flex h-12 w-12 items-center justify-center rounded-xl text-white', tone)}>
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <h3 className="mb-2 text-base font-bold text-slate-950 dark:text-white">{title}</h3>
+                <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">{description}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-12 bg-brand-900 text-white relative overflow-hidden">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          <h2 className="text-2xl md:text-4xl font-bold mb-3">Ready to Find Your Student Home?</h2>
-          <p className="text-sm md:text-base mb-7 text-brand-100 max-w-xl mx-auto">
-            Join Wits and UJ students using oneApplyHub to search, compare, review, and apply with more confidence.
+      {/* CTA */}
+      <section className="relative overflow-hidden bg-brand-900 py-16 text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.08),transparent_50%)]" aria-hidden="true" />
+        <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <h2 className="text-2xl font-bold tracking-tight md:text-4xl">Ready to find your student home?</h2>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-brand-100 md:text-base">
+            Join Wits and UJ students using oneApplyHub to search, compare, review, and apply with confidence.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              to="/properties"
-              className="bg-white text-brand-800 hover:bg-gray-100 px-7 py-3 rounded-xl transition-colors font-bold text-sm flex items-center justify-center gap-2 group shadow-md"
-            >
-              Browse Properties
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-            <Link
-              to="/register"
-              className="border-2 border-white/60 text-white hover:border-white hover:bg-white/10 px-7 py-3 rounded-xl transition-colors font-bold text-sm text-center"
-            >
-              Create Free Account
-            </Link>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Button to="/properties" variant="inverse" size="xl" className="group">
+              Browse properties
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Button>
+            <Button to="/register" variant="inverse-outline" size="xl">Create free account</Button>
           </div>
         </div>
       </section>
-
-      <style>{`
-        @keyframes fadeDown {
-          from { opacity: 0; transform: translateY(-14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 };

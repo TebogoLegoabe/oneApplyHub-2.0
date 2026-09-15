@@ -1,236 +1,386 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  AlertCircle,
-  Building2,
-  CheckCircle,
-  ClipboardList,
-  Crown,
-  Eye,
-  GraduationCap,
-  LayoutDashboard,
-  LogOut,
-  MessageSquare,
-  Moon,
-  Save,
-  Shield,
-  Sun,
-  Trash2,
-  UserCog,
-  Users,
-  X,
-  XCircle,
+  AlertCircle, Building2, ClipboardList, Crown, DoorOpen, Eye, ExternalLink, GraduationCap, LayoutDashboard,
+  LogOut, Menu, MessageSquare, Moon, Save, Shield, Sun, Trash2, UserCog, Users, X,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import logoImg from '../assets/OneHubLogo.png';
-
-const Badge = ({ children, color = 'gray' }) => {
-  const colors = {
-    green: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
-    amber: 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
-    blue: 'bg-brand-100 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300',
-    purple: 'bg-gold-100 text-gold-700 dark:bg-gold-500/10 dark:text-gold-300',
-    red: 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-300',
-    gray: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
-  };
-  return <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold capitalize ${colors[color]}`}>{children}</span>;
-};
+import { Badge, Button, ConfirmDialog, EmptyState, Modal, Select, Spinner, StatusBadge, Textarea, useToast } from '../components/ui';
+import { cn } from '../utils/cn';
 
 const Loading = () => (
-  <div className="flex justify-center py-12">
-    <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-brand-600" />
+  <div className="flex justify-center py-16" role="status" aria-label="Loading">
+    <Spinner size="lg" />
   </div>
 );
 
-const EmptyState = ({ text }) => <div className="rounded-2xl border border-dashed border-gray-200 p-8 text-center text-sm text-gray-400 dark:border-gray-800">{text}</div>;
-const ShellCard = ({ children, className = '' }) => <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900 ${className}`}>{children}</div>;
+const ShellCard = ({ children, className = '' }) => (
+  <div className={cn('rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900', className)}>{children}</div>
+);
 
-const statusColor = (status) => status === 'approved' ? 'green' : status === 'rejected' ? 'red' : status === 'under_review' ? 'blue' : 'amber';
-const fmt = (value) => value ? new Date(value).toLocaleDateString('en-ZA') : '—';
-const show = (value) => value || '—';
+const CardTitle = ({ title, description, action }) => (
+  <div className="flex flex-col gap-2 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <h2 className="text-base font-bold text-slate-950 dark:text-white">{title}</h2>
+      {description && <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{description}</p>}
+    </div>
+    {action}
+  </div>
+);
+
+const Table = ({ columns, children }) => (
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm">
+      <thead className="bg-slate-50 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:bg-slate-800/60 dark:text-slate-400">
+        <tr>
+          {columns.map((column) => (
+            <th key={column.label} scope="col" className={cn('px-5 py-3', column.align === 'right' && 'text-right')}>{column.label}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">{children}</tbody>
+    </table>
+  </div>
+);
+
+const fmt = (value) => (value ? new Date(value).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
+const show = (value) => (value === null || value === undefined || value === '' ? '—' : value);
 
 const DetailRow = ({ label, value }) => (
-  <div className="rounded-2xl border border-gray-100 bg-gray-50 p-3 dark:border-gray-800 dark:bg-gray-950/60">
-    <p className="text-[11px] font-bold uppercase tracking-wide text-gray-400">{label}</p>
-    <p className="mt-1 break-words text-sm font-bold text-gray-950 dark:text-white">{show(value)}</p>
+  <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/60">
+    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
+    <p className="mt-1 break-words text-sm font-medium text-slate-950 dark:text-white">{show(value)}</p>
   </div>
 );
+
+const DecisionFields = ({ status, setStatus, notes, setNotes, notesLabel, notesPlaceholder }) => (
+  <div className="grid grid-cols-1 gap-4 lg:grid-cols-[260px_1fr]">
+    <Select label="Decision status" value={status} onChange={(event) => setStatus(event.target.value)} className="font-semibold">
+      <option value="pending">Pending</option>
+      <option value="under_review">Under review</option>
+      <option value="approved">Approved</option>
+      <option value="rejected">Rejected</option>
+    </Select>
+    <Textarea label={notesLabel} rows={5} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={notesPlaceholder} />
+  </div>
+);
+
+/* ------------------------------------------------------------------ Overview */
 
 const Overview = ({ stats, user, onNav }) => {
   if (!stats) return <Loading />;
   const cards = [
-    { label: 'Users', value: stats.total_users, sub: `${stats.verified_users} verified`, icon: Users, tab: 'Users', color: 'blue' },
-    { label: 'Properties', value: stats.total_properties, sub: `${stats.approved_properties} approved`, icon: Building2, tab: 'Properties', color: 'green' },
-    { label: 'Reviews', value: stats.pending_reviews, sub: 'pending moderation', icon: MessageSquare, tab: 'Reviews', color: 'purple' },
-    { label: 'Applications', value: stats.total_applications, sub: `${stats.pending_applications} pending`, icon: ClipboardList, tab: 'Applications', color: 'amber' },
+    { label: 'Users', value: stats.total_users, sub: `${stats.verified_users ?? 0} verified`, icon: Users, tab: 'Users', tone: 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300' },
+    { label: 'Properties', value: stats.total_properties, sub: `${stats.approved_properties ?? 0} approved`, icon: Building2, tab: 'Properties', tone: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300' },
+    { label: 'Pending reviews', value: stats.pending_reviews, sub: 'awaiting moderation', icon: MessageSquare, tab: 'Reviews', tone: 'bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300' },
+    { label: 'Applications', value: stats.total_applications, sub: `${stats.pending_applications ?? 0} pending`, icon: ClipboardList, tab: 'Applications', tone: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300' },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map(({ label, value, sub, icon: Icon, tab, color }) => (
-          <button key={label} onClick={() => onNav(tab)} className="rounded-2xl border border-gray-100 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-gray-800 dark:bg-gray-900">
-            <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${color === 'green' ? 'bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10' : color === 'purple' ? 'bg-gold-100 text-gold-600 dark:bg-gold-500/10' : color === 'amber' ? 'bg-amber-100 text-amber-600 dark:bg-amber-500/10' : 'bg-brand-100 text-brand-600 dark:bg-brand-500/10'}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-            <p className="text-3xl font-bold text-gray-950 dark:text-white">{value ?? 0}</p>
-            <p className="mt-1 text-sm font-bold text-gray-700 dark:text-gray-300">{label}</p>
-            <p className="mt-0.5 text-xs text-gray-400">{sub}</p>
+    <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {cards.map(({ label, value, sub, icon: Icon, tab, tone }) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onNav(tab)}
+            className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900"
+          >
+            <span className={cn('mb-4 flex h-11 w-11 items-center justify-center rounded-xl', tone)}>
+              <Icon className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">{value ?? 0}</p>
+            <p className="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-300">{label}</p>
+            <p className="mt-0.5 text-xs text-slate-400">{sub}</p>
           </button>
         ))}
       </div>
 
       {user?.is_super_admin && (
-        <button onClick={() => { window.location.href = '/admin/property-admins'; }} className="w-full rounded-2xl bg-brand-800 p-6 text-left text-white shadow-sm transition-shadow hover:shadow-md">
+        <Link to="/admin/property-admins" className="block rounded-2xl bg-brand-800 p-6 text-white shadow-card transition-shadow hover:shadow-card-hover">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold">
-                <UserCog className="h-3.5 w-3.5" /> Super admin action
-              </div>
+              <span className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+                <UserCog className="h-3.5 w-3.5" aria-hidden="true" /> Super admin action
+              </span>
               <h2 className="text-xl font-bold">Create and assign property admins</h2>
               <p className="mt-1 max-w-2xl text-sm text-brand-50">Give each property manager access only to their assigned properties, reviews, and applications.</p>
             </div>
-            <span className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-brand-700">Open Property Admins</span>
+            <span className="inline-flex h-10 shrink-0 items-center rounded-xl bg-white px-4 text-sm font-semibold text-brand-800">Open property admins</span>
           </div>
-        </button>
+        </Link>
       )}
 
-      <ShellCard className="p-6">
-        <h3 className="mb-4 text-lg font-bold text-gray-950 dark:text-white">Current scope</h3>
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div><p className="text-xs text-gray-400">Role</p><Badge color={user?.is_super_admin ? 'purple' : 'blue'}>{user?.is_super_admin ? 'Super Admin' : 'Managing Admin'}</Badge></div>
-          <div><p className="text-xs text-gray-400">Managed properties</p><p className="font-bold text-gray-900 dark:text-white">{user?.is_super_admin ? 'All' : (stats.managed_property_ids?.length || 0)}</p></div>
-          <div><p className="text-xs text-gray-400">Applications visible</p><p className="font-bold text-gray-900 dark:text-white">{stats.total_applications}</p></div>
-        </div>
+      <ShellCard className="p-5 sm:p-6">
+        <h3 className="mb-4 text-base font-bold text-slate-950 dark:text-white">Your access scope</h3>
+        <dl className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <dt className="text-xs text-slate-400">Role</dt>
+            <dd className="mt-1"><Badge tone={user?.is_super_admin ? 'gold' : 'brand'}>{user?.is_super_admin ? 'Super admin' : 'Managing admin'}</Badge></dd>
+          </div>
+          <div>
+            <dt className="text-xs text-slate-400">Managed properties</dt>
+            <dd className="mt-1 font-semibold text-slate-900 dark:text-white">{user?.is_super_admin ? 'All properties' : (stats.managed_property_ids?.length || 0)}</dd>
+          </div>
+          <div>
+            <dt className="text-xs text-slate-400">Applications visible</dt>
+            <dd className="mt-1 font-semibold text-slate-900 dark:text-white">{stats.total_applications ?? 0}</dd>
+          </div>
+        </dl>
       </ShellCard>
     </div>
   );
 };
 
-const PropertiesTab = ({ onToast }) => {
+/* ----------------------------------------------------------------- Properties */
+
+const PropertiesTab = ({ onChanged }) => {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getProperties({ per_page: 100, status: 'all' });
-      setItems(res.data.properties || []);
+      const response = await adminAPI.getProperties({ per_page: 100, status: 'all' });
+      setItems(response.data.properties || []);
     } catch {
-      onToast('Failed to load properties', 'error');
+      toast.error('Failed to load properties.');
     } finally {
       setLoading(false);
     }
-  }, [onToast]);
+  }, [toast]);
   useEffect(() => { load(); }, [load]);
 
   const toggleApproval = async (property) => {
     try {
       await adminAPI.toggleApproval(property.id, !property.approved);
-      onToast('Property updated');
+      toast.success(property.approved ? `${property.name} is now hidden from students.` : `${property.name} is now live.`);
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to update property', 'error');
+      toast.error(err.response?.data?.error || 'Failed to update property.');
     }
   };
 
   if (loading) return <Loading />;
   return (
     <ShellCard className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Properties</h2></div>
-      {!items.length ? <EmptyState text="No properties found." /> : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">Property</th><th className="px-4 py-3">University</th><th className="px-4 py-3">Price</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Actions</th></tr></thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {items.map((p) => <tr key={p.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40"><td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{p.name}</p><p className="text-xs text-gray-400">{p.address}</p></td><td className="px-4 py-3"><Badge>{p.university?.toUpperCase()}</Badge></td><td className="px-4 py-3 text-gray-600 dark:text-gray-300">R{p.price_min?.toLocaleString()} - R{p.price_max?.toLocaleString()}</td><td className="px-4 py-3"><Badge color={p.approved ? 'green' : 'amber'}>{p.approved ? 'Approved' : 'Pending'}</Badge></td><td className="px-4 py-3 text-right"><div className="flex items-center justify-end gap-2"><a href={`/admin/properties/${p.id}/rooms`} className="rounded-lg px-3 py-1.5 text-xs font-bold text-gold-600 hover:bg-gold-50 dark:hover:bg-gold-500/10">Manage rooms</a><button onClick={() => toggleApproval(p)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">Toggle approval</button></div></td></tr>)}
-            </tbody>
-          </table>
-        </div>
+      <CardTitle title="Properties" description="Approve listings so students can see and apply to them." action={<Badge tone="brand">{items.length} total</Badge>} />
+      {!items.length ? (
+        <EmptyState icon={Building2} title="No properties found" description="Properties you manage will appear here." />
+      ) : (
+        <Table columns={[{ label: 'Property' }, { label: 'University' }, { label: 'Price' }, { label: 'Status' }, { label: 'Actions', align: 'right' }]}>
+          {items.map((property) => (
+            <tr key={property.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+              <td className="px-5 py-3">
+                <p className="font-semibold text-slate-950 dark:text-white">{property.name}</p>
+                <p className="text-xs text-slate-400">{property.address}</p>
+              </td>
+              <td className="px-5 py-3"><Badge>{property.university?.toUpperCase()}</Badge></td>
+              <td className="whitespace-nowrap px-5 py-3 text-slate-600 dark:text-slate-300">R{property.price_min?.toLocaleString()} – R{property.price_max?.toLocaleString()}</td>
+              <td className="px-5 py-3"><Badge tone={property.approved ? 'success' : 'warning'}>{property.approved ? 'Approved' : 'Pending'}</Badge></td>
+              <td className="px-5 py-3 text-right">
+                <div className="flex items-center justify-end gap-1">
+                  <Button to={`/admin/properties/${property.id}/rooms`} variant="ghost" size="sm"><DoorOpen className="h-3.5 w-3.5" aria-hidden="true" />Rooms</Button>
+                  <Button onClick={() => toggleApproval(property)} variant={property.approved ? 'ghost' : 'soft'} size="sm">{property.approved ? 'Unapprove' : 'Approve'}</Button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </Table>
       )}
     </ShellCard>
   );
 };
 
-const ReviewsTab = ({ onToast }) => {
+/* -------------------------------------------------------------------- Reviews */
+
+const ReviewsTab = ({ onChanged }) => {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getReviews({ per_page: 100, status: 'all' });
-      setItems(res.data.reviews || []);
+      const response = await adminAPI.getReviews({ per_page: 100, status: 'all' });
+      setItems(response.data.reviews || []);
     } catch {
-      onToast('Failed to load reviews', 'error');
+      toast.error('Failed to load reviews.');
     } finally {
       setLoading(false);
     }
-  }, [onToast]);
+  }, [toast]);
   useEffect(() => { load(); }, [load]);
 
   const approve = async (review, approved) => {
     try {
       await adminAPI.approveReview(review.id, approved);
-      onToast('Review updated');
+      toast.success(approved ? 'Review published.' : 'Review unpublished.');
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to update review', 'error');
+      toast.error(err.response?.data?.error || 'Failed to update review.');
     }
   };
 
-  const remove = async (review) => {
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    setDeleting(true);
     try {
-      await adminAPI.deleteReview(review.id);
-      onToast('Review deleted');
+      await adminAPI.deleteReview(pendingDelete.id);
+      toast.success('Review deleted.');
+      setPendingDelete(null);
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to delete review', 'error');
+      toast.error(err.response?.data?.error || 'Failed to delete review.');
+    } finally {
+      setDeleting(false);
     }
   };
 
   if (loading) return <Loading />;
+  const pendingCount = items.filter((review) => !review.approved).length;
+
   return (
-    <ShellCard className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Reviews</h2></div>
-      {!items.length ? <EmptyState text="No reviews found." /> : <div className="divide-y divide-gray-100 dark:divide-gray-800">{items.map((r) => <div key={r.id} className="p-4"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><p className="font-bold text-gray-950 dark:text-white">{r.property_name}</p><p className="text-xs text-gray-400">{r.author_email}</p><p className="mt-2 max-w-2xl text-sm text-gray-600 dark:text-gray-300">{r.review_text}</p></div><div className="flex items-center gap-2"><Badge color={r.approved ? 'green' : 'amber'}>{r.approved ? 'Approved' : 'Pending'}</Badge><button onClick={() => approve(r, !r.approved)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">{r.approved ? 'Unapprove' : 'Approve'}</button><button onClick={() => remove(r)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"><Trash2 className="h-4 w-4" /></button></div></div></div>)}</div>}
-    </ShellCard>
+    <>
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={confirmDelete}
+        loading={deleting}
+        title="Delete this review?"
+        description={`The review for ${pendingDelete?.property_name || 'this property'} will be permanently removed. This cannot be undone.`}
+        confirmLabel="Delete review"
+      />
+      <ShellCard className="overflow-hidden">
+        <CardTitle title="Reviews" description="Moderate student reviews before they appear publicly." action={pendingCount > 0 ? <Badge tone="warning">{pendingCount} awaiting approval</Badge> : <Badge tone="success">All caught up</Badge>} />
+        {!items.length ? (
+          <EmptyState icon={MessageSquare} title="No reviews found" description="Student reviews for your properties will appear here." />
+        ) : (
+          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            {items.map((review) => (
+              <li key={review.id} className="p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-slate-950 dark:text-white">{review.property_name}</p>
+                      <Badge tone={review.approved ? 'success' : 'warning'} size="sm">{review.approved ? 'Published' : 'Pending'}</Badge>
+                      {review.overall_rating != null && <Badge tone="gold" size="sm">{review.overall_rating}/5 ★</Badge>}
+                    </div>
+                    <p className="mt-0.5 text-xs text-slate-400">{review.author_email} · {fmt(review.created_at)}</p>
+                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600 dark:text-slate-300">{review.review_text}</p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <Button onClick={() => approve(review, !review.approved)} variant={review.approved ? 'ghost' : 'soft'} size="sm">{review.approved ? 'Unpublish' : 'Approve'}</Button>
+                    <Button onClick={() => setPendingDelete(review)} variant="ghost" size="icon" className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10" aria-label="Delete review">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </ShellCard>
+    </>
   );
 };
 
-const UsersTab = ({ currentUser, onToast }) => {
+/* ---------------------------------------------------------------------- Users */
+
+const UsersTab = ({ currentUser, onChanged }) => {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingRole, setPendingRole] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getUsers({ per_page: 100 });
-      setItems(res.data.users || []);
+      const response = await adminAPI.getUsers({ per_page: 100 });
+      setItems(response.data.users || []);
     } catch {
-      onToast('Failed to load users', 'error');
+      toast.error('Failed to load users.');
     } finally {
       setLoading(false);
     }
-  }, [onToast]);
+  }, [toast]);
   useEffect(() => { load(); }, [load]);
 
-  const promote = async (u) => {
+  const confirmRoleChange = async () => {
+    if (!pendingRole) return;
+    setSaving(true);
     try {
-      await adminAPI.updateUser(u.id, { is_admin: !u.is_admin });
-      onToast('User role updated');
+      await adminAPI.updateUser(pendingRole.id, { is_admin: !pendingRole.is_admin });
+      toast.success(pendingRole.is_admin ? `${pendingRole.name} is no longer an admin.` : `${pendingRole.name} is now an admin.`);
+      setPendingRole(null);
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to update user', 'error');
+      toast.error(err.response?.data?.error || 'Failed to update user.');
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) return <Loading />;
   return (
-    <ShellCard className="overflow-hidden">
-      <div className="border-b border-gray-100 p-4 dark:border-gray-800"><h2 className="font-bold text-gray-950 dark:text-white">Users</h2></div>
-      {!items.length ? <EmptyState text="No users found." /> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60"><tr><th className="px-4 py-3">User</th><th className="px-4 py-3">Verified</th><th className="px-4 py-3">Role</th><th className="px-4 py-3 text-right">Actions</th></tr></thead><tbody className="divide-y divide-gray-100 dark:divide-gray-800">{items.map((u) => <tr key={u.id}><td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{u.name}</p><p className="text-xs text-gray-400">{u.email}</p></td><td className="px-4 py-3"><Badge color={u.verified ? 'green' : 'amber'}>{u.verified ? 'Verified' : 'Unverified'}</Badge></td><td className="px-4 py-3"><Badge color={u.is_super_admin ? 'purple' : u.is_admin ? 'blue' : 'gray'}>{u.is_super_admin ? 'Super Admin' : u.is_admin ? 'Admin' : 'Student'}</Badge></td><td className="px-4 py-3 text-right">{currentUser?.is_super_admin && currentUser?.id !== u.id && !u.is_super_admin && <button onClick={() => promote(u)} className="rounded-lg px-3 py-1.5 text-xs font-bold text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10">{u.is_admin ? 'Revoke admin' : 'Make admin'}</button>}</td></tr>)}</tbody></table></div>}
-    </ShellCard>
+    <>
+      <ConfirmDialog
+        open={Boolean(pendingRole)}
+        onClose={() => setPendingRole(null)}
+        onConfirm={confirmRoleChange}
+        loading={saving}
+        tone={pendingRole?.is_admin ? 'danger' : 'primary'}
+        title={pendingRole?.is_admin ? 'Revoke admin access?' : 'Grant admin access?'}
+        description={pendingRole?.is_admin
+          ? `${pendingRole?.name} will lose access to the admin console and any assigned properties.`
+          : `${pendingRole?.name} will be able to sign in to the admin console. Assign properties afterwards under Property Admins.`}
+        confirmLabel={pendingRole?.is_admin ? 'Revoke access' : 'Make admin'}
+      />
+      <ShellCard className="overflow-hidden">
+        <CardTitle title="Users" description="Registered students and administrators." action={<Badge tone="brand">{items.length} users</Badge>} />
+        {!items.length ? (
+          <EmptyState icon={Users} title="No users found" />
+        ) : (
+          <Table columns={[{ label: 'User' }, { label: 'Verified' }, { label: 'Role' }, { label: 'Actions', align: 'right' }]}>
+            {items.map((item) => {
+              const canChangeRole = currentUser?.is_super_admin && currentUser?.id !== item.id && !item.is_super_admin;
+              return (
+                <tr key={item.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                  <td className="px-5 py-3">
+                    <p className="font-semibold text-slate-950 dark:text-white">{item.name}</p>
+                    <p className="text-xs text-slate-400">{item.email}</p>
+                  </td>
+                  <td className="px-5 py-3"><Badge tone={item.verified ? 'success' : 'warning'}>{item.verified ? 'Verified' : 'Unverified'}</Badge></td>
+                  <td className="px-5 py-3">
+                    <Badge tone={item.is_super_admin ? 'gold' : item.is_admin ? 'brand' : 'neutral'}>{item.is_super_admin ? 'Super admin' : item.is_admin ? 'Admin' : 'Student'}</Badge>
+                  </td>
+                  <td className="px-5 py-3 text-right">
+                    {canChangeRole && (
+                      <Button onClick={() => setPendingRole(item)} variant={item.is_admin ? 'ghost' : 'soft'} size="sm">{item.is_admin ? 'Revoke admin' : 'Make admin'}</Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </Table>
+        )}
+      </ShellCard>
+    </>
   );
 };
+
+/* --------------------------------------------------- Accommodation applications */
 
 const AccommodationReviewModal = ({ item, onClose, onSave, saving }) => {
   const [status, setStatus] = useState(item.status || 'pending');
@@ -280,7 +430,7 @@ const AccommodationReviewModal = ({ item, onClose, onSave, saving }) => {
     },
   ], [profile, application, item.applicant_email]);
 
-  const documentBadges = [
+  const documents = [
     ['Student/applicant ID', profile?.has_student_id_document],
     ['Parent/guardian ID', profile?.has_parent_guardian_id_document],
     ['Proof of registration', application?.has_proof_of_registration],
@@ -289,78 +439,68 @@ const AccommodationReviewModal = ({ item, onClose, onSave, saving }) => {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900">
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge color={statusColor(item.status)}>{item.status?.replace('_', ' ') || 'pending'}</Badge>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application?.reference}</span>
-            </div>
-            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Review for {item.property_name}: {item.applicant_name}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application?.submitted_at)} · Your decision only affects this property</p>
-          </div>
-          <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
-        </div>
-
-        <div className="overflow-y-auto px-5 py-5">
-          {siblingProperties.length > 1 && (
-            <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 p-4 dark:border-brand-900/60 dark:bg-brand-500/10">
-              <p className="text-sm font-bold text-gray-950 dark:text-white">Also applied to</p>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">This student selected {siblingProperties.length} properties. Each one reviews and decides independently — shown here for context only.</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {siblingProperties.map((p) => <Badge key={p.id} color={p.id === item.id ? 'blue' : 'gray'}>{p.property_name} · {p.status}</Badge>)}
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-5">
-            {sections.map((section) => (
-              <div key={section.title}>
-                <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">{section.title}</h3>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {section.fields.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
-                </div>
-              </div>
-            ))}
-
-            <div>
-              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Documents</h3>
-              <div className="flex flex-wrap gap-2">
-                {documentBadges.map(([name, provided]) => <Badge key={name} color={provided ? 'green' : 'gray'}>{name}: {provided ? 'Provided' : 'Not provided'}</Badge>)}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Decision status</label>
-                <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white">
-                  <option value="pending">Pending</option>
-                  <option value="under_review">Under review</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Admin notes / feedback to applicant</label>
-                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} placeholder="Add notes about missing documents, approval comments, or rejection reason..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-end">
-          <button onClick={onClose} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Cancel</button>
-          <button onClick={() => onSave(item, status, notes)} disabled={saving === item.id} className="inline-flex items-center justify-center rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
-            <Save className="mr-2 h-4 w-4" />{saving === item.id ? 'Saving...' : 'Save review decision'}
-          </button>
-        </div>
+    <Modal
+      open
+      onClose={onClose}
+      size="xl"
+      title={`${item.applicant_name} · ${item.property_name}`}
+      description={`Submitted ${fmt(application?.submitted_at)} · Your decision only affects this property`}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button onClick={() => onSave(item, status, notes)} loading={saving === item.id}>
+            <Save className="h-4 w-4" aria-hidden="true" />Save decision
+          </Button>
+        </>
+      }
+    >
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <StatusBadge status={item.status} />
+        <Badge>{application?.reference}</Badge>
       </div>
-    </div>
+
+      {siblingProperties.length > 1 && (
+        <div className="mb-5 rounded-2xl border border-brand-100 bg-brand-50 p-4 dark:border-brand-900/60 dark:bg-brand-500/10">
+          <p className="text-sm font-semibold text-slate-950 dark:text-white">Also applied to</p>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">This student selected {siblingProperties.length} properties. Each one decides independently — shown here for context only.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {siblingProperties.map((sibling) => <Badge key={sibling.id} tone={sibling.id === item.id ? 'brand' : 'neutral'}>{sibling.property_name} · {sibling.status?.replace(/_/g, ' ')}</Badge>)}
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-6">
+        {sections.map((section) => (
+          <section key={section.title}>
+            <h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">{section.title}</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {section.fields.map(([label, value]) => <DetailRow key={label} label={label} value={value} />)}
+            </div>
+          </section>
+        ))}
+
+        <section>
+          <h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Documents</h3>
+          <div className="flex flex-wrap gap-2">
+            {documents.map(([name, provided]) => <Badge key={name} tone={provided ? 'success' : 'neutral'}>{name}: {provided ? 'Provided' : 'Not provided'}</Badge>)}
+          </div>
+        </section>
+
+        <DecisionFields
+          status={status}
+          setStatus={setStatus}
+          notes={notes}
+          setNotes={setNotes}
+          notesLabel="Admin notes / feedback to applicant"
+          notesPlaceholder="Missing documents, approval comments, or a rejection reason…"
+        />
+      </div>
+    </Modal>
   );
 };
 
-const ApplicationsTab = ({ onToast }) => {
+const ApplicationsTab = ({ onChanged }) => {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
@@ -369,25 +509,26 @@ const ApplicationsTab = ({ onToast }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getAccommodationApplications({ per_page: 100, status: 'all' });
-      setItems(res.data.applications || []);
+      const response = await adminAPI.getAccommodationApplications({ per_page: 100, status: 'all' });
+      setItems(response.data.applications || []);
     } catch {
-      onToast('Failed to load applications', 'error');
+      toast.error('Failed to load applications.');
     } finally {
       setLoading(false);
     }
-  }, [onToast]);
+  }, [toast]);
   useEffect(() => { load(); }, [load]);
 
   const updateStatus = async (item, status, notes = item.admin_notes || '') => {
     setSaving(item.id);
     try {
       await adminAPI.updateAccommodationApplicationStatus(item.accommodation_application_id, item.property_id, { status, admin_notes: notes });
-      onToast('Application reviewed and updated');
+      toast.success('Application decision saved.');
       setSelected(null);
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to update application', 'error');
+      toast.error(err.response?.data?.error || 'Failed to update application.');
     } finally {
       setSaving(null);
     }
@@ -398,119 +539,115 @@ const ApplicationsTab = ({ onToast }) => {
     <>
       {selected && <AccommodationReviewModal item={selected} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
       <ShellCard className="overflow-hidden">
-        <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-bold text-gray-950 dark:text-white">Accommodation Applications</h2>
-            <p className="mt-1 text-xs text-gray-400">Each row is one property's decision — reviewing it never affects other properties the student applied to.</p>
-          </div>
-          <Badge color="blue">{items.length} visible</Badge>
-        </div>
-        {!items.length ? <EmptyState text="No applications found for your assigned properties." /> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
-                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">Property</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {items.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{item.applicant_name}</p><p className="text-xs text-gray-400">{item.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{item.application?.reference}</p></td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{item.property_name}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(item.application?.submitted_at)}</td>
-                    <td className="px-4 py-3"><Badge color={statusColor(item.status)}>{item.status?.replace('_', ' ') || 'pending'}</Badge></td>
-                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected(item)} className="inline-flex items-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <CardTitle
+          title="Accommodation applications"
+          description="Each row is one property's decision — reviewing it never affects other properties the student applied to."
+          action={<Badge tone="brand">{items.length} visible</Badge>}
+        />
+        {!items.length ? (
+          <EmptyState icon={ClipboardList} title="No applications yet" description="Applications for your assigned properties will appear here." />
+        ) : (
+          <Table columns={[{ label: 'Applicant' }, { label: 'Property' }, { label: 'Submitted' }, { label: 'Status' }, { label: 'Review', align: 'right' }]}>
+            {items.map((item) => (
+              <tr key={item.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <td className="px-5 py-3">
+                  <p className="font-semibold text-slate-950 dark:text-white">{item.applicant_name}</p>
+                  <p className="text-xs text-slate-400">{item.applicant_email}</p>
+                  <p className="font-mono text-[11px] text-slate-400">{item.application?.reference}</p>
+                </td>
+                <td className="px-5 py-3 text-slate-600 dark:text-slate-300">{item.property_name}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-500 dark:text-slate-400">{fmt(item.application?.submitted_at)}</td>
+                <td className="px-5 py-3"><StatusBadge status={item.status} /></td>
+                <td className="px-5 py-3 text-right">
+                  <Button onClick={() => setSelected(item)} size="sm"><Eye className="h-3.5 w-3.5" aria-hidden="true" />Review</Button>
+                </td>
+              </tr>
+            ))}
+          </Table>
         )}
       </ShellCard>
     </>
   );
 };
 
+/* ------------------------------------------------------ University applications */
+
 const UniversityReviewModal = ({ application, choiceId, onClose, onSave, saving }) => {
-  const choice = (application.choices || []).find((c) => c.id === choiceId);
+  const choice = (application.choices || []).find((item) => item.id === choiceId);
   const [status, setStatus] = useState(choice?.status || 'pending');
   const [notes, setNotes] = useState(choice?.admin_notes || '');
   const profile = application.applicant_profile;
 
-  const grade11 = (profile?.academic_results || []).filter((r) => r.grade === 'grade_11');
-  const grade12June = (profile?.academic_results || []).filter((r) => r.grade === 'grade_12_june');
+  const grade11 = (profile?.academic_results || []).filter((result) => result.grade === 'grade_11');
+  const grade12June = (profile?.academic_results || []).filter((result) => result.grade === 'grade_12_june');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl dark:bg-gray-900">
-        <div className="flex items-start justify-between gap-4 border-b border-gray-100 px-5 py-4 dark:border-gray-800">
-          <div>
-            <div className="mb-2 flex flex-wrap items-center gap-2">
-              <Badge color={statusColor(choice?.status)}>{choice?.status?.replace('_', ' ') || 'pending'}</Badge>
-              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-300">{application.reference}</span>
-            </div>
-            <h2 className="text-xl font-bold text-gray-950 dark:text-white">Review for {choice?.university}: {application.applicant_name}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Submitted {fmt(application.submitted_at)}</p>
-          </div>
-          <button onClick={onClose} className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-white"><X className="h-5 w-5" /></button>
-        </div>
-
-        <div className="overflow-y-auto px-5 py-5">
-          <div className="space-y-5">
-            <div>
-              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Applicant details</h3>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <DetailRow label="First name" value={profile?.first_name} />
-                <DetailRow label="Last name" value={profile?.last_name} />
-                <DetailRow label="Email" value={application.applicant_email} />
-                <DetailRow label="Phone" value={profile?.phone_number} />
-                <DetailRow label="ID number" value={profile?.id_number} />
-                <DetailRow label="Programme applied for" value={choice?.programme} />
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Grade 11 final results</h3>
-              {grade11.length ? <div className="flex flex-wrap gap-2">{grade11.map((r) => <Badge key={r.id} color="gray">{r.subject}: {r.mark}%</Badge>)}</div> : <EmptyState text="No Grade 11 results captured." />}
-            </div>
-            <div>
-              <h3 className="mb-3 text-sm font-bold text-gray-950 dark:text-white">Grade 12 June results</h3>
-              {grade12June.length ? <div className="flex flex-wrap gap-2">{grade12June.map((r) => <Badge key={r.id} color="gray">{r.subject}: {r.mark}%</Badge>)}</div> : <EmptyState text="No Grade 12 June results captured." />}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Badge color={profile?.has_grade11_results_document ? 'green' : 'gray'}>Grade 11 slip: {profile?.has_grade11_results_document ? 'Provided' : 'Not provided'}</Badge>
-                <Badge color={profile?.has_grade12_june_results_document ? 'green' : 'gray'}>Grade 12 June slip: {profile?.has_grade12_june_results_document ? 'Provided' : 'Not provided'}</Badge>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr]">
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Decision status</label>
-                <select value={status} onChange={(event) => setStatus(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm font-bold text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white">
-                  <option value="pending">Pending</option>
-                  <option value="under_review">Under review</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
-                </select>
-              </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-gray-400">Admin notes</label>
-                <textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={5} placeholder="Notes about manual submission progress, missing info, etc..." className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-950 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-950 dark:text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-end">
-          <button onClick={onClose} className="rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Cancel</button>
-          <button onClick={() => onSave(application, choiceId, status, notes)} disabled={saving === choiceId} className="inline-flex items-center justify-center rounded-xl bg-gold-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-gold-700 disabled:opacity-50">
-            <Save className="mr-2 h-4 w-4" />{saving === choiceId ? 'Saving...' : 'Save review decision'}
-          </button>
-        </div>
+    <Modal
+      open
+      onClose={onClose}
+      size="xl"
+      title={`${application.applicant_name} · ${choice?.university}`}
+      description={`Submitted ${fmt(application.submitted_at)}`}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>Cancel</Button>
+          <Button variant="gold" onClick={() => onSave(application, choiceId, status, notes)} loading={saving === choiceId}>
+            <Save className="h-4 w-4" aria-hidden="true" />Save decision
+          </Button>
+        </>
+      }
+    >
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <StatusBadge status={choice?.status} />
+        <Badge>{application.reference}</Badge>
       </div>
-    </div>
+
+      <div className="space-y-6">
+        <section>
+          <h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Applicant details</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailRow label="First name" value={profile?.first_name} />
+            <DetailRow label="Last name" value={profile?.last_name} />
+            <DetailRow label="Email" value={application.applicant_email} />
+            <DetailRow label="Phone" value={profile?.phone_number} />
+            <DetailRow label="ID number" value={profile?.id_number} />
+            <DetailRow label="Programme applied for" value={choice?.programme} />
+          </div>
+        </section>
+
+        <section>
+          <h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Grade 11 final results</h3>
+          {grade11.length ? (
+            <div className="flex flex-wrap gap-2">{grade11.map((result) => <Badge key={result.id}>{result.subject}: {result.mark}%</Badge>)}</div>
+          ) : <p className="text-sm text-slate-400">No Grade 11 results captured.</p>}
+        </section>
+
+        <section>
+          <h3 className="mb-3 text-sm font-bold text-slate-950 dark:text-white">Grade 12 June results</h3>
+          {grade12June.length ? (
+            <div className="flex flex-wrap gap-2">{grade12June.map((result) => <Badge key={result.id}>{result.subject}: {result.mark}%</Badge>)}</div>
+          ) : <p className="text-sm text-slate-400">No Grade 12 June results captured.</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Badge tone={profile?.has_grade11_results_document ? 'success' : 'neutral'}>Grade 11 slip: {profile?.has_grade11_results_document ? 'Provided' : 'Not provided'}</Badge>
+            <Badge tone={profile?.has_grade12_june_results_document ? 'success' : 'neutral'}>Grade 12 June slip: {profile?.has_grade12_june_results_document ? 'Provided' : 'Not provided'}</Badge>
+          </div>
+        </section>
+
+        <DecisionFields
+          status={status}
+          setStatus={setStatus}
+          notes={notes}
+          setNotes={setNotes}
+          notesLabel="Admin notes"
+          notesPlaceholder="Manual submission progress, missing information, etc."
+        />
+      </div>
+    </Modal>
   );
 };
 
-const UniversityApplicationsTab = ({ onToast }) => {
+const UniversityApplicationsTab = ({ onChanged }) => {
+  const toast = useToast();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(null);
@@ -519,25 +656,26 @@ const UniversityApplicationsTab = ({ onToast }) => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminAPI.getUniversityApplications({ per_page: 100 });
-      setItems(res.data.applications || []);
+      const response = await adminAPI.getUniversityApplications({ per_page: 100 });
+      setItems(response.data.applications || []);
     } catch {
-      onToast('Failed to load university applications', 'error');
+      toast.error('Failed to load university applications.');
     } finally {
       setLoading(false);
     }
-  }, [onToast]);
+  }, [toast]);
   useEffect(() => { load(); }, [load]);
 
   const updateStatus = async (application, choiceId, status, notes) => {
     setSaving(choiceId);
     try {
       await adminAPI.updateUniversityChoiceStatus(application.id, choiceId, { status, admin_notes: notes });
-      onToast('Application reviewed and updated');
+      toast.success('Application decision saved.');
       setSelected(null);
       load();
+      onChanged?.();
     } catch (err) {
-      onToast(err.response?.data?.error || 'Failed to update application', 'error');
+      toast.error(err.response?.data?.error || 'Failed to update application.');
     } finally {
       setSaving(null);
     }
@@ -545,41 +683,43 @@ const UniversityApplicationsTab = ({ onToast }) => {
 
   if (loading) return <Loading />;
   const rows = items.flatMap((application) => (application.choices || []).map((choice) => ({ application, choice })));
+
   return (
     <>
       {selected && <UniversityReviewModal application={selected.application} choiceId={selected.choice.id} onClose={() => setSelected(null)} onSave={updateStatus} saving={saving} />}
       <ShellCard className="overflow-hidden">
-        <div className="flex flex-col gap-2 border-b border-gray-100 p-4 dark:border-gray-800 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-bold text-gray-950 dark:text-white">University Applications</h2>
-            <p className="mt-1 text-xs text-gray-400">Internal tracking queue for manually submitting each applicant to the university's own system.</p>
-          </div>
-          <Badge color="purple">{rows.length} choices</Badge>
-        </div>
-        {!rows.length ? <EmptyState text="No university applications submitted yet." /> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs font-bold uppercase text-gray-500 dark:bg-gray-800/60">
-                <tr><th className="px-4 py-3">Applicant</th><th className="px-4 py-3">University</th><th className="px-4 py-3">Submitted</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Review</th></tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                {rows.map(({ application, choice }) => (
-                  <tr key={choice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/40">
-                    <td className="px-4 py-3"><p className="font-bold text-gray-950 dark:text-white">{application.applicant_name}</p><p className="text-xs text-gray-400">{application.applicant_email}</p><p className="text-[11px] font-mono text-gray-400">{application.reference}</p></td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{choice.programme ? `${choice.university} — ${choice.programme}` : choice.university}</td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">{fmt(application.submitted_at)}</td>
-                    <td className="px-4 py-3"><Badge color={statusColor(choice.status)}>{choice.status?.replace('_', ' ') || 'pending'}</Badge></td>
-                    <td className="px-4 py-3 text-right"><button onClick={() => setSelected({ application, choice })} className="inline-flex items-center rounded-xl bg-gold-600 px-4 py-2 text-xs font-bold text-white hover:bg-gold-700"><Eye className="mr-1.5 h-3.5 w-3.5" />Review</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <CardTitle
+          title="University applications"
+          description="Internal tracking queue for manually submitting each applicant to the university's own system."
+          action={<Badge tone="gold">{rows.length} choices</Badge>}
+        />
+        {!rows.length ? (
+          <EmptyState icon={GraduationCap} title="No university applications yet" />
+        ) : (
+          <Table columns={[{ label: 'Applicant' }, { label: 'University' }, { label: 'Submitted' }, { label: 'Status' }, { label: 'Review', align: 'right' }]}>
+            {rows.map(({ application, choice }) => (
+              <tr key={choice.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                <td className="px-5 py-3">
+                  <p className="font-semibold text-slate-950 dark:text-white">{application.applicant_name}</p>
+                  <p className="text-xs text-slate-400">{application.applicant_email}</p>
+                  <p className="font-mono text-[11px] text-slate-400">{application.reference}</p>
+                </td>
+                <td className="px-5 py-3 text-slate-600 dark:text-slate-300">{choice.programme ? `${choice.university} — ${choice.programme}` : choice.university}</td>
+                <td className="whitespace-nowrap px-5 py-3 text-slate-500 dark:text-slate-400">{fmt(application.submitted_at)}</td>
+                <td className="px-5 py-3"><StatusBadge status={choice.status} /></td>
+                <td className="px-5 py-3 text-right">
+                  <Button onClick={() => setSelected({ application, choice })} variant="gold" size="sm"><Eye className="h-3.5 w-3.5" aria-hidden="true" />Review</Button>
+                </td>
+              </tr>
+            ))}
+          </Table>
         )}
       </ShellCard>
     </>
   );
 };
+
+/* ---------------------------------------------------------------------- Shell */
 
 const NAV = [
   { id: 'Overview', label: 'Overview', icon: LayoutDashboard },
@@ -587,88 +727,163 @@ const NAV = [
   { id: 'Reviews', label: 'Reviews', icon: MessageSquare },
   { id: 'Users', label: 'Users', icon: Users },
   { id: 'Applications', label: 'Applications', icon: ClipboardList },
-  { id: 'UniversityApplications', label: 'University Applications', icon: GraduationCap, superOnly: true },
-  { id: 'PropertyAdmins', label: 'Property Admins', icon: UserCog, superOnly: true, route: '/admin/property-admins' },
+  { id: 'UniversityApplications', label: 'University applications', icon: GraduationCap, superOnly: true },
+  { id: 'PropertyAdmins', label: 'Property admins', icon: UserCog, superOnly: true, route: '/admin/property-admins' },
 ];
+
+const SUBTITLES = {
+  Overview: 'Platform summary and quick links',
+  Properties: 'Manage and approve accommodation listings',
+  Reviews: 'Moderate student reviews before publishing',
+  Users: 'Manage registered students and admins',
+  Applications: 'Review applications and record decisions per property',
+  UniversityApplications: 'Internal tracking queue for manual university submissions',
+};
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('Overview');
   const [stats, setStats] = useState(null);
-  const [toast, setToast] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const loadStats = useCallback(() => {
-    adminAPI.getStats().then((res) => setStats(res.data)).catch(() => {});
+    adminAPI.getStats().then((response) => setStats(response.data)).catch(() => {});
   }, []);
 
+  // Refresh sidebar counts on mount and whenever a tab reports a change.
   useEffect(() => { loadStats(); }, [loadStats]);
 
-  const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3500);
-    loadStats();
-  }, [loadStats]);
-
-  const navigate = (tab) => {
-    const item = NAV.find((nav) => nav.id === tab);
+  const goTo = (tab) => {
+    const item = NAV.find((navItem) => navItem.id === tab);
     if (item?.route) {
-      window.location.href = item.route;
+      navigate(item.route);
       return;
     }
     setActiveTab(tab);
     setSidebarOpen(false);
   };
 
-  const pendingCount = stats ? (stats.pending_properties || 0) + (stats.pending_reviews || 0) + (stats.pending_applications || 0) : 0;
-  const navItems = NAV.filter((item) => !item.superOnly || user?.is_super_admin);
-  const subtitles = {
-    Overview: 'Platform summary and quick links',
-    Properties: 'Manage and approve accommodation listings',
-    Reviews: 'Moderate student reviews before publishing',
-    Users: 'Manage registered students and admins',
-    Applications: 'Review full student application details and process decisions',
-    UniversityApplications: 'Internal tracking queue for manual university submissions',
+  const handleLogout = () => {
+    logout();
+    navigate('/', { replace: true });
   };
 
+  const pendingCount = stats ? (stats.pending_properties || 0) + (stats.pending_reviews || 0) + (stats.pending_applications || 0) : 0;
+  const navItems = NAV.filter((item) => !item.superOnly || user?.is_super_admin);
+  const pendingFor = (id) => {
+    if (!stats) return 0;
+    if (id === 'Reviews') return stats.pending_reviews || 0;
+    if (id === 'Properties') return stats.pending_properties || 0;
+    if (id === 'Applications') return stats.pending_applications || 0;
+    return 0;
+  };
+  const activeLabel = NAV.find((item) => item.id === activeTab)?.label || activeTab;
+
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
-      {sidebarOpen && <div className="fixed inset-0 z-40 bg-black/40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
-      <aside className={`fixed left-0 top-0 z-50 flex h-full w-64 flex-col border-r border-gray-200 bg-white transition-transform duration-300 dark:border-gray-800 dark:bg-gray-900 lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center gap-3 border-b border-gray-100 px-5 py-5 dark:border-gray-800">
-          <img src={logoImg} alt="oneApplyHub logo" className="h-9 w-9 object-contain" />
-          <div><p className="text-sm font-bold text-gray-950 dark:text-white">oneApplyHub</p><p className="text-xs text-gray-400">Admin Console</p></div>
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div
+        className={cn('fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm transition-opacity lg:hidden', sidebarOpen ? 'opacity-100' : 'pointer-events-none opacity-0')}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden="true"
+      />
+      <aside
+        className={cn(
+          'fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform duration-300 dark:border-slate-800 dark:bg-slate-900 lg:sticky lg:top-0 lg:h-screen lg:w-64 lg:translate-x-0',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+        aria-label="Admin navigation"
+      >
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={logoImg} alt="" className="h-9 w-9 object-contain" />
+            <div>
+              <p className="text-sm font-bold text-slate-950 dark:text-white">oneApplyHub</p>
+              <p className="text-xs text-slate-400">Admin console</p>
+            </div>
+          </Link>
+          <button type="button" onClick={() => setSidebarOpen(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden" aria-label="Close navigation">
+            <X className="h-5 w-5" />
+          </button>
         </div>
+
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {navItems.map(({ id, label, icon: Icon }) => {
             const active = activeTab === id;
-            const pendingBadge = id === 'Reviews' ? stats?.pending_reviews : id === 'Properties' ? stats?.pending_properties : id === 'Applications' ? stats?.pending_applications : 0;
-            return <button key={id} onClick={() => navigate(id)} className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-all ${active ? 'bg-brand-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-950 dark:text-gray-400 dark:hover:bg-white/[0.07] dark:hover:text-white'}`}><Icon className="h-4 w-4" /><span className="flex-1 text-left">{label}</span>{pendingBadge > 0 && <span className={`rounded-full px-1.5 py-0.5 text-xs ${active ? 'bg-white/20' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'}`}>{pendingBadge}</span>}</button>;
+            const pending = pendingFor(id);
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => goTo(id)}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors',
+                  active
+                    ? 'bg-brand-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white',
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="flex-1 truncate text-left">{label}</span>
+                {pending > 0 && (
+                  <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums', active ? 'bg-white/20' : 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300')}>{pending}</span>
+                )}
+              </button>
+            );
           })}
         </nav>
-        <div className="space-y-1 border-t border-gray-100 px-3 py-3 dark:border-gray-800">
-          <button onClick={toggleTheme} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/[0.07]">{isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}{isDark ? 'Light Mode' : 'Dark Mode'}</button>
-          <div className="flex items-center gap-3 px-3 py-2"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-brand-600 dark:bg-brand-500/10">{user?.is_super_admin ? <Crown className="h-4 w-4" /> : <Shield className="h-4 w-4" />}</div><div className="min-w-0"><p className="truncate text-sm font-bold text-gray-950 dark:text-white">{user?.name || 'Admin'}</p><p className="truncate text-xs text-gray-400">{user?.is_super_admin ? 'Super Admin' : 'Managing Admin'}</p></div></div>
-          <button onClick={logout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"><LogOut className="h-4 w-4" />Sign out</button>
+
+        <div className="space-y-1 border-t border-slate-100 px-3 py-3 dark:border-slate-800">
+          <Link to="/" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/[0.07]">
+            <ExternalLink className="h-4 w-4" aria-hidden="true" />View public site
+          </Link>
+          <button type="button" onClick={toggleTheme} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/[0.07]">
+            {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+            {isDark ? 'Light mode' : 'Dark mode'}
+          </button>
+          <div className="flex items-center gap-3 px-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
+              {user?.is_super_admin ? <Crown className="h-4 w-4" aria-hidden="true" /> : <Shield className="h-4 w-4" aria-hidden="true" />}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{user?.name || 'Admin'}</p>
+              <p className="truncate text-xs text-slate-400">{user?.is_super_admin ? 'Super admin' : 'Managing admin'}</p>
+            </div>
+          </div>
+          <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10">
+            <LogOut className="h-4 w-4" aria-hidden="true" />Sign out
+          </button>
         </div>
       </aside>
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-gray-200 bg-white px-4 py-4 dark:border-gray-800 dark:bg-gray-900 sm:px-6">
-          <button onClick={() => setSidebarOpen(true)} className="rounded-lg p-1.5 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800 lg:hidden">☰</button>
-          <div><h1 className="text-lg font-bold text-gray-950 dark:text-white">{activeTab}</h1><p className="hidden text-xs text-gray-400 sm:block">{subtitles[activeTab]}</p></div>
-          {pendingCount > 0 && <div className="ml-auto flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-700 dark:border-amber-900 dark:bg-amber-500/10 dark:text-amber-300"><AlertCircle className="h-4 w-4" />{pendingCount} pending</div>}
+        <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-slate-200 bg-white/95 px-4 py-3.5 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:px-6">
+          <button type="button" onClick={() => setSidebarOpen(true)} className="-ml-1 rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 lg:hidden" aria-label="Open navigation">
+            <Menu className="h-5 w-5" />
+          </button>
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-bold tracking-tight text-slate-950 dark:text-white">{activeLabel}</h1>
+            <p className="hidden truncate text-xs text-slate-400 sm:block">{SUBTITLES[activeTab]}</p>
+          </div>
+          {pendingCount > 0 && (
+            <div className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-700 dark:border-amber-900 dark:bg-amber-500/10 dark:text-amber-300">
+              <AlertCircle className="h-4 w-4" aria-hidden="true" />
+              {pendingCount} pending
+            </div>
+          )}
         </header>
+
         <main className="flex-1 px-4 py-6 sm:px-6">
-          {activeTab === 'Overview' && <Overview stats={stats} user={user} onNav={navigate} />}
-          {activeTab === 'Properties' && <PropertiesTab onToast={showToast} />}
-          {activeTab === 'Reviews' && <ReviewsTab onToast={showToast} />}
-          {activeTab === 'Users' && <UsersTab currentUser={user} onToast={showToast} />}
-          {activeTab === 'Applications' && <ApplicationsTab onToast={showToast} />}
-          {activeTab === 'UniversityApplications' && <UniversityApplicationsTab onToast={showToast} />}
+          {activeTab === 'Overview' && <Overview stats={stats} user={user} onNav={goTo} />}
+          {activeTab === 'Properties' && <PropertiesTab onChanged={loadStats} />}
+          {activeTab === 'Reviews' && <ReviewsTab onChanged={loadStats} />}
+          {activeTab === 'Users' && <UsersTab currentUser={user} onChanged={loadStats} />}
+          {activeTab === 'Applications' && <ApplicationsTab onChanged={loadStats} />}
+          {activeTab === 'UniversityApplications' && <UniversityApplicationsTab onChanged={loadStats} />}
         </main>
       </div>
-      {toast && <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-white shadow-lg ${toast.type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`}>{toast.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}{toast.message}</div>}
     </div>
   );
 };

@@ -1,128 +1,202 @@
-import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, FileText, LayoutDashboard, Shield, Sun, Moon, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { Menu, X, FileText, LayoutDashboard, Shield, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { cn } from '../../utils/cn';
+import logoImg from '../../assets/OneHubLogo.png';
 
 const NAV_LINKS = [
   { to: '/properties', label: 'Properties' },
-  { to: '/reviews',    label: 'Reviews'    },
-  { to: '/bursaries',  label: 'OpportunitiesHub'  },
+  { to: '/reviews', label: 'Reviews' },
+  { to: '/bursaries', label: 'Opportunities' },
 ];
 
 const UserAvatar = ({ user, size = 'sm' }) => {
-  const sizeClass = size === 'md' ? 'h-9 w-9 text-sm' : 'h-8 w-8 text-xs';
+  const sizeClass = size === 'md' ? 'h-10 w-10 text-sm' : 'h-8 w-8 text-xs';
   return (
-    <div className={`${sizeClass} overflow-hidden bg-brand-700 rounded-full flex items-center justify-center shadow-sm flex-shrink-0`}>
+    <div className={cn(sizeClass, 'flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-600 font-bold text-white ring-2 ring-white dark:ring-slate-900')}>
       {user?.profile_picture_url ? (
         <img src={user.profile_picture_url} alt={user?.name || 'Profile'} className="h-full w-full object-cover" />
       ) : (
-        <span className="text-white font-bold">{user?.name?.charAt(0)?.toUpperCase()}</span>
+        <span>{user?.name?.charAt(0)?.toUpperCase()}</span>
       )}
     </div>
   );
 };
+
+const desktopLinkClass = ({ isActive }) =>
+  cn(
+    'inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-medium transition-colors',
+    isActive
+      ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200'
+      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white',
+  );
+
+const mobileLinkClass = ({ isActive }) =>
+  cn(
+    'flex items-center gap-2.5 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors',
+    isActive
+      ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-200'
+      : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/[0.07]',
+  );
 
 const Header = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close the drawer whenever the route changes (link taps, back button).
+  useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   const handleLogout = () => {
     logout();
     navigate('/');
-    setIsMobileMenuOpen(false);
   };
 
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
-  const isActive = (to) => pathname === to || (to !== '/' && pathname.startsWith(to));
-
-  const ThemeToggle = () => (
-    <button onClick={toggleTheme} className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 transition-all" aria-label="Toggle dark mode">
+  const themeToggle = (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/[0.07] dark:hover:text-white"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
       {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </button>
   );
 
-  const navLinkClass = (to) => `px-3 py-2 rounded-lg font-medium text-sm transition-all ${isActive(to) ? 'text-brand-700 bg-brand-50 dark:text-brand-400 dark:bg-brand-900/30' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-700'}`;
-  const mobileNavLinkClass = (to) => `block py-2.5 px-4 rounded-xl font-medium text-sm transition-all ${isActive(to) ? 'text-brand-700 bg-brand-50' : 'text-slate-700 hover:bg-slate-50'}`;
-
   return (
-    <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2 group" onClick={closeMobileMenu}>
-            <div className="flex flex-col leading-none">
-              <span className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">oneApplyHub</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium -mt-0.5 hidden sm:block">All Your Options. One Platform.</span>
-            </div>
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-md dark:border-slate-800 dark:bg-slate-950/80">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-2.5" aria-label="oneApplyHub home">
+            <img src={logoImg} alt="" className="h-9 w-9 object-contain" />
+            <span className="flex flex-col leading-none">
+              <span className="text-base font-bold tracking-tight text-slate-900 dark:text-white">oneApplyHub</span>
+              <span className="mt-0.5 hidden text-[10px] font-medium text-slate-400 dark:text-slate-500 sm:block">All Your Options. One Platform.</span>
+            </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-0.5">
-            {isAuthenticated && <Link to="/dashboard" className={navLinkClass('/dashboard')}><span className="flex items-center gap-1.5"><LayoutDashboard className="w-3.5 h-3.5" />Dashboard</span></Link>}
-            {NAV_LINKS.map(({ to, label }) => <Link key={to} to={to} className={navLinkClass(to)}>{label}</Link>)}
-            {isAuthenticated && <Link to="/application" className={navLinkClass('/application')}><span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" />Apply</span></Link>}
-            {isAuthenticated && user?.is_admin && <Link to="/admin" className={navLinkClass('/admin')}><span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-gold-500" />Admin</span></Link>}
+          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Primary">
+            {isAuthenticated && (
+              <NavLink to="/dashboard" className={desktopLinkClass}>
+                <LayoutDashboard className="h-3.5 w-3.5" aria-hidden="true" />Dashboard
+              </NavLink>
+            )}
+            {NAV_LINKS.map(({ to, label }) => (
+              <NavLink key={to} to={to} className={desktopLinkClass}>{label}</NavLink>
+            ))}
+            {isAuthenticated && (
+              <NavLink to="/application" className={desktopLinkClass}>
+                <FileText className="h-3.5 w-3.5" aria-hidden="true" />Apply
+              </NavLink>
+            )}
+            {isAuthenticated && user?.is_admin && (
+              <NavLink to="/admin" className={desktopLinkClass}>
+                <Shield className="h-3.5 w-3.5 text-gold-500" aria-hidden="true" />Admin
+              </NavLink>
+            )}
           </nav>
 
-          <div className="hidden md:flex items-center gap-2">
-            <ThemeToggle />
+          <div className="hidden items-center gap-2 md:flex">
+            {themeToggle}
             {isAuthenticated ? (
               <>
-                <div className="flex items-center gap-2">
+                <div className="ml-1 flex items-center gap-2.5 border-l border-slate-200 pl-3 dark:border-slate-700">
                   <UserAvatar user={user} />
-                  <div className="leading-none">
+                  <div className="leading-tight">
                     <p className="text-sm font-semibold text-slate-800 dark:text-white">{user?.name?.split(' ')[0]}</p>
-                    {user?.verified && <p className="text-[10px] text-emerald-600 font-medium">Verified</p>}
+                    {user?.verified && <p className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">Verified</p>}
                   </div>
                 </div>
-                <div className="w-px h-5 bg-slate-200 mx-1" />
-                <button onClick={handleLogout} className="text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 px-3 py-2 rounded-lg transition-all">Logout</button>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-500/10 dark:hover:text-red-300"
+                >
+                  <LogOut className="h-3.5 w-3.5" aria-hidden="true" />Log out
+                </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg hover:bg-slate-50 transition-all">Login</Link>
-                <Link to="/register" className="bg-brand-700 hover:bg-brand-800 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-sm transition-colors">Sign Up</Link>
+                <Link to="/login" className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white">
+                  Log in
+                </Link>
+                <Link to="/register" className="inline-flex h-9 items-center rounded-lg bg-brand-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-700">
+                  Sign up
+                </Link>
               </>
             )}
           </div>
 
-          <div className="md:hidden flex items-center gap-1">
-            <ThemeToggle />
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-700 transition-all" aria-label="Toggle menu">
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <div className="flex items-center gap-1 md:hidden">
+            {themeToggle}
+            <button
+              type="button"
+              onClick={() => setMobileOpen((open) => !open)}
+              className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
 
-        {isMobileMenuOpen && (
-          <div className="md:hidden border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 py-3 space-y-0.5">
-            {isAuthenticated && <Link to="/dashboard" className={mobileNavLinkClass('/dashboard')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><LayoutDashboard className="w-4 h-4" />Dashboard</span></Link>}
-            {NAV_LINKS.map(({ to, label }) => <Link key={to} to={to} className={mobileNavLinkClass(to)} onClick={closeMobileMenu}>{label}</Link>)}
-            {isAuthenticated && <Link to="/application" className={mobileNavLinkClass('/application')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><FileText className="w-4 h-4" />Application</span></Link>}
-            {isAuthenticated && user?.is_admin && <Link to="/admin" className={mobileNavLinkClass('/admin')} onClick={closeMobileMenu}><span className="flex items-center gap-2"><Shield className="w-4 h-4 text-gold-500" />Admin</span></Link>}
+        {mobileOpen && (
+          <nav id="mobile-menu" className="space-y-0.5 border-t border-slate-100 py-3 animate-fade-in dark:border-slate-800 md:hidden" aria-label="Mobile">
+            {isAuthenticated && (
+              <NavLink to="/dashboard" className={mobileLinkClass}>
+                <LayoutDashboard className="h-4 w-4" aria-hidden="true" />Dashboard
+              </NavLink>
+            )}
+            {NAV_LINKS.map(({ to, label }) => (
+              <NavLink key={to} to={to} className={mobileLinkClass}>{label}</NavLink>
+            ))}
+            {isAuthenticated && (
+              <NavLink to="/application" className={mobileLinkClass}>
+                <FileText className="h-4 w-4" aria-hidden="true" />Application
+              </NavLink>
+            )}
+            {isAuthenticated && user?.is_admin && (
+              <NavLink to="/admin" className={mobileLinkClass}>
+                <Shield className="h-4 w-4 text-gold-500" aria-hidden="true" />Admin
+              </NavLink>
+            )}
 
-            <div className="pt-3 mt-1 border-t border-slate-100 dark:border-slate-700 px-2">
+            <div className="mt-2 border-t border-slate-100 px-2 pt-3 dark:border-slate-800">
               {isAuthenticated ? (
-                <div className="flex items-center justify-between px-2 py-2">
-                  <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center justify-between gap-3 px-2 py-1">
+                  <div className="flex min-w-0 items-center gap-3">
                     <UserAvatar user={user} size="md" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{user?.name}</p>
-                      <p className="text-xs text-slate-400 truncate max-w-[160px]">{user?.verified ? 'Verified account' : 'Unverified account'}</p>
+                      <p className="truncate text-sm font-semibold text-slate-800 dark:text-white">{user?.name}</p>
+                      <p className="truncate text-xs text-slate-500 dark:text-slate-400">{user?.verified ? 'Verified account' : 'Unverified account'}</p>
                     </div>
                   </div>
-                  <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-red-50 transition-all border border-red-100">Logout</button>
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-red-200 px-3 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-500/10"
+                  >
+                    <LogOut className="h-3.5 w-3.5" aria-hidden="true" />Log out
+                  </button>
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <Link to="/login" className="block text-center py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200 transition-all" onClick={closeMobileMenu}>Login</Link>
-                  <Link to="/register" className="block text-center py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-700 hover:bg-brand-800 transition-colors" onClick={closeMobileMenu}>Sign Up Free</Link>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link to="/login" className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">
+                    Log in
+                  </Link>
+                  <Link to="/register" className="inline-flex h-11 items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold text-white transition-colors hover:bg-brand-700">
+                    Sign up free
+                  </Link>
                 </div>
               )}
             </div>
-          </div>
+          </nav>
         )}
       </div>
     </header>
