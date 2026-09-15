@@ -17,9 +17,10 @@ import {
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { ConfirmDialog, INPUT_CLASS } from '../components/ui';
 
-const inputClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
-const cardClass = 'rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900';
+const inputClass = INPUT_CLASS;
+const cardClass = 'rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900';
 
 const Badge = ({ children, color = 'slate' }) => {
   const classes = {
@@ -52,6 +53,8 @@ const PropertyAdminsPage = () => {
   const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', propertyIds: [], grantUniAccess: false });
+  // Destructive actions are staged here and executed only after the user confirms.
+  const [confirm, setConfirm] = useState(null);
 
   const isSuperAdmin = user?.is_super_admin;
 
@@ -203,12 +206,21 @@ const PropertyAdminsPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-4 lg:px-6">
-        <Link to="/admin" className="mb-4 inline-flex items-center rounded-xl bg-white px-3 py-2 text-xs font-bold text-brand-600 shadow-sm hover:bg-brand-50 dark:bg-slate-900 dark:text-brand-400">
-          <ArrowLeft className="mr-1.5 h-3.5 w-3.5" /> Back to admin dashboard
+      <ConfirmDialog
+        open={Boolean(confirm)}
+        onClose={() => setConfirm(null)}
+        onConfirm={async () => { await confirm.action(); setConfirm(null); }}
+        loading={saving}
+        title={confirm?.title}
+        description={confirm?.description}
+        confirmLabel={confirm?.confirmLabel}
+      />
+      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+        <Link to="/admin" className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300">
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /> Back to admin dashboard
         </Link>
 
-        <div className="mb-5 overflow-hidden rounded-3xl bg-brand-800 p-6 text-white shadow-sm">
+        <div className="mb-5 overflow-hidden rounded-2xl bg-brand-800 p-6 text-white shadow-card">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
             <UserCog className="h-3.5 w-3.5" /> Super admin workspace
           </div>
@@ -358,7 +370,7 @@ const PropertyAdminsPage = () => {
                     <p className="truncate text-sm font-bold text-slate-950 dark:text-white">{admin.name}</p>
                     <p className="truncate text-xs text-slate-500 dark:text-slate-400">{admin.email}</p>
                   </div>
-                  <button onClick={() => handleRevokeUniAccess(admin)} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
+                  <button type="button" onClick={() => setConfirm({ title: `Revoke university applications access?`, description: `${admin.name} will no longer be able to view or decide on university applications.`, confirmLabel: 'Revoke access', action: () => handleRevokeUniAccess(admin) })} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Revoke
                   </button>
                 </div>
@@ -401,7 +413,7 @@ const PropertyAdminsPage = () => {
                           <p className="truncate text-sm font-bold text-slate-950 dark:text-white">{item.property_name}</p>
                           <p className="text-xs text-slate-400">Assignment #{item.id}</p>
                         </div>
-                        <button onClick={() => handleRemove(item.id)} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
+                        <button type="button" onClick={() => setConfirm({ title: 'Remove this assignment?', description: `${admin.admin_name} will immediately lose access to ${item.property_name}, its reviews, and its applications.`, confirmLabel: 'Remove access', action: () => handleRemove(item.id) })} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
                           <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remove
                         </button>
                       </div>

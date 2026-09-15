@@ -1,43 +1,113 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ThumbsUp, Calendar, Filter, Search, AlertCircle, MessageSquare, Star, Home } from 'lucide-react';
+import { ThumbsUp, CalendarDays, Search, MessageSquare, Star, Home, ArrowUpDown } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { useHelpfulVotes } from '../hooks/useHelpfulVotes';
 import { formatDate, getRatingBadge, getUniversityCode } from '../utils/format';
+import { Alert, Badge, Button, EmptyState, Input, PageHeader, Select, Skeleton, useToast } from '../components/ui';
+import { cn } from '../utils/cn';
 
 const INITIAL_FILTERS = { university: 'all', rating: 'all', search: '', page: 1 };
+const PER_PAGE = 12;
+const SEARCH_DEBOUNCE_MS = 400;
 
-const getMarkedHelpful = () => {
-  try {
-    const marked = localStorage.getItem('markedHelpful');
-    return marked ? new Set(JSON.parse(marked)) : new Set();
-  } catch {
-    return new Set();
-  }
+const StatTile = ({ icon: Icon, value, label }) => (
+  <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+    <div className="min-w-0">
+      <p className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</p>
+      <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{label}</p>
+    </div>
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
+      <Icon className="h-4 w-4" aria-hidden="true" />
+    </span>
+  </div>
+);
+
+const ReviewCard = ({ review, onHelpful, helpfulMarked, helpfulPending }) => {
+  const rating = review.overall_rating || review.rating;
+  const authorName = review.anonymous ? 'Anonymous student' : (review.author || review.user?.name || 'Anonymous');
+  const initial = review.anonymous ? 'A' : authorName.charAt(0).toUpperCase();
+  const recommends = review.recommend || review.would_recommend;
+  const propertyName = review.property_name || review.property?.title || 'Property';
+
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition-all duration-200 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex min-w-0 gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-sm font-bold text-white">{initial}</span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{authorName}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {[review.author_year || review.user?.year_of_study || 'Student', getUniversityCode(review.author_university || review.user?.university)].filter(Boolean).join(' · ')}
+            </p>
+            <Link to={`/properties/${review.property_id}`} className="mt-0.5 inline-block truncate text-xs font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-300">
+              {propertyName}
+            </Link>
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+          <span className={cn('rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ring-black/5 dark:ring-white/10', getRatingBadge(rating))}>{rating}/5 ★</span>
+          <span className="inline-flex items-center gap-1 text-xs text-slate-400">
+            <CalendarDays className="h-3.5 w-3.5" aria-hidden="true" />{formatDate(review.created_at)}
+          </span>
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{review.review_text || review.comment || 'No review text available.'}</p>
+
+      <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+        <Badge tone={recommends ? 'success' : 'danger'}>{recommends ? 'Recommends' : 'Does not recommend'}</Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => onHelpful(review.id)}
+            disabled={helpfulMarked || helpfulPending}
+            aria-pressed={helpfulMarked}
+            className={cn(
+              'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed',
+              helpfulMarked
+                ? 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300'
+                : 'text-slate-500 hover:bg-slate-100 hover:text-brand-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-brand-300',
+            )}
+          >
+            <ThumbsUp className={cn('h-3.5 w-3.5', helpfulMarked && 'fill-current')} aria-hidden="true" />
+            {helpfulMarked ? 'Marked helpful' : 'Helpful'} · {review.helpful_count || 0}
+          </button>
+          <Button to={`/properties/${review.property_id}`} variant="ghost" size="sm">View property</Button>
+        </div>
+      </div>
+    </article>
+  );
 };
 
 const ReviewsPage = () => {
+  const { isAuthenticated } = useAuth();
+  const toast = useToast();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [totalPages, setTotalPages] = useState(1);
   const [totalReviews, setTotalReviews] = useState(0);
-  const [helpfulLoading, setHelpfulLoading] = useState({});
-  const [markedHelpful, setMarkedHelpful] = useState(getMarkedHelpful);
-  const [helpfulError, setHelpfulError] = useState(null);
   const [searchInput, setSearchInput] = useState('');
   const debounceTimer = useRef(null);
+
+  const onCounted = useCallback((reviewId, helpfulCount) => {
+    setReviews((previous) => previous.map((review) => (review.id === reviewId ? { ...review, helpful_count: helpfulCount } : review)));
+  }, []);
+  const onHelpfulError = useCallback((message) => toast.error(message), [toast]);
+  const { markHelpful, hasMarked, isPending } = useHelpfulVotes({ isAuthenticated, onCounted, onError: onHelpfulError });
 
   const fetchReviews = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const params = { page: filters.page, per_page: 12 };
+      const params = { page: filters.page, per_page: PER_PAGE };
       if (filters.university !== 'all') params.university = filters.university;
       if (filters.rating !== 'all') params.min_rating = filters.rating;
       if (filters.search) params.search = filters.search;
-      const response = await reviewsAPI.getAllReviews(params);
-      const data = response.data;
+      const { data } = await reviewsAPI.getAllReviews(params);
       if (data.reviews) {
         setReviews(data.reviews);
         setTotalPages(data.total_pages || 1);
@@ -52,7 +122,7 @@ const ReviewsPage = () => {
         setTotalReviews(0);
       }
     } catch (err) {
-      setError(err.response?.data?.error || err.message);
+      setError(err.response?.data?.error || 'We could not load reviews right now.');
       setReviews([]);
     } finally {
       setLoading(false);
@@ -64,119 +134,115 @@ const ReviewsPage = () => {
   useEffect(() => {
     clearTimeout(debounceTimer.current);
     debounceTimer.current = setTimeout(() => {
-      setFilters((prev) => ({ ...prev, search: searchInput, page: 1 }));
-    }, 400);
+      setFilters((previous) => (previous.search === searchInput.trim() ? previous : { ...previous, search: searchInput.trim(), page: 1 }));
+    }, SEARCH_DEBOUNCE_MS);
     return () => clearTimeout(debounceTimer.current);
   }, [searchInput]);
 
-  const handleFilterChange = (key, value) => setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
+  const handleFilterChange = (key, value) => setFilters((previous) => ({ ...previous, [key]: value, page: key === 'page' ? value : 1 }));
+  const resetFilters = () => { setFilters(INITIAL_FILTERS); setSearchInput(''); };
 
-  const handleMarkHelpful = async (reviewId) => {
-    if (!localStorage.getItem('token')) {
-      setHelpfulError('Please log in to mark reviews as helpful.');
-      setTimeout(() => setHelpfulError(null), 3000);
-      return;
-    }
-    if (markedHelpful.has(reviewId)) return;
-    setHelpfulLoading((prev) => ({ ...prev, [reviewId]: true }));
-    try {
-      const response = await reviewsAPI.markHelpful(reviewId);
-      setReviews((prev) => prev.map((r) => r.id === reviewId ? { ...r, helpful_count: response.data.helpful_count } : r));
-      const updated = new Set([...markedHelpful, reviewId]);
-      setMarkedHelpful(updated);
-      localStorage.setItem('markedHelpful', JSON.stringify([...updated]));
-    } catch (err) {
-      setHelpfulError(err.response?.data?.error || 'Failed to mark review as helpful.');
-      setTimeout(() => setHelpfulError(null), 3000);
-    } finally {
-      setHelpfulLoading((prev) => ({ ...prev, [reviewId]: false }));
-    }
-  };
-
-  const averageRating = reviews.length > 0 ? (reviews.reduce((sum, r) => sum + (r.overall_rating || r.rating || 0), 0) / reviews.length).toFixed(1) : '0';
-  const recommendationCount = reviews.filter((r) => r.recommend || r.would_recommend).length;
-  const propertiesReviewedCount = new Set(reviews.map((r) => r.property_name || r.property?.title)).size;
-  const selectClass = 'w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white';
+  const averageRating = reviews.length > 0
+    ? (reviews.reduce((sum, review) => sum + (review.overall_rating || review.rating || 0), 0) / reviews.length).toFixed(1)
+    : '—';
+  const recommendationCount = reviews.filter((review) => review.recommend || review.would_recommend).length;
+  const propertiesReviewedCount = new Set(reviews.map((review) => review.property_id || review.property_name)).size;
+  const hasActiveFilters = filters.university !== 'all' || filters.rating !== 'all' || Boolean(filters.search);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
-            <MessageSquare className="h-3.5 w-3.5" />Student reviews
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">Accommodation reviews</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">Read student feedback about safety, value, management, location, and overall experience.</p>
+    <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      <PageHeader
+        eyebrow="Student reviews"
+        icon={MessageSquare}
+        title="Accommodation reviews"
+        description="Read student feedback about safety, value, management, location, and overall experience."
+        className="mb-4"
+      />
+
+      <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Filters">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <Input
+            icon={Search}
+            type="search"
+            aria-label="Search reviews or properties"
+            placeholder="Search reviews or properties"
+            wrapperClassName="md:col-span-2"
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
+          />
+          <Select aria-label="University" value={filters.university} onChange={(event) => handleFilterChange('university', event.target.value)}>
+            <option value="all">All universities</option>
+            <option value="wits">Wits students</option>
+            <option value="uj">UJ students</option>
+          </Select>
+          <Select aria-label="Minimum rating" value={filters.rating} onChange={(event) => handleFilterChange('rating', event.target.value)}>
+            <option value="all">All ratings</option>
+            <option value="4">4+ stars</option>
+            <option value="3">3+ stars</option>
+            <option value="2">2+ stars</option>
+            <option value="1">1+ stars</option>
+          </Select>
         </div>
+      </section>
 
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <div className="relative md:col-span-2">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input type="text" placeholder="Search reviews or properties" className={`${selectClass} pl-9`} value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
-            </div>
-            <select className={selectClass} value={filters.university} onChange={(e) => handleFilterChange('university', e.target.value)}>
-              <option value="all">All universities</option><option value="wits">Wits students</option><option value="uj">UJ students</option>
-            </select>
-            <select className={selectClass} value={filters.rating} onChange={(e) => handleFilterChange('rating', e.target.value)}>
-              <option value="all">All ratings</option><option value="4">4+ stars</option><option value="3">3+ stars</option><option value="2">2+ stars</option><option value="1">1+ stars</option>
-            </select>
-          </div>
+      {error && (
+        <Alert tone="error" className="mb-4" action={<Button size="sm" variant="danger" onClick={fetchReviews}>Retry</Button>}>{error}</Alert>
+      )}
+
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile icon={MessageSquare} value={totalReviews} label="Reviews" />
+        <StatTile icon={Star} value={averageRating === '—' ? '—' : `${averageRating} / 5`} label="Average on this page" />
+        <StatTile icon={ThumbsUp} value={recommendationCount} label="Recommendations" />
+        <StatTile icon={Home} value={propertiesReviewedCount} label="Properties" />
+      </div>
+
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">Recent reviews</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400" aria-live="polite">{totalReviews} review{totalReviews === 1 ? '' : 's'} found</p>
         </div>
+        <p className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+          <ArrowUpDown className="h-3.5 w-3.5" aria-hidden="true" />Latest first
+        </p>
+      </div>
 
-        {error && <div className="mb-4 flex items-center gap-2 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-800 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200"><AlertCircle className="h-4 w-4" />{error}</div>}
-
-        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[{ value: totalReviews, label: 'Reviews', icon: MessageSquare }, { value: `${averageRating}★`, label: 'Average rating', icon: Star }, { value: recommendationCount, label: 'Recommendations', icon: ThumbsUp }, { value: propertiesReviewedCount, label: 'Properties', icon: Home }].map(({ value, label, icon: Icon }) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0"><div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div><div className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">{label}</div></div>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300"><Icon className="h-4 w-4" /></div>
-              </div>
-            </div>
+      {loading ? (
+        <div className="space-y-3" aria-busy="true">
+          {Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-40 rounded-2xl" />)}
+        </div>
+      ) : reviews.length > 0 ? (
+        <div className="space-y-3">
+          {reviews.map((review) => (
+            <ReviewCard key={review.id} review={review} onHelpful={markHelpful} helpfulMarked={hasMarked(review.id)} helpfulPending={isPending(review.id)} />
           ))}
         </div>
-
-        {helpfulError && <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">{helpfulError}</div>}
-
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <div><h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">Recent reviews</h2><p className="text-xs text-slate-500 dark:text-slate-400">{totalReviews} review{totalReviews === 1 ? '' : 's'} found</p></div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Latest first</div>
+      ) : (
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+          <EmptyState
+            icon={Search}
+            title="No reviews found"
+            description={hasActiveFilters ? 'Try adjusting your search or filters.' : 'Reviews will appear here once students share their experiences.'}
+            action={hasActiveFilters ? <Button onClick={resetFilters}>Clear filters</Button> : <Button to="/properties" variant="secondary">Browse properties</Button>}
+          />
         </div>
+      )}
 
-        {loading ? (
-          <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="h-36 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)}</div>
-        ) : reviews.length > 0 ? (
-          <div className="space-y-3">
-            {reviews.map((review) => {
-              const rating = review.overall_rating || review.rating;
-              const authorName = review.anonymous ? 'Anonymous student' : (review.author || review.user?.name || 'Anonymous');
-              const initial = review.anonymous ? 'A' : authorName.charAt(0);
-              const recommends = review.recommend || review.would_recommend;
-              return (
-                <article key={review.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900 sm:p-5">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex min-w-0 gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-700 text-sm font-bold text-white">{initial}</div>
-                      <div className="min-w-0"><p className="truncate text-sm font-bold text-slate-950 dark:text-white">{authorName}</p><p className="text-xs text-slate-500 dark:text-slate-400">{review.author_year || review.user?.year_of_study || 'Student'} · {getUniversityCode(review.author_university || review.user?.university)}</p><Link to={`/properties/${review.property_id}`} className="mt-0.5 inline-block truncate text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">{review.property_name || review.property?.title || 'Property'}</Link></div>
-                    </div>
-                    <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end"><span className={`rounded-full px-2.5 py-1 text-xs font-bold ${getRatingBadge(rating)}`}>{rating}/5 ★</span><span className="inline-flex items-center gap-1 text-xs text-slate-400"><Calendar className="h-3.5 w-3.5" />{formatDate(review.created_at)}</span></div>
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{review.review_text || review.comment || 'No review text available.'}</p>
-                  <div className="mt-4 flex flex-col gap-3 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-                    <span className={`text-xs font-bold ${recommends ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>{recommends ? '✓ Recommends' : 'Does not recommend'}</span>
-                    <div className="flex flex-wrap items-center gap-3"><button onClick={() => handleMarkHelpful(review.id)} disabled={helpfulLoading[review.id] || markedHelpful.has(review.id)} className="inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-60 dark:text-slate-400 dark:hover:bg-slate-800"><ThumbsUp className="h-3.5 w-3.5" />{review.helpful_count || 0} helpful</button><Link to={`/properties/${review.property_id}`} className="text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">View property</Link></div>
-                  </div>
-                </article>
-              );
-            })}
+      {totalPages > 1 && (
+        <nav className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row" aria-label="Pagination">
+          <Button variant="secondary" onClick={() => handleFilterChange('page', Math.max(1, filters.page - 1))} disabled={filters.page === 1} className="w-full sm:w-auto">Previous</Button>
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Page {filters.page} of {totalPages}</span>
+          <Button variant="secondary" onClick={() => handleFilterChange('page', Math.min(totalPages, filters.page + 1))} disabled={filters.page === totalPages} className="w-full sm:w-auto">Next</Button>
+        </nav>
+      )}
+
+      <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-base font-bold">Share your accommodation experience</h3>
+            <p className="mt-1 max-w-2xl text-sm text-slate-300">Help fellow students make better accommodation decisions.</p>
           </div>
-        ) : (
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No reviews found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your search criteria or filters.</p><button onClick={() => { setFilters(INITIAL_FILTERS); setSearchInput(''); }} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>
-        )}
-
-        {totalPages > 1 && <div className="mt-5 flex flex-col items-center justify-center gap-3 sm:flex-row"><button onClick={() => handleFilterChange('page', Math.max(1, filters.page - 1))} disabled={filters.page === 1} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto">Previous</button><span className="text-sm font-semibold text-slate-500 dark:text-slate-400">Page {filters.page} of {totalPages}</span><button onClick={() => handleFilterChange('page', Math.min(totalPages, filters.page + 1))} disabled={filters.page === totalPages} className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:w-auto">Next</button></div>}
-        <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-sm font-bold sm:text-base">Share your accommodation experience</h3><p className="mt-1 max-w-2xl text-xs text-slate-300 sm:text-sm">Help fellow students make better accommodation decisions.</p></div><Link to="/properties" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">Find properties to review</Link></div></div>
+          <Button to="/properties" variant="inverse" className="shrink-0">Find a property to review</Button>
+        </div>
       </div>
     </div>
   );

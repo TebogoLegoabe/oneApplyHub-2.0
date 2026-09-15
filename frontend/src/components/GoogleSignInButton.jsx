@@ -57,10 +57,10 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
       type="button"
       onClick={handleClick}
       disabled={loading || !ready}
-      className="w-full flex items-center justify-center gap-3 py-3 px-5 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+      className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800"
     >
       {loading ? (
-        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600" />
+        <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600 dark:border-slate-600 dark:border-t-slate-200" />
       ) : (
         <GoogleIcon />
       )}

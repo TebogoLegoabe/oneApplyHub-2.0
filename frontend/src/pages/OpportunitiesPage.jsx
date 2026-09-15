@@ -1,162 +1,171 @@
 import { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  Search, Filter, ExternalLink, Briefcase, Clock,
-  AlertCircle, Building, MapPin, Loader2, ChevronDown, ChevronUp,
-} from 'lucide-react';
+import { Search, Briefcase, GraduationCap, Layers, ArrowUpDown, X, AlertCircle } from 'lucide-react';
 import { opportunitiesAPI } from '../services/api';
+import OpportunityCard, { daysUntil } from '../components/OpportunityCard';
+import { Alert, Button, EmptyState, Input, PageHeader, Skeleton } from '../components/ui';
+import { cn } from '../utils/cn';
 
-const OPPORTUNITY_TYPE_FILTERS = [
-  { value: 'all', label: 'All types' },
-  { value: 'internship', label: 'Internships' },
-  { value: 'graduate', label: 'Graduate programs' },
+const TYPE_FILTERS = [
+  { value: 'all', label: 'All types', icon: Layers },
+  { value: 'internship', label: 'Internships', icon: Briefcase },
+  { value: 'graduate', label: 'Graduate programmes', icon: GraduationCap },
 ];
 
-const daysUntil = (dateStr) => {
-  const d = new Date(dateStr);
-  return Math.ceil((d - new Date()) / 864e5);
-};
-
-const OpportunityCard = ({ opportunity }) => {
-  const [expanded, setExpanded] = useState(false);
-  const days = daysUntil(opportunity.deadline);
-  const isUrgent = days <= 30 && days > 0;
-  const expired = days <= 0;
-  const typeLabel = opportunity.opportunity_type === 'internship' ? 'Internship' : 'Graduate program';
-  const typeColor = opportunity.opportunity_type === 'internship'
-    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-    : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300';
-
-  return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-brand-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand-100 text-brand-700 dark:bg-brand-900/30 dark:text-brand-300">
-            <Briefcase className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <h3 className="text-sm font-bold leading-snug text-slate-950 dark:text-white">{opportunity.title}</h3>
-            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">{opportunity.provider}</p>
-          </div>
-        </div>
-        <div className={`shrink-0 rounded-xl px-2.5 py-1.5 text-xs font-bold ${expired ? 'bg-red-50 text-red-600 dark:bg-red-500/10' : isUrgent ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'}`}>
-          <div className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" />
-            <span>{expired ? 'Expired' : `${days} days left`}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${typeColor}`}>{typeLabel}</span>
-        {opportunity.field && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{opportunity.field}</span>}
-        {opportunity.location && <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"><MapPin className="h-3 w-3" />{opportunity.location}</span>}
-      </div>
-
-      {opportunity.salary_range && <p className="mt-3 text-xs font-bold text-emerald-600 dark:text-emerald-400">{opportunity.salary_range}</p>}
-      <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{opportunity.description}</p>
-
-      <button onClick={() => setExpanded((p) => !p)} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:text-brand-700 dark:text-brand-400">
-        {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        {expanded ? 'Hide details' : 'View details'}
-      </button>
-
-      {expanded && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {opportunity.requirements && <div className="w-full"><p className="text-xs font-bold text-slate-950 dark:text-white">Requirements:</p><p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{opportunity.requirements}</p></div>}
-        </div>
-      )}
-
-      <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-3 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-slate-500 dark:text-slate-400">Deadline: {new Date(opportunity.deadline).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-        <a href={opportunity.application_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white hover:bg-brand-700">
-          Apply now <ExternalLink className="h-3.5 w-3.5" />
-        </a>
-      </div>
-    </article>
-  );
-};
+const INITIAL_FILTERS = { type: 'all', search: '' };
 
 const OpportunitiesPage = () => {
   const { isAuthenticated } = useAuth();
-  const [filters, setFilters] = useState({ type: 'all', search: '' });
-  const handleFilter = (key, value) => setFilters((p) => ({ ...p, [key]: value }));
-
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const setFilter = (key, value) => setFilters((previous) => ({ ...previous, [key]: value }));
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError('');
     opportunitiesAPI.getOpportunities()
-      .then((res) => { if (!cancelled) setOpportunities(res.data.opportunities || []); })
-      .catch(() => { if (!cancelled) setError('Could not load opportunities. Please try again later.'); })
+      .then((response) => { if (!cancelled) setOpportunities(response.data.opportunities || []); })
+      .catch(() => { if (!cancelled) setError('We could not load opportunities right now. Please try again later.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
-  const filtered = useMemo(() => opportunities.filter((o) => {
-    if (filters.type !== 'all' && o.opportunity_type !== filters.type) return false;
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      if (!o.title.toLowerCase().includes(q) && !o.provider.toLowerCase().includes(q) && !o.description.toLowerCase().includes(q)) return false;
-    }
-    return true;
-  }), [opportunities, filters]);
+  const filtered = useMemo(() => {
+    const query = filters.search.trim().toLowerCase();
+    return opportunities
+      .filter((item) => {
+        if (filters.type !== 'all' && item.opportunity_type !== filters.type) return false;
+        if (query && ![item.title, item.provider, item.description, item.field, item.location].some((value) => value && String(value).toLowerCase().includes(query))) return false;
+        return true;
+      })
+      .sort((a, b) => new Date(a.deadline || '2999-12-31') - new Date(b.deadline || '2999-12-31'));
+  }, [opportunities, filters]);
 
-  const openCount = filtered.filter((o) => daysUntil(o.deadline) > 0).length;
+  const openCount = filtered.filter((item) => daysUntil(item.deadline) > 0).length;
+  const internshipCount = opportunities.filter((item) => item.opportunity_type === 'internship').length;
+  const graduateCount = opportunities.filter((item) => item.opportunity_type === 'graduate').length;
+  const hasActiveFilters = filters.type !== 'all' || Boolean(filters.search);
+  const listTitle = TYPE_FILTERS.find((item) => item.value === filters.type)?.label || 'All opportunities';
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="mx-auto w-full max-w-7xl px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:px-5 sm:py-4">
-          <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300"><Briefcase className="h-3.5 w-3.5" />Opportunities Hub</div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">Internships & Graduate Programs</h1>
-          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 dark:text-slate-400 sm:text-sm">Find internships and graduate programs to launch your career.</p>
-        </div>
+    <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      <PageHeader
+        eyebrow="Opportunities Hub"
+        icon={Briefcase}
+        title="Internships & graduate programmes"
+        description="Vacation work, learnerships, and entry-level programmes to launch your career."
+        action={<Button to="/bursaries" variant="secondary" size="sm">Looking for bursaries?</Button>}
+        className="mb-4"
+      />
 
-        <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {[
-            { value: filtered.length, label: 'Found' },
-            { value: openCount, label: 'Open now' },
-            { value: opportunities.length, label: 'Total listed' },
-          ].map(({ value, label }) => (
-            <div key={label} className="rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="text-xl font-bold leading-none text-slate-950 dark:text-white">{value}</div>
-              <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Type</p>
-          <div className="flex flex-wrap gap-2">{OPPORTUNITY_TYPE_FILTERS.map(({ value, label }) => <button key={value} type="button" onClick={() => handleFilter('type', value)} className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition ${filters.type === value ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'}`}>{label}</button>)}</div>
-        </div>
-
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="relative"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search opportunities or providers" className="w-full rounded-xl border border-slate-200 bg-white pl-9 px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white" value={filters.search} onChange={(e) => handleFilter('search', e.target.value)} /></div>
-        </div>
-
-        {!isAuthenticated && <div className="mb-4 rounded-2xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-900 dark:bg-brand-500/10"><div className="flex gap-3"><AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" /><div><p className="text-sm font-bold text-brand-950 dark:text-brand-200">Track saved opportunities</p><p className="mt-1 text-xs text-brand-700 dark:text-brand-300">Create an account to save opportunities and manage application deadlines.</p><div className="mt-3 flex gap-2"><Link to="/register" className="rounded-xl bg-brand-600 px-3 py-2 text-xs font-bold text-white hover:bg-brand-700">Create account</Link><Link to="/login" className="rounded-xl border border-brand-300 px-3 py-2 text-xs font-bold text-brand-700 hover:bg-brand-100 dark:text-brand-300">Login</Link></div></div></div></div>}
-
-        <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><div><h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg">{filters.type !== 'all' ? OPPORTUNITY_TYPE_FILTERS.find((f) => f.value === filters.type)?.label : 'All opportunities'} ({filtered.length})</h2><p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p></div><div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400"><Filter className="h-3.5 w-3.5" />Soonest first</div></div>
-
-        {loading ? (
-          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <Loader2 className="mx-auto mb-4 h-9 w-9 animate-spin text-brand-500" />
-            <h3 className="text-base font-bold text-slate-950 dark:text-white">Loading opportunities…</h3>
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {[
+          { value: filtered.length, label: 'Matching' },
+          { value: openCount, label: 'Open now' },
+          { value: internshipCount, label: 'Internships' },
+          { value: graduateCount, label: 'Graduate programmes' },
+        ].map(({ value, label }) => (
+          <div key={label} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-xl font-bold leading-none text-slate-950 dark:text-white">{loading ? <Skeleton className="inline-block h-5 w-8" /> : value}</p>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{label}</p>
           </div>
-        ) : error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-12 text-center shadow-sm dark:border-red-500/20 dark:bg-red-500/10">
-            <AlertCircle className="mx-auto mb-4 h-9 w-9 text-red-500" />
-            <h3 className="text-base font-bold text-slate-950 dark:text-white">{error}</h3>
-          </div>
-        ) : filtered.length > 0 ? <div className="space-y-3">{[...filtered].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).map((o) => <OpportunityCard key={o.id} opportunity={o} />)}</div> : <div className="rounded-2xl border border-slate-200 bg-white px-4 py-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"><Search className="mx-auto mb-4 h-9 w-9 text-slate-400" /><h3 className="text-base font-bold text-slate-950 dark:text-white">No opportunities found</h3><p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">Try adjusting your filters.</p><button onClick={() => setFilters({ type: 'all', search: '' })} className="mt-5 rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-700">Clear filters</button></div>}
+        ))}
+      </div>
 
-        <div className="mt-5 rounded-2xl bg-slate-950 p-4 text-white shadow-sm dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-5"><div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-sm font-bold sm:text-base">Plan accommodation and career together</h3><p className="mt-1 max-w-2xl text-xs text-slate-300 sm:text-sm">Apply for accommodation while tracking career opportunities.</p></div><Link to="/application" className="inline-flex shrink-0 items-center justify-center rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">Apply for accommodation</Link></div></div>
+      <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Search and filters">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Opportunity type">
+            {TYPE_FILTERS.map(({ value, label, icon: Icon }) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setFilter('type', value)}
+                aria-pressed={filters.type === value}
+                className={cn(
+                  'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-colors',
+                  filters.type === value
+                    ? 'bg-brand-600 text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
+                )}
+              >
+                <Icon className="h-3.5 w-3.5" aria-hidden="true" />{label}
+              </button>
+            ))}
+          </div>
+          <Input
+            icon={Search}
+            type="search"
+            aria-label="Search opportunities or providers"
+            placeholder="Search by title, company, field, or location"
+            wrapperClassName="md:ml-auto md:w-80"
+            value={filters.search}
+            onChange={(event) => setFilter('search', event.target.value)}
+          />
+        </div>
+      </section>
+
+      {!isAuthenticated && (
+        <Alert tone="info" className="mb-4" title="Track opportunities alongside your accommodation application">
+          <p>Create a free account to apply for accommodation and keep everything in one dashboard.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button to="/register" size="sm">Create account</Button>
+            <Button to="/login" size="sm" variant="secondary">Log in</Button>
+          </div>
+        </Alert>
+      )}
+
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg" aria-live="polite">
+            {listTitle} <span className="font-medium text-slate-400">({filtered.length})</span>
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={() => setFilters(INITIAL_FILTERS)}>
+              <X className="h-3.5 w-3.5" aria-hidden="true" />Clear filters
+            </Button>
+          )}
+          <p className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <ArrowUpDown className="h-3.5 w-3.5" aria-hidden="true" />Soonest first
+          </p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3" aria-busy="true">
+          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}
+        </div>
+      ) : error ? (
+        <Alert tone="error" title="Could not load opportunities" action={<Button size="sm" variant="danger" onClick={() => window.location.reload()}>Retry</Button>}>{error}</Alert>
+      ) : filtered.length > 0 ? (
+        <div className="space-y-3">
+          {filtered.map((item) => <OpportunityCard key={item.id} opportunity={item} />)}
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+          <EmptyState
+            icon={opportunities.length ? Search : AlertCircle}
+            title={opportunities.length ? 'No opportunities match your filters' : 'No opportunities listed yet'}
+            description={opportunities.length ? 'Try a different type or clear your search.' : 'Check back soon — new listings are added regularly.'}
+            action={opportunities.length ? <Button onClick={() => setFilters(INITIAL_FILTERS)}>Clear filters</Button> : null}
+          />
+        </div>
+      )}
+
+      <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h3 className="text-base font-bold">Plan accommodation and career together</h3>
+            <p className="mt-1 max-w-2xl text-sm text-slate-300">Apply for accommodation while you track career opportunities.</p>
+          </div>
+          <Button to={isAuthenticated ? '/application' : '/register'} variant="inverse" className="shrink-0">Apply for accommodation</Button>
+        </div>
       </div>
     </div>
   );

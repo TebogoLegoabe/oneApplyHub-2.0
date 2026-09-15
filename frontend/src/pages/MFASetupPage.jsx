@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, ShieldOff, Lock, Copy, CheckCircle2, Eye, EyeOff, Smartphone, QrCode, KeyRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { mfaAPI } from '../services/api';
-import {
-  ShieldCheck, ShieldOff, Lock, Copy, CheckCircle, AlertCircle,
-  ArrowLeft, Eye, EyeOff,
-} from 'lucide-react';
+import { Alert, Button, Card, Checkbox, Input, PageHeader, useToast } from '../components/ui';
 
 const STEPS = { IDLE: 'idle', QR: 'qr', BACKUP: 'backup', DISABLE: 'disable' };
+
+const formatBackupCode = (code) => `${code.slice(0, 4)}-${code.slice(4)}`;
 
 const MFASetupPage = () => {
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [step, setStep] = useState(STEPS.IDLE);
   const [qrCode, setQrCode] = useState('');
@@ -20,11 +21,9 @@ const MFASetupPage = () => {
   const [backupCodes, setBackupCodes] = useState([]);
   const [copiedAll, setCopiedAll] = useState(false);
   const [savedConfirmed, setSavedConfirmed] = useState(false);
-
   const [disablePassword, setDisablePassword] = useState('');
   const [disableCode, setDisableCode] = useState('');
   const [showDisablePassword, setShowDisablePassword] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -32,52 +31,63 @@ const MFASetupPage = () => {
   const mfaEnabled = user?.mfa_enabled;
 
   useEffect(() => {
-    if (successMsg) {
-      const t = setTimeout(() => setSuccessMsg(''), 4000);
-      return () => clearTimeout(t);
-    }
+    if (!successMsg) return undefined;
+    const timer = setTimeout(() => setSuccessMsg(''), 4000);
+    return () => clearTimeout(timer);
   }, [successMsg]);
 
   const handleStartSetup = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await mfaAPI.setup();
-      setQrCode(res.data.qr_code);
-      setSecret(res.data.secret);
+      const response = await mfaAPI.setup();
+      setQrCode(response.data.qr_code);
+      setSecret(response.data.secret);
       setStep(STEPS.QR);
-    } catch (e) {
-      setError(e.response?.data?.error || 'Failed to start MFA setup');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to start two-factor setup.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEnable = async (e) => {
-    e.preventDefault();
+  const handleEnable = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const res = await mfaAPI.enable(code);
-      setBackupCodes(res.data.backup_codes);
+      const response = await mfaAPI.enable(code);
+      setBackupCodes(response.data.backup_codes);
       await refreshUser();
       setStep(STEPS.BACKUP);
-    } catch (e) {
-      setError(e.response?.data?.error || 'Invalid code, please try again');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid code, please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCopyAll = () => {
-    const formatted = backupCodes.map(c => `${c.slice(0, 4)}-${c.slice(4)}`).join('\n');
-    navigator.clipboard.writeText(formatted);
-    setCopiedAll(true);
-    setTimeout(() => setCopiedAll(false), 2000);
+  const copyToClipboard = async (text, message) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(message);
+      return true;
+    } catch {
+      toast.error('Could not copy to clipboard.');
+      return false;
+    }
   };
 
-  const handleDisable = async (e) => {
-    e.preventDefault();
+  const handleCopyAll = async () => {
+    const copied = await copyToClipboard(backupCodes.map(formatBackupCode).join('\n'), 'Backup codes copied.');
+    if (copied) {
+      setCopiedAll(true);
+      setTimeout(() => setCopiedAll(false), 2000);
+    }
+  };
+
+  const handleDisable = async (event) => {
+    event.preventDefault();
     setLoading(true);
     setError('');
     try {
@@ -86,297 +96,194 @@ const MFASetupPage = () => {
       setStep(STEPS.IDLE);
       setDisablePassword('');
       setDisableCode('');
-      setSuccessMsg('MFA has been disabled.');
-    } catch (e) {
-      setError(e.response?.data?.error || 'Failed to disable MFA');
+      setSuccessMsg('Two-factor authentication has been disabled.');
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to disable two-factor authentication.');
     } finally {
       setLoading(false);
     }
   };
 
+  const resetToIdle = () => {
+    setStep(STEPS.IDLE);
+    setCode('');
+    setError('');
+    setDisablePassword('');
+    setDisableCode('');
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-gray-900">
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+    <div className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+      <PageHeader
+        backTo="/dashboard"
+        backLabel="Back to dashboard"
+        eyebrow="Account security"
+        icon={ShieldCheck}
+        title="Two-factor authentication"
+        description="Protect your account with a one-time code from an authenticator app."
+        action={mfaEnabled ? <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-inset ring-emerald-200/70 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20"><ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" />Enabled</span> : <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800 dark:text-slate-300 dark:ring-white/5"><ShieldOff className="h-3.5 w-3.5" aria-hidden="true" />Off</span>}
+        className="mb-4"
+      />
 
-        <Link to="/dashboard" className="inline-flex items-center text-sm text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 mb-6 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Dashboard
-        </Link>
+      <Card>
+        {successMsg && <Alert tone="success" className="mb-5" onDismiss={() => setSuccessMsg('')}>{successMsg}</Alert>}
+        {error && <Alert tone="error" className="mb-5">{error}</Alert>}
 
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-
-          {/* Header */}
-          <div className="bg-brand-700 px-6 py-6 text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5" />
+        {step === STEPS.IDLE && (mfaEnabled ? (
+          <div className="space-y-5">
+            <Alert tone="success" title="Two-factor authentication is active">Your account is protected by an authenticator app.</Alert>
+            <div className="rounded-2xl border border-red-200 p-5 dark:border-red-900/60">
+              <div className="mb-2 flex items-center gap-2">
+                <ShieldOff className="h-4 w-4 text-red-500" aria-hidden="true" />
+                <h2 className="text-sm font-semibold text-red-700 dark:text-red-300">Disable two-factor authentication</h2>
               </div>
-              <div>
-                <h1 className="text-lg font-bold">Two-Factor Authentication</h1>
-                <p className="text-brand-100 text-sm">Protect your account with an authenticator app</p>
-              </div>
+              <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+                Disabling this makes your account less secure. You will need to confirm with your password and current authenticator code.
+              </p>
+              <Button variant="danger-soft" onClick={() => { setStep(STEPS.DISABLE); setError(''); }}>Disable two-factor auth</Button>
             </div>
           </div>
+        ) : (
+          <div className="space-y-5">
+            <div className="rounded-2xl border border-brand-100 bg-brand-50 p-5 dark:border-brand-900/60 dark:bg-brand-500/10">
+              <h2 className="mb-3 text-sm font-semibold text-brand-900 dark:text-brand-200">How it works</h2>
+              <ol className="space-y-2.5 text-sm text-brand-800 dark:text-brand-100">
+                {[
+                  [Smartphone, <>Install <strong>Google Authenticator</strong>, <strong>Authy</strong>, or <strong>Microsoft Authenticator</strong> on your phone.</>],
+                  [QrCode, 'Scan the QR code we generate for you.'],
+                  [KeyRound, 'Enter the 6-digit code to confirm setup.'],
+                  [Lock, 'Save your backup codes somewhere safe.'],
+                ].map(([Icon, text], index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-white text-brand-600 shadow-sm dark:bg-slate-900 dark:text-brand-300">
+                      <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <Button onClick={handleStartSetup} loading={loading} size="lg" fullWidth>
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />Set up two-factor authentication
+            </Button>
+          </div>
+        ))}
 
-          <div className="p-6">
-
-            {successMsg && (
-              <div className="mb-5 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl p-4 flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <p className="text-sm text-emerald-700 dark:text-emerald-300 font-medium">{successMsg}</p>
+        {step === STEPS.QR && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-base font-semibold text-slate-950 dark:text-white">Scan this QR code</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Open your authenticator app and scan the code below.</p>
+            </div>
+            <div className="flex justify-center">
+              <div className="inline-block rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <img src={`data:image/png;base64,${qrCode}`} alt="Two-factor authentication QR code" className="h-48 w-48" />
               </div>
-            )}
-
-            {error && (
-              <div className="mb-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                <p className="text-sm text-red-800 dark:text-red-300 font-medium">{error}</p>
-              </div>
-            )}
-
-            {/* ── STEP: IDLE ── */}
-            {step === STEPS.IDLE && (
-              <div>
-                {mfaEnabled ? (
-                  <div className="space-y-5">
-                    <div className="flex items-center gap-3 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-700 rounded-xl p-4">
-                      <ShieldCheck className="w-6 h-6 text-emerald-600 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">MFA is active</p>
-                        <p className="text-xs text-emerald-600 dark:text-emerald-400">Your account is protected by an authenticator app.</p>
-                      </div>
-                    </div>
-                    <div className="border border-red-200 dark:border-red-800 rounded-xl p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <ShieldOff className="w-4 h-4 text-red-500" />
-                        <h3 className="text-sm font-semibold text-red-700 dark:text-red-400">Disable MFA</h3>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                        Disabling MFA makes your account less secure. You will need to confirm with your password and current authenticator code.
-                      </p>
-                      <button
-                        onClick={() => { setStep(STEPS.DISABLE); setError(''); }}
-                        className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-700 rounded-lg text-sm font-semibold hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-                      >
-                        Disable Two-Factor Auth
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    <div className="bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-700 rounded-xl p-5">
-                      <h3 className="text-sm font-semibold text-brand-800 dark:text-brand-300 mb-2">How it works</h3>
-                      <ul className="space-y-1.5 text-sm text-brand-700 dark:text-brand-400">
-                        <li>1. Install <strong>Google Authenticator</strong>, <strong>Authy</strong>, or <strong>Microsoft Authenticator</strong> on your phone</li>
-                        <li>2. Scan the QR code we generate</li>
-                        <li>3. Enter the 6-digit code to confirm setup</li>
-                        <li>4. Save your backup codes in a safe place</li>
-                      </ul>
-                    </div>
-                    <button
-                      onClick={handleStartSetup}
-                      disabled={loading}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-5 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold rounded-xl transition-colors"
-                    >
-                      {loading ? (
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                      ) : (
-                        <>
-                          <ShieldCheck className="w-4 h-4" />
-                          Set Up Two-Factor Auth
-                        </>
-                      )}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* ── STEP: QR ── */}
-            {step === STEPS.QR && (
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Scan this QR code</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Open your authenticator app and scan the code below.</p>
-                </div>
-                <div className="flex justify-center">
-                  <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm inline-block">
-                    <img src={`data:image/png;base64,${qrCode}`} alt="MFA QR Code" className="w-48 h-48" />
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Can't scan? Enter this code manually:</p>
-                  <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 rounded-lg px-3 py-2 border border-gray-200 dark:border-gray-600">
-                    <code className="flex-1 text-sm font-mono text-gray-800 dark:text-gray-200 break-all">{secret}</code>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(secret)}
-                      className="text-gray-400 hover:text-brand-600 transition-colors flex-shrink-0"
-                      title="Copy secret"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-                <form onSubmit={handleEnable} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                      Enter the 6-digit code to confirm
-                    </label>
-                    <input
-                      type="text" inputMode="numeric" autoComplete="one-time-code"
-                      maxLength={6} required autoFocus
-                      className="w-full text-center text-2xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
-                      placeholder="000000"
-                      value={code}
-                      onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); if (error) setError(''); }}
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { setStep(STEPS.IDLE); setCode(''); setError(''); }}
-                      className="flex-1 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading || code.length < 6}
-                      className="flex-1 py-3 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          Verifying...
-                        </div>
-                      ) : 'Enable MFA'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {/* ── STEP: BACKUP CODES ── */}
-            {step === STEPS.BACKUP && (
-              <div className="space-y-6">
-                <div className="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl p-4">
-                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Save your backup codes now</p>
-                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                      These codes let you sign in if you lose your phone. Each code can only be used once.
-                      Store them somewhere safe. You won't see them again.
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Backup Codes</span>
-                    <button onClick={handleCopyAll} className="inline-flex items-center gap-1.5 text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
-                      {copiedAll ? <CheckCircle className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                      {copiedAll ? 'Copied!' : 'Copy all'}
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {backupCodes.map((c) => (
-                      <code key={c} className="bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-mono text-center text-gray-800 dark:text-gray-200 tracking-widest">
-                        {c.slice(0, 4)}-{c.slice(4)}
-                      </code>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox" id="savedConfirm"
-                    checked={savedConfirmed}
-                    onChange={(e) => setSavedConfirmed(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                  />
-                  <label htmlFor="savedConfirm" className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-                    I have saved my backup codes in a safe place
-                  </label>
-                </div>
-                <button
-                  onClick={() => navigate('/dashboard')}
-                  disabled={!savedConfirmed}
-                  className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  <CheckCircle className="w-4 h-4" />
-                  MFA Enabled. Go to Dashboard
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">Can't scan? Enter this key manually:</p>
+              <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950">
+                <code className="flex-1 break-all font-mono text-sm text-slate-800 dark:text-slate-200">{secret}</code>
+                <button type="button" onClick={() => copyToClipboard(secret, 'Secret key copied.')} className="shrink-0 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-white hover:text-brand-700 dark:hover:bg-slate-800 dark:hover:text-brand-300" aria-label="Copy secret key">
+                  <Copy className="h-4 w-4" />
                 </button>
               </div>
-            )}
-
-            {/* ── STEP: DISABLE ── */}
-            {step === STEPS.DISABLE && (
-              <div className="space-y-5">
-                <div>
-                  <h2 className="text-base font-semibold text-gray-900 dark:text-white mb-1">Disable Two-Factor Auth</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Confirm your identity to remove MFA from your account.</p>
-                </div>
-                <form onSubmit={handleDisable} className="space-y-4">
-                  {!user?.oauth_provider && (
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                        Current Password
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                          <Lock className="h-4 w-4 text-gray-400" />
-                        </div>
-                        <input
-                          type={showDisablePassword ? 'text' : 'password'}
-                          required
-                          className="w-full pl-10 pr-10 py-3 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all"
-                          placeholder="Enter your password"
-                          value={disablePassword}
-                          onChange={(e) => { setDisablePassword(e.target.value); if (error) setError(''); }}
-                        />
-                        <button type="button" onClick={() => setShowDisablePassword(!showDisablePassword)}
-                          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-brand-500 transition-colors">
-                          {showDisablePassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-2">
-                      Authenticator Code <span className="font-normal text-gray-400">(optional)</span>
-                    </label>
-                    <input
-                      type="text" inputMode="numeric" maxLength={6}
-                      className="w-full text-center text-xl tracking-widest font-mono py-3 px-4 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"
-                      placeholder="000000"
-                      value={disableCode}
-                      onChange={(e) => { setDisableCode(e.target.value.replace(/\D/g, '')); if (error) setError(''); }}
-                    />
-                  </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { setStep(STEPS.IDLE); setError(''); setDisablePassword(''); setDisableCode(''); }}
-                      className="flex-1 py-3 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-xl font-semibold text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading || (!user?.oauth_provider && !disablePassword)}
-                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      {loading ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                          Disabling...
-                        </div>
-                      ) : 'Disable MFA'}
-                    </button>
-                  </div>
-                </form>
+            </div>
+            <form onSubmit={handleEnable} className="space-y-4">
+              <Input
+                label="Enter the 6-digit code to confirm"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={6}
+                required
+                autoFocus
+                className="text-center font-mono text-2xl tracking-[0.4em]"
+                placeholder="000000"
+                value={code}
+                onChange={(event) => { setCode(event.target.value.replace(/\D/g, '')); if (error) setError(''); }}
+              />
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                <Button type="button" variant="secondary" className="flex-1" onClick={resetToIdle}>Cancel</Button>
+                <Button type="submit" className="flex-1" loading={loading} disabled={code.length < 6}>Enable two-factor auth</Button>
               </div>
-            )}
+            </form>
           </div>
-        </div>
-      </div>
+        )}
+
+        {step === STEPS.BACKUP && (
+          <div className="space-y-6">
+            <Alert tone="warning" title="Save your backup codes now">
+              These codes let you sign in if you lose your phone. Each code works once. Store them somewhere safe — you will not see them again.
+            </Alert>
+            <div>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Backup codes</span>
+                <Button variant="ghost" size="xs" onClick={handleCopyAll}>
+                  {copiedAll ? <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> : <Copy className="h-3.5 w-3.5" aria-hidden="true" />}
+                  {copiedAll ? 'Copied' : 'Copy all'}
+                </Button>
+              </div>
+              <ul className="grid grid-cols-2 gap-2">
+                {backupCodes.map((backupCode) => (
+                  <li key={backupCode}>
+                    <code className="block rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center font-mono text-sm tracking-widest text-slate-800 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">
+                      {formatBackupCode(backupCode)}
+                    </code>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Checkbox checked={savedConfirmed} onChange={(event) => setSavedConfirmed(event.target.checked)} label="I have saved my backup codes in a safe place" />
+            <Button onClick={() => navigate('/dashboard')} disabled={!savedConfirmed} size="lg" fullWidth>
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />Done — go to dashboard
+            </Button>
+          </div>
+        )}
+
+        {step === STEPS.DISABLE && (
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-base font-semibold text-slate-950 dark:text-white">Disable two-factor authentication</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Confirm your identity to remove two-factor authentication from your account.</p>
+            </div>
+            <form onSubmit={handleDisable} className="space-y-4">
+              {!user?.oauth_provider && (
+                <Input
+                  label="Current password"
+                  icon={Lock}
+                  type={showDisablePassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  placeholder="Enter your password"
+                  value={disablePassword}
+                  onChange={(event) => { setDisablePassword(event.target.value); if (error) setError(''); }}
+                  trailing={
+                    <button type="button" onClick={() => setShowDisablePassword((previous) => !previous)} className="rounded-lg p-1.5 text-slate-400 transition-colors hover:text-slate-700 dark:hover:text-slate-200" aria-label={showDisablePassword ? 'Hide password' : 'Show password'}>
+                      {showDisablePassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  }
+                />
+              )}
+              <Input
+                label="Authenticator code"
+                optional
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                className="text-center font-mono text-xl tracking-[0.4em]"
+                placeholder="000000"
+                value={disableCode}
+                onChange={(event) => { setDisableCode(event.target.value.replace(/\D/g, '')); if (error) setError(''); }}
+              />
+              <div className="flex flex-col-reverse gap-3 sm:flex-row">
+                <Button type="button" variant="secondary" className="flex-1" onClick={resetToIdle}>Cancel</Button>
+                <Button type="submit" variant="danger" className="flex-1" loading={loading} disabled={!user?.oauth_provider && !disablePassword}>Disable two-factor auth</Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
