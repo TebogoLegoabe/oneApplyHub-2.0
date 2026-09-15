@@ -52,8 +52,9 @@ const PropertyAdminsPage = () => {
   const [message, setMessage] = useState(null);
   const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', propertyIds: [] });
-  const [pendingRemoval, setPendingRemoval] = useState(null);
+  const [form, setForm] = useState({ name: '', email: '', propertyIds: [], grantUniAccess: false });
+  // Destructive actions are staged here and executed only after the user confirms.
+  const [confirm, setConfirm] = useState(null);
 
   const isSuperAdmin = user?.is_super_admin;
 
@@ -79,6 +80,7 @@ const PropertyAdminsPage = () => {
   useEffect(() => { if (isSuperAdmin) load(); }, [isSuperAdmin]);
 
   const assignableUsers = useMemo(() => users.filter((item) => !item.is_super_admin), [users]);
+  const universityAdmins = useMemo(() => users.filter((item) => item.can_manage_university_applications && !item.is_super_admin), [users]);
   const adminCount = useMemo(() => new Set(assignments.map((item) => item.admin_user_id)).size, [assignments]);
   const coveredProperties = useMemo(() => new Set(assignments.map((item) => item.property_id)).size, [assignments]);
 
@@ -117,8 +119,9 @@ const PropertyAdminsPage = () => {
         name: form.name,
         email: form.email,
         property_ids: form.propertyIds,
+        can_manage_university_applications: form.grantUniAccess,
       });
-      setForm({ name: '', email: '', propertyIds: [] });
+      setForm({ name: '', email: '', propertyIds: [], grantUniAccess: false });
       if (response.data.temporary_password) {
         setGeneratedCredentials({ email: response.data.user.email, password: response.data.temporary_password });
       } else {
@@ -160,14 +163,26 @@ const PropertyAdminsPage = () => {
     }
   };
 
-  const handleRemove = async () => {
-    if (!pendingRemoval) return;
+  const handleRevokeUniAccess = async (adminUser) => {
     setSaving(true);
     setMessage(null);
     try {
-      await adminAPI.removePropertyAdmin(pendingRemoval.id);
-      setMessage({ type: 'success', text: `${pendingRemoval.admin_name} no longer manages ${pendingRemoval.property_name}.` });
-      setPendingRemoval(null);
+      await adminAPI.updateUser(adminUser.id, { can_manage_university_applications: false });
+      setMessage({ type: 'success', text: `Revoked university applications access for ${adminUser.name}.` });
+      await load();
+    } catch (err) {
+      setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to update admin.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemove = async (id) => {
+    setSaving(true);
+    setMessage(null);
+    try {
+      await adminAPI.removePropertyAdmin(id);
+      setMessage({ type: 'success', text: 'Assignment removed.' });
       await load();
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.error || 'Failed to remove assignment.' });
@@ -192,13 +207,13 @@ const PropertyAdminsPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <ConfirmDialog
-        open={Boolean(pendingRemoval)}
-        onClose={() => setPendingRemoval(null)}
-        onConfirm={handleRemove}
+        open={Boolean(confirm)}
+        onClose={() => setConfirm(null)}
+        onConfirm={async () => { await confirm.action(); setConfirm(null); }}
         loading={saving}
-        title="Remove this assignment?"
-        description={`${pendingRemoval?.admin_name || 'This admin'} will immediately lose access to ${pendingRemoval?.property_name || 'this property'}, its reviews, and its applications.`}
-        confirmLabel="Remove access"
+        title={confirm?.title}
+        description={confirm?.description}
+        confirmLabel={confirm?.confirmLabel}
       />
       <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
         <Link to="/admin" className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 transition-colors hover:text-brand-700 dark:text-slate-400 dark:hover:text-brand-300">
@@ -234,7 +249,7 @@ const PropertyAdminsPage = () => {
             <div className="flex items-start gap-2">
               <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-gold-700 dark:text-gold-300" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-gold-800 dark:text-gold-200">Admin created — copy this password now</p>
+                <p className="text-sm font-bold text-gold-800 dark:text-gold-200">Admin created. Copy this password now</p>
                 <p className="mt-1 text-xs text-gold-700 dark:text-gold-300">It won't be shown again. Share it with {generatedCredentials.email} outside this app; they'll be required to set their own password on first login.</p>
                 <div className="mt-2 flex items-center gap-2 rounded-xl border border-gold-200 bg-white px-3 py-2 dark:border-gold-500/30 dark:bg-slate-900">
                   <code className="flex-1 truncate font-mono text-sm text-slate-900 dark:text-white">{generatedCredentials.password}</code>
@@ -266,7 +281,7 @@ const PropertyAdminsPage = () => {
                 <input type="email" value={form.email} onChange={(event) => set('email', event.target.value)} className={inputClass} placeholder="admin@example.com" />
               </Field>
             </div>
-            <p className="mt-3 text-xs text-slate-400">A random temporary password is generated automatically and shown once after creation — the new admin must set their own password on first login.</p>
+            <p className="mt-3 text-xs text-slate-400">A random temporary password is generated automatically and shown once after creation. The new admin must set their own password on first login.</p>
 
             <div className="mt-5">
               <div className="mb-2 flex items-center justify-between">
@@ -292,6 +307,14 @@ const PropertyAdminsPage = () => {
               </div>
             </div>
 
+            <label className="mt-4 flex items-start gap-3 rounded-2xl border border-gold-200 bg-gold-50 p-4 dark:border-gold-500/30 dark:bg-gold-500/10">
+              <input type="checkbox" checked={form.grantUniAccess} onChange={(event) => set('grantUniAccess', event.target.checked)} className="mt-0.5" />
+              <span className="text-sm text-slate-700 dark:text-slate-300">
+                <b>Grant university applications access</b><br />
+                Lets this admin view and decide on all university applications, separate from any property assignment. A university-applications admin doesn't need any properties selected above.
+              </span>
+            </label>
+
             <button type="submit" disabled={saving} className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-brand-600 px-5 py-3 text-sm font-bold text-white hover:bg-brand-700 disabled:opacity-50">
               <Plus className="mr-2 h-4 w-4" /> {saving ? 'Saving...' : 'Create admin and assign'}
             </button>
@@ -312,7 +335,7 @@ const PropertyAdminsPage = () => {
               <Field label="Admin user">
                 <select value={selectedUser} onChange={(event) => setSelectedUser(event.target.value)} className={inputClass}>
                   <option value="">Select admin</option>
-                  {assignableUsers.map((item) => <option key={item.id} value={item.id}>{item.name} — {item.email}</option>)}
+                  {assignableUsers.map((item) => <option key={item.id} value={item.id}>{item.name} ({item.email})</option>)}
                 </select>
               </Field>
               <button type="button" onClick={handleAssignExisting} disabled={saving} className="inline-flex w-full items-center justify-center rounded-xl border border-brand-200 bg-brand-50 px-5 py-3 text-sm font-bold text-brand-700 hover:bg-brand-100 disabled:opacity-50 dark:border-brand-900 dark:bg-brand-500/10 dark:text-brand-300">
@@ -329,6 +352,33 @@ const PropertyAdminsPage = () => {
               </ul>
             </div>
           </div>
+        </div>
+
+        <div className={`${cardClass} mt-5 overflow-hidden`}>
+          <div className="flex flex-col gap-2 border-b border-slate-100 p-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-slate-950 dark:text-white">University applications admins</h2>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Admins with access to view and decide on university applications.</p>
+            </div>
+            <Badge color="purple">{universityAdmins.length} with access</Badge>
+          </div>
+          {universityAdmins.length ? (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {universityAdmins.map((admin) => (
+                <div key={admin.id} className="flex items-center justify-between gap-3 p-4">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold text-slate-950 dark:text-white">{admin.name}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">{admin.email}</p>
+                  </div>
+                  <button type="button" onClick={() => setConfirm({ title: `Revoke university applications access?`, description: `${admin.name} will no longer be able to view or decide on university applications.`, confirmLabel: 'Revoke access', action: () => handleRevokeUniAccess(admin) })} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
+                    <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Revoke
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="p-6 text-center text-sm text-slate-400">No admins have university applications access yet.</div>
+          )}
         </div>
 
         <div className={`${cardClass} mt-5 overflow-hidden`}>
@@ -363,7 +413,7 @@ const PropertyAdminsPage = () => {
                           <p className="truncate text-sm font-bold text-slate-950 dark:text-white">{item.property_name}</p>
                           <p className="text-xs text-slate-400">Assignment #{item.id}</p>
                         </div>
-                        <button type="button" onClick={() => setPendingRemoval({ ...item, admin_name: admin.admin_name })} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
+                        <button type="button" onClick={() => setConfirm({ title: 'Remove this assignment?', description: `${admin.admin_name} will immediately lose access to ${item.property_name}, its reviews, and its applications.`, confirmLabel: 'Remove access', action: () => handleRemove(item.id) })} disabled={saving} className="inline-flex shrink-0 items-center rounded-xl border border-red-200 px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-500/10">
                           <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Remove
                         </button>
                       </div>

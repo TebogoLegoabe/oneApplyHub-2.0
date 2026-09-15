@@ -5,6 +5,7 @@ import secrets
 import string
 from functools import wraps
 
+import cloudinary.uploader
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -14,6 +15,7 @@ from app.models import (
     AccommodationApplicationProperty,
     ApplicantProfile,
     HelpfulVote,
+    Opportunity,
     Property,
     PropertyAdmin,
     PropertyImage,
@@ -26,6 +28,9 @@ from app.utils import utcnow
 
 ACCOMMODATION_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
 UNIVERSITY_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
+
+ALLOWED_IMAGE_MIMETYPES = {'image/jpeg', 'image/jpg', 'image/png', 'image/webp'}
+MAX_IMAGE_UPLOAD_BYTES = 8 * 1024 * 1024
 
 logger = logging.getLogger(__name__)
 admin_bp = Blueprint('admin', __name__)
@@ -69,11 +74,17 @@ def super_admin_required(fn):
         user = _current_admin()
         if not user or not user.effective_is_super_admin:
             return jsonify({'error': 'Super admin access required'}), 403
-        if not user.mfa_enabled:
-            return jsonify({
-                'error': 'Enable two-factor authentication on your account before managing admins.',
-                'mfa_setup_required': True,
-            }), 403
+        return fn(*args, **kwargs)
+    return wrapper
+
+
+def university_applications_admin_required(fn):
+    @wraps(fn)
+    @admin_required
+    def wrapper(*args, **kwargs):
+        user = _current_admin()
+        if not user or not user.effective_can_manage_university_applications:
+            return jsonify({'error': 'University applications access required'}), 403
         return fn(*args, **kwargs)
     return wrapper
 
@@ -278,6 +289,133 @@ def delete_property(property_id):
     return jsonify({'message': f'Property "{prop.name}" deleted'}), 200
 
 
+@admin_bp.route('/properties/<int:property_id>/images', methods=['POST'])
+@admin_required
+def add_property_image(property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    prop = db.session.get(Property, property_id)
+    if not prop:
+        return jsonify({'error': 'Property not found'}), 404
+
+    data = request.get_json(silent=True) or {}
+    image_url = (data.get('image_url') or '').strip()
+    if not image_url:
+        return jsonify({'error': 'image_url is required'}), 400
+    if not (image_url.startswith('http://') or image_url.startswith('https://')):
+        return jsonify({'error': 'image_url must be a valid http(s) URL'}), 400
+    if len(image_url) > 500:
+        return jsonify({'error': 'image_url is too long (max 500 characters)'}), 400
+
+    is_primary = bool(data.get('is_primary', False))
+    image = PropertyImage(
+        property_id=property_id, image_url=image_url,
+        caption=(data.get('caption') or '').strip() or None, is_primary=is_primary,
+    )
+    try:
+        if is_primary:
+            PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        db.session.add(image)
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to add image for property %s', property_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to add image'}), 500
+    return jsonify({'message': 'Image added', 'image': image.to_dict()}), 201
+
+
+@admin_bp.route('/properties/<int:property_id>/images/upload', methods=['POST'])
+@admin_required
+def upload_property_image(property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    prop = db.session.get(Property, property_id)
+    if not prop:
+        return jsonify({'error': 'Property not found'}), 404
+
+    file = request.files.get('image')
+    if not file or not file.filename:
+        return jsonify({'error': 'No image file provided'}), 400
+    if file.mimetype not in ALLOWED_IMAGE_MIMETYPES:
+        return jsonify({'error': 'Image must be JPG, PNG, or WebP'}), 400
+
+    file.seek(0, 2)
+    size = file.tell()
+    file.seek(0)
+    if size > MAX_IMAGE_UPLOAD_BYTES:
+        return jsonify({'error': 'Image must be under 8 MB'}), 400
+
+    if not cloudinary.config().cloud_name:
+        return jsonify({'error': 'Image uploads are not configured on this server'}), 503
+
+    try:
+        result = cloudinary.uploader.upload(
+            file, folder='oneapplyhub/properties', resource_type='image',
+        )
+    except Exception:
+        logger.exception('Cloudinary upload failed for property %s', property_id)
+        return jsonify({'error': 'Failed to upload image. Please try again.'}), 502
+
+    is_primary = request.form.get('is_primary', 'false').lower() == 'true'
+    caption = (request.form.get('caption') or '').strip() or None
+    image = PropertyImage(
+        property_id=property_id, image_url=result['secure_url'], caption=caption, is_primary=is_primary,
+    )
+    try:
+        if is_primary:
+            PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        db.session.add(image)
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to save uploaded image for property %s', property_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to save image'}), 500
+    return jsonify({'message': 'Image uploaded', 'image': image.to_dict()}), 201
+
+
+@admin_bp.route('/properties/<int:property_id>/images/<int:image_id>', methods=['PATCH'])
+@admin_required
+def update_property_image(property_id, image_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    image = PropertyImage.query.filter_by(id=image_id, property_id=property_id).first()
+    if not image:
+        return jsonify({'error': 'Image not found for this property'}), 404
+
+    data = request.get_json(silent=True) or {}
+    if 'caption' in data:
+        image.caption = (data.get('caption') or '').strip() or None
+    if data.get('is_primary'):
+        PropertyImage.query.filter_by(property_id=property_id).update({'is_primary': False})
+        image.is_primary = True
+    elif 'is_primary' in data:
+        image.is_primary = False
+    try:
+        db.session.commit()
+    except Exception:
+        logger.exception('Failed to update image %s', image_id)
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update image'}), 500
+    return jsonify({'image': image.to_dict()}), 200
+
+
+@admin_bp.route('/properties/<int:property_id>/images/<int:image_id>', methods=['DELETE'])
+@admin_required
+def delete_property_image(property_id, image_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage assigned properties'}), 403
+    image = PropertyImage.query.filter_by(id=image_id, property_id=property_id).first()
+    if not image:
+        return jsonify({'error': 'Image not found for this property'}), 404
+    db.session.delete(image)
+    db.session.commit()
+    return jsonify({'message': 'Image deleted'}), 200
+
+
 @admin_bp.route('/users', methods=['GET'])
 @admin_required
 def list_users():
@@ -321,13 +459,16 @@ def create_admin_user():
     name = str(data.get('name', '')).strip()
     reset_password = bool(data.get('reset_password', False))
     property_ids = data.get('property_ids') or []
+    grant_university_applications = bool(data.get('can_manage_university_applications', False))
 
     if not EMAIL_RE.match(email):
         return jsonify({'error': 'A valid admin email is required'}), 400
     if not name:
         return jsonify({'error': 'Admin name is required'}), 400
-    if not isinstance(property_ids, list) or not property_ids:
-        return jsonify({'error': 'Select at least one property for this admin'}), 400
+    if not isinstance(property_ids, list):
+        return jsonify({'error': 'Invalid property selection'}), 400
+    if not property_ids and not grant_university_applications:
+        return jsonify({'error': 'Select at least one property or grant university applications access'}), 400
 
     user = User.query.filter(db.func.lower(User.email) == email).first()
     creating = user is None
@@ -349,6 +490,7 @@ def create_admin_user():
                 verified=True,
                 is_admin=True,
                 is_super_admin=False,
+                can_manage_university_applications=grant_university_applications,
                 must_change_password=True,
             )
             user.set_password(temp_password)
@@ -358,6 +500,8 @@ def create_admin_user():
             user.name = name or user.name
             user.verified = True
             user.is_admin = True
+            if 'can_manage_university_applications' in data:
+                user.can_manage_university_applications = grant_university_applications
             if reset_password:
                 temp_password = _generate_temp_password()
                 user.set_password(temp_password)
@@ -400,6 +544,8 @@ def update_user(user_id):
         user.is_super_admin = bool(data['is_super_admin'])
         if user.is_super_admin:
             user.is_admin = True
+    if 'can_manage_university_applications' in data:
+        user.can_manage_university_applications = bool(data['can_manage_university_applications'])
     db.session.commit()
     return jsonify({'user': user.to_dict()}), 200
 
@@ -572,8 +718,37 @@ def update_accommodation_application_property_status(application_id, property_id
     return jsonify({'application_property': row.to_dict()}), 200
 
 
+@admin_bp.route('/accommodation-applications/<int:application_id>/properties/<int:property_id>', methods=['DELETE'])
+@admin_required
+def delete_accommodation_application_property(application_id, property_id):
+    current = _current_admin()
+    if not _can_manage_property(current, property_id):
+        return jsonify({'error': 'You can only manage applications for assigned properties'}), 403
+    row = AccommodationApplicationProperty.query.filter_by(
+        accommodation_application_id=application_id, property_id=property_id,
+    ).first()
+    if not row:
+        return jsonify({'error': 'Application not found for this property'}), 404
+
+    db.session.delete(row)
+    db.session.flush()
+
+    # If that was the student's last property row, the shared parent
+    # submission (documents, profile snapshot) has nothing left to serve.
+    remaining = AccommodationApplicationProperty.query.filter_by(
+        accommodation_application_id=application_id,
+    ).count()
+    if remaining == 0:
+        parent = db.session.get(AccommodationApplication, application_id)
+        if parent:
+            db.session.delete(parent)
+
+    db.session.commit()
+    return jsonify({'message': 'Application deleted'}), 200
+
+
 @admin_bp.route('/university-applications', methods=['GET'])
-@super_admin_required
+@university_applications_admin_required
 def list_university_applications():
     page = request.args.get('page', 1, type=int)
     per_page = min(request.args.get('per_page', 20, type=int), 100)
@@ -593,7 +768,7 @@ def list_university_applications():
 
 
 @admin_bp.route('/university-applications/<int:application_id>/choices/<int:choice_id>/status', methods=['PATCH'])
-@super_admin_required
+@university_applications_admin_required
 def update_university_choice_status(application_id, choice_id):
     choice = UniversityApplicationChoice.query.filter_by(id=choice_id, university_application_id=application_id).first()
     if not choice:
@@ -609,3 +784,159 @@ def update_university_choice_status(application_id, choice_id):
     choice.reviewed_at = utcnow()
     db.session.commit()
     return jsonify({'choice': choice.to_dict()}), 200
+
+
+@admin_bp.route('/opportunities/seed', methods=['POST'])
+@super_admin_required
+def seed_opportunities():
+    try:
+        import os
+        from datetime import datetime
+        data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'data', 'opportunities.json')
+        with open(data_path) as f:
+            data = json.load(f)
+        Opportunity.query.delete()
+        db.session.commit()
+        for item in data:
+            deadline = datetime.fromisoformat(item['deadline'].replace('Z', '+00:00')) if item.get('deadline') else None
+            opp = Opportunity(
+                title=item['title'],
+                provider=item['provider'],
+                opportunity_type=item['opportunity_type'],
+                location=item.get('location'),
+                duration=item.get('duration'),
+                field=item.get('field'),
+                description=item.get('description'),
+                requirements=item.get('requirements'),
+                salary_range=item.get('salary_range'),
+                application_url=item['application_url'],
+                deadline=deadline,
+                status=item.get('status', 'open'),
+            )
+            db.session.add(opp)
+        db.session.commit()
+        return jsonify({'message': f'Successfully seeded {len(data)} opportunities'}), 200
+    except Exception as e:
+        logger.exception('Failed to seed opportunities')
+        return jsonify({'error': f'Failed to seed opportunities: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities', methods=['GET'])
+@admin_required
+def get_all_opportunities():
+    try:
+        opps = Opportunity.query.order_by(Opportunity.deadline.asc()).all()
+        return jsonify({'opportunities': [o.to_dict() for o in opps]}), 200
+    except Exception as e:
+        logger.exception('Failed to fetch opportunities')
+        return jsonify({'error': f'Failed to fetch opportunities: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities', methods=['POST'])
+@admin_required
+def create_opportunity():
+    try:
+        data = request.get_json(silent=True) or {}
+        title = data.get('title', '').strip()
+        provider = data.get('provider', '').strip()
+        opp_type = data.get('opportunity_type', '').strip()
+
+        if not title or not provider or not opp_type:
+            return jsonify({'error': 'title, provider, and opportunity_type are required'}), 400
+        if opp_type not in ('internship', 'graduate'):
+            return jsonify({'error': 'opportunity_type must be internship or graduate'}), 400
+
+        from datetime import datetime
+        deadline = None
+        if data.get('deadline'):
+            try:
+                deadline = datetime.fromisoformat(data['deadline'].replace('Z', '+00:00'))
+            except:
+                return jsonify({'error': 'Invalid deadline format. Use ISO 8601 (e.g., 2026-12-31T23:59:59Z)'}), 400
+
+        opp = Opportunity(
+            title=title,
+            provider=provider,
+            opportunity_type=opp_type,
+            location=data.get('location', '').strip() or None,
+            duration=data.get('duration', '').strip() or None,
+            field=data.get('field', '').strip() or None,
+            description=data.get('description', '').strip() or None,
+            requirements=data.get('requirements', '').strip() or None,
+            salary_range=data.get('salary_range', '').strip() or None,
+            application_url=data.get('application_url', '').strip() or 'https://example.com',
+            deadline=deadline,
+            status=data.get('status', 'open'),
+        )
+        db.session.add(opp)
+        db.session.commit()
+        return jsonify({'opportunity': opp.to_dict()}), 201
+    except Exception as e:
+        logger.exception('Failed to create opportunity')
+        return jsonify({'error': f'Failed to create opportunity: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities/<int:opportunity_id>', methods=['PATCH'])
+@admin_required
+def update_opportunity(opportunity_id):
+    try:
+        opp = db.session.get(Opportunity, opportunity_id)
+        if not opp:
+            return jsonify({'error': 'Opportunity not found'}), 404
+
+        data = request.get_json(silent=True) or {}
+
+        if 'title' in data:
+            opp.title = data['title'].strip()
+        if 'provider' in data:
+            opp.provider = data['provider'].strip()
+        if 'opportunity_type' in data:
+            if data['opportunity_type'] not in ('internship', 'graduate'):
+                return jsonify({'error': 'opportunity_type must be internship or graduate'}), 400
+            opp.opportunity_type = data['opportunity_type']
+        if 'location' in data:
+            opp.location = data['location'].strip() or None
+        if 'duration' in data:
+            opp.duration = data['duration'].strip() or None
+        if 'field' in data:
+            opp.field = data['field'].strip() or None
+        if 'description' in data:
+            opp.description = data['description'].strip() or None
+        if 'requirements' in data:
+            opp.requirements = data['requirements'].strip() or None
+        if 'salary_range' in data:
+            opp.salary_range = data['salary_range'].strip() or None
+        if 'application_url' in data:
+            opp.application_url = data['application_url'].strip() or 'https://example.com'
+        if 'deadline' in data:
+            from datetime import datetime
+            if data['deadline']:
+                try:
+                    opp.deadline = datetime.fromisoformat(data['deadline'].replace('Z', '+00:00'))
+                except:
+                    return jsonify({'error': 'Invalid deadline format'}), 400
+            else:
+                opp.deadline = None
+        if 'status' in data:
+            opp.status = data['status']
+
+        db.session.commit()
+        return jsonify({'opportunity': opp.to_dict()}), 200
+    except Exception as e:
+        logger.exception('Failed to update opportunity')
+        return jsonify({'error': f'Failed to update opportunity: {str(e)}'}), 500
+
+
+@admin_bp.route('/opportunities/<int:opportunity_id>', methods=['DELETE'])
+@admin_required
+def delete_opportunity(opportunity_id):
+    try:
+        opp = db.session.get(Opportunity, opportunity_id)
+        if not opp:
+            return jsonify({'error': 'Opportunity not found'}), 404
+        db.session.delete(opp)
+        db.session.commit()
+        return jsonify({'message': 'Opportunity deleted'}), 200
+    except Exception as e:
+        logger.exception('Failed to delete opportunity')
+        return jsonify({'error': f'Failed to delete opportunity: {str(e)}'}), 500

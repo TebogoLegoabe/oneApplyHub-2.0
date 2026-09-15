@@ -1,6 +1,5 @@
 [
   {
-    "id": 1,
     "title": "NSFAS Bursary",
     "provider": "National Student Financial Aid Scheme",
     "funder": "government",
@@ -20,7 +19,6 @@
     "status": "Open"
   },
   {
-    "id": 2,
     "title": "Funza Lushaka Teaching Bursary",
     "provider": "Department of Basic Education",
     "funder": "government",
@@ -40,12 +38,11 @@
     "status": "Open"
   },
   {
-    "id": 3,
     "title": "NRF Freestanding Scholarship",
     "provider": "National Research Foundation",
     "funder": "government",
     "field": "sciences",
-    "amount": "R90 000 – R180 000 per year",
+    "amount": "R90 000 to R180 000 per year",
     "amountValue": 135000,
     "deadline": "2026-08-31",
     "level": ["honours", "masters", "phd"],
@@ -61,7 +58,6 @@
     "status": "Open"
   },
   {
-    "id": 4,
     "title": "Eskom Scholarship",
     "provider": "Eskom",
     "funder": "corporate",
@@ -82,7 +78,6 @@
     "status": "Open"
   },
   {
-    "id": 5,
     "title": "Anglo American Bursary",
     "provider": "Anglo American",
     "funder": "corporate",
@@ -103,12 +98,11 @@
     "status": "Open"
   },
   {
-    "id": 6,
     "title": "Sasol Bursary Programme",
     "provider": "Sasol",
     "funder": "corporate",
     "field": "engineering",
-    "amount": "R60 000 – R120 000 per year",
+    "amount": "R60 000 to R120 000 per year",
     "amountValue": 90000,
     "deadline": "2026-06-30",
     "level": ["undergraduate"],
@@ -124,7 +118,6 @@
     "status": "Open"
   },
   {
-    "id": 7,
     "title": "Transnet Bursary",
     "provider": "Transnet SOC",
     "funder": "government",
@@ -145,7 +138,6 @@
     "status": "Open"
   },
   {
-    "id": 8,
     "title": "BHP Bursary (South Africa)",
     "provider": "BHP",
     "funder": "corporate",
@@ -165,7 +157,6 @@
     "status": "Open"
   },
   {
-    "id": 9,
     "title": "MTN Bursary Programme",
     "provider": "MTN Group",
     "funder": "corporate",
@@ -186,7 +177,6 @@
     "status": "Open"
   },
   {
-    "id": 10,
     "title": "Vodacom e-School Bursary",
     "provider": "Vodacom",
     "funder": "corporate",
@@ -206,7 +196,6 @@
     "status": "Open"
   },
   {
-    "id": 11,
     "title": "Standard Bank IT Bursary",
     "provider": "Standard Bank",
     "funder": "corporate",
@@ -227,7 +216,6 @@
     "status": "Open"
   },
   {
-    "id": 12,
     "title": "Department of Health Bursary",
     "provider": "National Department of Health",
     "funder": "government",
@@ -248,12 +236,11 @@
     "status": "Open"
   },
   {
-    "id": 13,
     "title": "Discovery Health Bursary",
     "provider": "Discovery Health",
     "funder": "corporate",
     "field": "health",
-    "amount": "R50 000 – R80 000 per year",
+    "amount": "R50 000 to R80 000 per year",
     "amountValue": 65000,
     "deadline": "2026-06-30",
     "level": ["undergraduate"],
@@ -269,7 +256,6 @@
     "status": "Open"
   },
   {
-    "id": 14,
     "title": "Netcare Bursary (Nursing)",
     "provider": "Netcare",
     "funder": "corporate",
@@ -289,7 +275,6 @@
     "status": "Open"
   },
   {
-    "id": 15,
     "title": "FirstRand Bursary",
     "provider": "FirstRand Group (FNB, RMB, WesBank)",
     "funder": "corporate",
@@ -310,12 +295,11 @@
     "status": "Open"
   },
   {
-    "id": 16,
     "title": "Investec Bursary",
     "provider": "Investec",
     "funder": "corporate",
     "field": "business",
-    "amount": "R40 000 – R70 000 per year",
+    "amount": "R40 000 to R70 000 per year",
     "amountValue": 55000,
     "deadline": "2026-07-31",
     "level": ["undergraduate"],
@@ -331,7 +315,6 @@
     "status": "Open"
   },
   {
-    "id": 17,
     "title": "Old Mutual Actuarial Bursary",
     "provider": "Old Mutual",
     "funder": "corporate",
@@ -351,7 +334,6 @@
     "status": "Open"
   },
   {
-    "id": 18,
     "title": "Mastercard Foundation Scholars",
     "provider": "Mastercard Foundation",
     "funder": "international",
@@ -372,12 +354,11 @@
     "status": "Open"
   },
   {
-    "id": 19,
     "title": "SAICA CA(SA) Bursary",
     "provider": "South African Institute of Chartered Accountants",
     "funder": "professional",
     "field": "accounting",
-    "amount": "R30 000 – R60 000 per year",
+    "amount": "R30 000 to R60 000 per year",
     "amountValue": 45000,
     "deadline": "2026-09-30",
     "level": ["undergraduate", "honours"],
@@ -393,7 +374,6 @@
     "status": "Open"
   },
   {
-    "id": 20,
     "title": "PwC Bursary",
     "provider": "PricewaterhouseCoopers",
     "funder": "corporate",
@@ -413,7 +393,6 @@
     "status": "Open"
   },
   {
-    "id": 21,
     "title": "Deloitte Bursary",
     "provider": "Deloitte",
     "funder": "corporate",
@@ -434,7 +413,6 @@
     "status": "Open"
   },
   {
-    "id": 22,
     "title": "KPMG Bursary",
     "provider": "KPMG South Africa",
     "funder": "corporate",
@@ -454,7 +432,6 @@
     "status": "Open"
   },
   {
-    "id": 23,
     "title": "Allan Gray Orbis Foundation",
     "provider": "Allan Gray Orbis Foundation",
     "funder": "private",
@@ -475,7 +452,6 @@
     "status": "Open"
   },
   {
-    "id": 24,
     "title": "Legal Aid SA Bursary",
     "provider": "Legal Aid South Africa",
     "funder": "government",
@@ -496,12 +472,11 @@
     "status": "Open"
   },
   {
-    "id": 26,
     "title": "Golden Key Merit Scholarship",
     "provider": "Golden Key International Honour Society",
     "funder": "private",
     "field": "general",
-    "amount": "R15 000 – R25 000",
+    "amount": "R15 000 to R25 000",
     "amountValue": 20000,
     "deadline": "2026-06-15",
     "level": ["undergraduate", "honours"],
@@ -513,6 +488,85 @@
       "Community involvement and leadership"
     ],
     "applicationUrl": "https://scholarships.goldenkey.org/",
+    "status": "Open"
+  },
+  {
+    "title": "Absa Bursary Programme",
+    "provider": "Absa Group",
+    "funder": "corporate",
+    "field": "business",
+    "amount": "Full tuition + accommodation + allowances",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students pursuing degrees relevant to Absa's business, including finance, economics, data science, and commerce. Includes mentorship and vacation work exposure.",
+    "requirements": [
+      "South African citizen",
+      "Commerce / Finance / Economics / Data Science or related field",
+      "Academic average ≥ 60%",
+      "Financial need"
+    ],
+    "applicationUrl": "https://bursaries.feenix.org/absa/apply-now/",
+    "status": "Open"
+  },
+  {
+    "title": "Sanlam Bursary Programme (Actuarial Science)",
+    "provider": "Sanlam",
+    "funder": "corporate",
+    "field": "business",
+    "amount": "Full tuition + accommodation + book allowance + exam support",
+    "amountValue": 0,
+    "deadline": "2026-08-31",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students pursuing an Actuarial Science qualification. Includes support towards actuarial board exams, vacation work, and guaranteed employment on graduation.",
+    "requirements": [
+      "Actuarial Science degree",
+      "Completed first year of actuarial studies",
+      "Academic average ≥ 70%",
+      "South African citizen"
+    ],
+    "applicationUrl": "https://www.sanlam.co.za/careers/pages/bursaries.aspx",
+    "status": "Open"
+  },
+  {
+    "title": "Exxaro Student Bursary",
+    "provider": "Exxaro Resources",
+    "funder": "corporate",
+    "field": "engineering",
+    "amount": "Full tuition + accommodation + allowances",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students in Engineering, Information Technology, Geology, and business support disciplines relevant to the mining sector, with a focus on host-community candidates.",
+    "requirements": [
+      "Engineering / IT / Geology or related field",
+      "South African citizen",
+      "Academic average ≥ 60%",
+      "Financial need"
+    ],
+    "applicationUrl": "https://www.exxaro.com/careers/student-hub/",
+    "status": "Open"
+  },
+  {
+    "title": "Toyota South Africa Bursary",
+    "provider": "Toyota South Africa Motors",
+    "funder": "corporate",
+    "field": "engineering",
+    "amount": "Full tuition + allowance",
+    "amountValue": 0,
+    "deadline": "2026-09-30",
+    "level": ["undergraduate"],
+    "university": "all",
+    "description": "For students studying Engineering, Commerce, or Business fields, with structured internship and graduate programme exposure at Toyota SA.",
+    "requirements": [
+      "Engineering / Commerce / Business",
+      "South African citizen",
+      "Academic average ≥ 60%"
+    ],
+    "applicationUrl": "https://jobs.toyota.co.za/content/Bursary-Opportunity/?locale=en_GB",
     "status": "Open"
   }
 ]

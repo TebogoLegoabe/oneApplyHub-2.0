@@ -19,11 +19,11 @@ const NAV_ITEMS = [
 const Avatar = ({ user, initials, size = 'md' }) => {
   const sizeClass = size === 'lg' ? 'h-20 w-20 rounded-2xl text-xl' : 'h-12 w-12 rounded-xl text-sm';
   return (
-    <div className={`relative ${sizeClass} flex shrink-0 items-center justify-center overflow-hidden bg-brand-700 font-bold text-white shadow-sm`}>
+    <div className={`relative ${sizeClass} flex shrink-0 items-center justify-center overflow-hidden font-bold text-white shadow-sm ${user?.profile_picture_url ? 'bg-brand-700' : 'bg-gradient-to-br from-brand-500 to-brand-800 ring-1 ring-inset ring-white/10'}`}>
       {user?.profile_picture_url ? (
         <img src={user.profile_picture_url} alt={user?.name || 'Profile'} className="h-full w-full object-cover" />
       ) : (
-        <span>{initials}</span>
+        <span className="tracking-tight">{initials}</span>
       )}
       <span className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${user?.verified ? 'bg-emerald-400' : 'bg-gold-400'}`} />
     </div>

@@ -42,7 +42,11 @@ class Property(db.Model):
             Review.approved == True,  # noqa: E712
         ).scalar() or 0
 
+    def ordered_images(self):
+        return self.images.order_by(PropertyImage.is_primary.desc(), PropertyImage.created_at.asc()).all()
+
     def to_dict(self) -> dict:
+        images = [img.to_dict() for img in self.ordered_images()]
         return {
             'id': self.id,
             'name': self.name,
@@ -60,6 +64,8 @@ class Property(db.Model):
             'average_rating': round(self.average_rating(), 1),
             'review_count': self.review_count(),
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'images': images,
+            'primary_image_url': images[0]['image_url'] if images else None,
         }
 
 
@@ -72,3 +78,13 @@ class PropertyImage(db.Model):
     caption = db.Column(db.String(200))
     is_primary = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
+
+    def to_dict(self) -> dict:
+        return {
+            'id': self.id,
+            'property_id': self.property_id,
+            'image_url': self.image_url,
+            'caption': self.caption,
+            'is_primary': self.is_primary,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+        }

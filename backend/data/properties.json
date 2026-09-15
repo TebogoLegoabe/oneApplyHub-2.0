@@ -27,7 +27,7 @@
     "price_min": 5200,
     "price_max": 9200,
     "nsfas_accredited": true,
-    "description": "Modern student living redefined — a safe space for you to reach your potential.",
+    "description": "Modern student living redefined. A safe space for you to reach your potential.",
     "amenities": [
       "WiFi",
       "24/7 Security",
@@ -47,7 +47,7 @@
     "price_min": 5200,
     "price_max": 8200,
     "nsfas_accredited": false,
-    "description": "Modern student living redefined — a safe space for you to reach your potential.",
+    "description": "Modern student living redefined. A safe space for you to reach your potential.",
     "amenities": [
       "WiFi",
       "24/7 Security",
@@ -67,7 +67,7 @@
     "price_min": 5200,
     "price_max": 5200,
     "nsfas_accredited": false,
-    "description": "Modern student living redefined — a safe space for you to reach your potential.",
+    "description": "Modern student living redefined. A safe space for you to reach your potential.",
     "amenities": [
       "WiFi",
       "24/7 Security",
@@ -719,7 +719,7 @@
     "price_min": 5500,
     "price_max": 6500,
     "nsfas_accredited": false,
-    "description": "A few steps from Wits — a thriving community where you experience modern student living.",
+    "description": "A few steps from Wits. A thriving community where you experience modern student living.",
     "amenities": [
       "WiFi",
       "Security",
@@ -787,7 +787,7 @@
     "price_min": 5000,
     "price_max": 8000,
     "nsfas_accredited": false,
-    "description": "Exceptional student living in the vibrant heart of Braamfontein — a home that fosters growth, learning and an unforgettable experience.",
+    "description": "Exceptional student living in the vibrant heart of Braamfontein. A home that fosters growth, learning and an unforgettable experience.",
     "amenities": [
       "24/7 Security",
       "Reliable Transport",
@@ -921,7 +921,7 @@
     "price_min": 4600,
     "price_max": 5000,
     "nsfas_accredited": false,
-    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities — a true community in one block.",
+    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities. A true community in one block.",
     "amenities": [
       "24/7 Security",
       "WiFi",
@@ -943,7 +943,7 @@
     "price_min": 4800,
     "price_max": 6300,
     "nsfas_accredited": false,
-    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities — a true community in one block.",
+    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities. A true community in one block.",
     "amenities": [
       "24/7 Security",
       "WiFi",
@@ -965,7 +965,7 @@
     "price_min": 4800,
     "price_max": 5000,
     "nsfas_accredited": false,
-    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities — a true community in one block.",
+    "description": "Situated in one precinct, Student Digz residences share one entrance, garden and amenities. A true community in one block.",
     "amenities": [
       "24/7 Security",
       "WiFi",

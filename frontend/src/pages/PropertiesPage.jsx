@@ -14,11 +14,22 @@ const PropertyCard = ({ property }) => {
   const reviewCount = property.review_count || 0;
   return (
     <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
-      <div className="relative h-32 overflow-hidden bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950 sm:h-36">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" aria-hidden="true" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Home className="h-9 w-9 text-white/20" aria-hidden="true" />
-        </div>
+      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950">
+        {property.primary_image_url ? (
+          <img
+            src={property.primary_image_url}
+            alt={property.name}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" aria-hidden="true" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Home className="h-9 w-9 text-white/20" aria-hidden="true" />
+            </div>
+          </>
+        )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase text-brand-700 shadow-sm">{property.university}</span>
           {property.nsfas_accredited && <span className="rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">NSFAS</span>}
@@ -79,7 +90,7 @@ const PropertyCard = ({ property }) => {
 
 const PropertyCardSkeleton = () => (
   <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-    <Skeleton className="h-32 rounded-none sm:h-36" />
+    <Skeleton className="aspect-[4/3] rounded-none" />
     <div className="space-y-3 p-4">
       <Skeleton className="h-4 w-3/4" />
       <Skeleton className="h-3 w-1/2" />

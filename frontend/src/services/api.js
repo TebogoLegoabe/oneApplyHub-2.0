@@ -36,7 +36,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries', '/privacy', '/terms'];
+const PUBLIC_PATHS = ['/', '/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/properties', '/reviews', '/bursaries', '/opportunities', '/privacy', '/terms'];
 const isPublicPath = (pathname) => PUBLIC_PATHS.some((path) => pathname === path || (path !== '/' && pathname.startsWith(`${path}/`)));
 
 // Response interceptor - handle expired/invalid sessions
@@ -94,6 +94,16 @@ export const propertiesAPI = {
   getProperty: (id) => api.get(`/properties/${id}`),
 };
 
+// Bursaries API
+export const bursariesAPI = {
+  getBursaries: () => api.get('/bursaries'),
+};
+
+// Opportunities API
+export const opportunitiesAPI = {
+  getOpportunities: () => api.get('/opportunities'),
+};
+
 // Reviews API
 export const reviewsAPI = {
   getReviews: (propertyId, params = {}) =>
@@ -124,6 +134,10 @@ export const adminAPI = {
   updateProperty: (id, data) => api.put(`/admin/properties/${id}`, data),
   toggleApproval: (id, approved) => api.patch(`/admin/properties/${id}/approve`, { approved }),
   deleteProperty: (id) => api.delete(`/admin/properties/${id}`),
+  addPropertyImage: (propertyId, data) => api.post(`/admin/properties/${propertyId}/images`, data),
+  uploadPropertyImage: (propertyId, formData) => api.post(`/admin/properties/${propertyId}/images/upload`, formData, { headers: { 'Content-Type': undefined } }),
+  updatePropertyImage: (propertyId, imageId, data) => api.patch(`/admin/properties/${propertyId}/images/${imageId}`, data),
+  deletePropertyImage: (propertyId, imageId) => api.delete(`/admin/properties/${propertyId}/images/${imageId}`),
   // Users
   getUsers: (params = {}) => api.get('/admin/users', { params }),
   createAdminUser: (data) => api.post('/admin/admin-users', data),
@@ -141,10 +155,18 @@ export const adminAPI = {
   getAccommodationApplications: (params = {}) => api.get('/admin/accommodation-applications', { params }),
   updateAccommodationApplicationStatus: (applicationId, propertyId, data) =>
     api.patch(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}/status`, data),
+  deleteAccommodationApplication: (applicationId, propertyId) =>
+    api.delete(`/admin/accommodation-applications/${applicationId}/properties/${propertyId}`),
   // University applications
   getUniversityApplications: (params = {}) => api.get('/admin/university-applications', { params }),
   updateUniversityChoiceStatus: (applicationId, choiceId, data) =>
     api.patch(`/admin/university-applications/${applicationId}/choices/${choiceId}/status`, data),
+  // Opportunities
+  seedOpportunities: () => api.post('/admin/opportunities/seed'),
+  getOpportunitiesAdmin: () => api.get('/admin/opportunities'),
+  createOpportunity: (data) => api.post('/admin/opportunities', data),
+  updateOpportunity: (id, data) => api.patch(`/admin/opportunities/${id}`, data),
+  deleteOpportunity: (id) => api.delete(`/admin/opportunities/${id}`),
   // Room inventory
   getFloors: (propertyId) => api.get(`/admin/properties/${propertyId}/floors`),
   createFloor: (propertyId, data) => api.post(`/admin/properties/${propertyId}/floors`, data),

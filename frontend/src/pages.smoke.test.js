@@ -22,6 +22,8 @@ jest.mock('./services/api', () => {
     authAPI: { getProfile: () => ok({ user: null }), forgotPassword: () => ok({}), resetPassword: () => ok({}) },
     mfaAPI: { setup: () => ok({ qr_code: '', secret: 'ABC' }), enable: () => ok({ backup_codes: [] }), disable: () => ok({}) },
     statsAPI: { getStats: () => ok({ properties: 24, students: 900, reviews: 120, avg_rating: 4.2 }) },
+    bursariesAPI: { getBursaries: () => ok({ bursaries: [{ id: 1, title: 'NSFAS Bursary', provider: 'NSFAS', funder: 'government', field: 'general', amount: 'Full tuition', deadline: '2027-11-30', level: ['undergraduate'], description: 'Comprehensive aid.', requirements: ['SA citizen'], applicationUrl: 'https://www.nsfas.org.za', status: 'Open' }] }) },
+    opportunitiesAPI: { getOpportunities: () => ok({ opportunities: [{ id: 5, title: 'Software Intern', provider: 'Acme', opportunity_type: 'internship', location: 'Johannesburg', duration: '6 months', field: 'IT', description: 'Build things.', requirements: 'Final year student', salary_range: 'R8 000 / month', application_url: 'https://acme.example.com', deadline: '2027-03-01', status: 'open' }] }) },
     propertiesAPI: {
       getProperties: () => ok({ properties: [property], total: 1, pages: 1 }),
       getProperty: () => ok({ property }),
@@ -54,6 +56,10 @@ jest.mock('./services/api', () => {
       getFloors: () => ok({ floors: [{ id: 1, floor_number: 1, label: 'Ground', rooms: [{ id: 5, room_number: '101', room_type: 'single', capacity: 1, occupied_count: 0, occupants: [], is_full: false, price: 4000 }] }] }),
       getUnallocated: () => ok({ unallocated: [{ id: 9, applicant_name: 'Lebo', applicant_email: 'l@example.com', room_type_preference: 'single' }] }),
       deleteReview: () => ok({}),
+      getOpportunitiesAdmin: () => ok({ opportunities: [{ id: 5, title: 'Software Intern', provider: 'Acme', opportunity_type: 'internship', location: 'Johannesburg', deadline: '2027-03-01', status: 'open' }] }),
+      seedOpportunities: () => ok({}),
+      deleteOpportunity: () => ok({}),
+      deleteAccommodationApplication: () => ok({}),
     },
   };
 });
@@ -94,6 +100,7 @@ const PAGES = {
   PropertyDetailPage: require('./pages/PropertyDetailPage').default,
   ReviewsPage: require('./pages/ReviewsPage').default,
   BursaryPage: require('./pages/BursaryPage').default,
+  OpportunitiesPage: require('./pages/OpportunitiesPage').default,
   LegalPage: require('./pages/LegalPage').default,
   LoginPage: require('./pages/LoginPage').default,
   RegisterPage: require('./pages/RegisterPage').default,
@@ -145,13 +152,15 @@ const noConsoleErrors = () => {
 
 describe('public pages render (signed out)', () => {
   beforeEach(() => __setUser(null));
-  test.each(Object.entries(PAGES).filter(([name]) => ['HomePage', 'PropertiesPage', 'PropertyDetailPage', 'ReviewsPage', 'BursaryPage', 'LegalPage', 'LoginPage', 'RegisterPage', 'ForgotPasswordPage', 'ResetPasswordPage', 'VerifyEmailPage', 'NotFoundPage'].includes(name)))('%s', async (name, Page) => {
+  test.each(Object.entries(PAGES).filter(([name]) => ['HomePage', 'PropertiesPage', 'PropertyDetailPage', 'ReviewsPage', 'BursaryPage', 'OpportunitiesPage', 'LegalPage', 'LoginPage', 'RegisterPage', 'ForgotPasswordPage', 'ResetPasswordPage', 'VerifyEmailPage', 'NotFoundPage'].includes(name)))('%s', async (name, Page) => {
     const collect = noConsoleErrors();
     mount(<Page type="terms" />, name === 'PropertyDetailPage' ? '/properties/1' : '/');
     await waitFor(() => expect(document.body.textContent.length).toBeGreaterThan(20));
     if (name === 'PropertyDetailPage') await screen.findByText('Braam Heights', { selector: 'h1' });
     if (name === 'PropertiesPage') await screen.findByText(/1 property found/);
     if (name === 'HomePage') await screen.findByText('24+');
+    if (name === 'BursaryPage') await screen.findByText('NSFAS Bursary');
+    if (name === 'OpportunitiesPage') await screen.findByText('Software Intern');
     expect(collect()).toEqual([]);
   });
 
@@ -219,5 +228,29 @@ describe('admin pages render', () => {
     expect(await screen.findByText('Delete this review?')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(screen.queryByText('Delete this review?')).not.toBeInTheDocument());
+  });
+});
+
+describe('admin merged features', () => {
+  const admin = { id: 99, name: 'Admin One', email: 'info@oneapplyhub.co.za', verified: true, is_admin: true, is_super_admin: true };
+  beforeEach(() => __setUser(admin));
+
+  test('opportunities tab lists items and opens the create form', async () => {
+    mount(<PAGES.AdminDashboard />, '/admin');
+    await screen.findByText('Your access scope');
+    fireEvent.click(screen.getByRole('button', { name: /^Opportunities/ }));
+    await screen.findByText('Software Intern');
+    fireEvent.click(screen.getByRole('button', { name: /Add opportunity/ }));
+    expect(await screen.findByText('Add an opportunity')).toBeInTheDocument();
+  });
+
+  test('property photos modal opens from the properties tab', async () => {
+    mount(<PAGES.AdminDashboard />, '/admin');
+    await screen.findByText('Your access scope');
+    fireEvent.click(screen.getByRole('button', { name: /^Properties/ }));
+    const photosButton = await screen.findByRole('button', { name: /Photos/ });
+    fireEvent.click(photosButton);
+    expect(await screen.findByText('Photos · Braam Heights')).toBeInTheDocument();
+    expect(screen.getByText('No photos yet')).toBeInTheDocument();
   });
 });

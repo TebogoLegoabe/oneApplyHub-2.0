@@ -9,7 +9,8 @@ import logoImg from '../../assets/OneHubLogo.png';
 const NAV_LINKS = [
   { to: '/properties', label: 'Properties' },
   { to: '/reviews', label: 'Reviews' },
-  { to: '/bursaries', label: 'Opportunities' },
+  { to: '/bursaries', label: 'Bursaries' },
+  { to: '/opportunities', label: 'Internships & Programs' },
 ];
 
 const UserAvatar = ({ user, size = 'sm' }) => {

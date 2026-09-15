@@ -24,6 +24,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import StudentApplicationPage from './pages/StudentApplicationPage';
 import BursaryPage from './pages/BursaryPage';
+import OpportunitiesPage from './pages/OpportunitiesPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
 import AdminDashboard from './pages/AdminDashboard';
 import PropertyAdminsPage from './pages/PropertyAdminsPage';
@@ -43,6 +44,7 @@ const AppRoutes = () => (
     <Route path="/properties/:id" element={<PropertyDetailPage />} />
     <Route path="/reviews" element={<ReviewsPage />} />
     <Route path="/bursaries" element={<BursaryPage />} />
+    <Route path="/opportunities" element={<OpportunitiesPage />} />
     <Route path="/privacy" element={<LegalPage type="privacy" />} />
     <Route path="/terms" element={<LegalPage type="terms" />} />
     <Route path="/login" element={<LoginPage />} />

@@ -110,6 +110,7 @@ const PropertyDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const onCounted = useCallback((reviewId, helpfulCount) => {
     setReviews((previous) => previous.map((review) => (review.id === reviewId ? { ...review, helpful_count: helpfulCount } : review)));
@@ -192,6 +193,8 @@ const PropertyDetailPage = () => {
   const reviewCount = property.review_count || 0;
   const reviewLink = `/properties/${id}/review`;
   const websiteLabel = property.website?.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+  const images = property.images || [];
+  const activeImage = images[Math.min(activeImageIndex, Math.max(0, images.length - 1))] || null;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
@@ -205,20 +208,51 @@ const PropertyDetailPage = () => {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          {/* Hero */}
+          {/* Hero / gallery */}
           <div className={cn(CARD, 'overflow-hidden')}>
-            <div className="relative flex h-56 items-center justify-center bg-gradient-to-br from-brand-700 via-brand-800 to-brand-950 sm:h-64">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_55%)]" aria-hidden="true" />
-              <div className="relative flex flex-col items-center gap-2 text-white/70">
-                <Camera className="h-12 w-12" aria-hidden="true" />
-                <span className="text-sm font-medium">Photos coming soon</span>
-              </div>
+            <div className="relative aspect-[16/9] bg-gradient-to-br from-brand-700 via-brand-800 to-brand-950">
+              {activeImage ? (
+                <img src={activeImage.image_url} alt={activeImage.caption || property.name} className="h-full w-full object-cover" />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.1),transparent_55%)]" aria-hidden="true" />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-white/70">
+                    <Camera className="h-12 w-12" aria-hidden="true" />
+                    <span className="text-sm font-medium">Photos coming soon</span>
+                  </div>
+                </>
+              )}
               <div className="absolute left-5 top-5 flex gap-2">
                 <span className="rounded-full bg-white px-3 py-1.5 text-xs font-bold uppercase text-brand-700 shadow-sm">{property.university}</span>
                 {property.nsfas_accredited && <span className="rounded-full bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white shadow-sm">NSFAS accredited</span>}
               </div>
               <span className="absolute right-5 top-5 rounded-full bg-black/45 px-3 py-1.5 text-xs font-semibold capitalize text-white backdrop-blur">{property.property_type}</span>
+              {images.length > 1 && (
+                <span className="absolute bottom-4 right-5 rounded-full bg-black/45 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+                  {activeImageIndex + 1} / {images.length}
+                </span>
+              )}
             </div>
+            {images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto border-b border-slate-100 p-3 dark:border-slate-800" role="tablist" aria-label="Property photos">
+                {images.map((image, index) => (
+                  <button
+                    key={image.id || index}
+                    type="button"
+                    role="tab"
+                    aria-selected={index === activeImageIndex}
+                    aria-label={image.caption || `Photo ${index + 1}`}
+                    onClick={() => setActiveImageIndex(index)}
+                    className={cn(
+                      'h-14 w-20 shrink-0 overflow-hidden rounded-lg border-2 transition-colors',
+                      index === activeImageIndex ? 'border-brand-600' : 'border-transparent hover:border-brand-300',
+                    )}
+                  >
+                    <img src={image.image_url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="p-5 sm:p-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">

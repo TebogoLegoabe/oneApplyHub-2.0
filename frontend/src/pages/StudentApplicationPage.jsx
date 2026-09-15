@@ -33,9 +33,10 @@ const ACCOMMODATION_STEPS = [
 const UNIVERSITY_STEPS = [
   { id: 1, title: 'Personal', icon: User },
   { id: 2, title: 'Studies', icon: GraduationCap },
-  { id: 3, title: 'Universities', icon: Home },
-  { id: 4, title: 'Results', icon: Upload },
-  { id: 5, title: 'Review', icon: CheckCircle },
+  { id: 3, title: 'Next of Kin', icon: Users },
+  { id: 4, title: 'Universities', icon: Home },
+  { id: 5, title: 'Results', icon: Upload },
+  { id: 6, title: 'Review', icon: CheckCircle },
 ];
 
 const INITIAL_PROFILE_FORM = {
@@ -44,6 +45,8 @@ const INITIAL_PROFILE_FORM = {
   idNumber: '',
   phoneNumber: '',
   nationality: 'South African',
+  homeLanguage: '',
+  residentialAddress: '',
   studentNumber: '',
   faculty: '',
   yearOfStudy: '',
@@ -54,6 +57,10 @@ const INITIAL_PROFILE_FORM = {
   parentGuardianIdNumber: '',
   parentGuardianPhone: '',
   parentGuardianEmail: '',
+  nextOfKinName: '',
+  nextOfKinRelationship: '',
+  nextOfKinPhone: '',
+  nextOfKinEmail: '',
   studentIdDocument: null,
   parentGuardianIdDocument: null,
 };
@@ -83,6 +90,8 @@ const profileToFormFields = (profile) => {
     idNumber: profile.id_number || '',
     phoneNumber: profile.phone_number || '',
     nationality: profile.nationality || 'South African',
+    homeLanguage: profile.home_language || '',
+    residentialAddress: profile.residential_address || '',
     studentNumber: profile.student_number || '',
     faculty: profile.faculty || '',
     yearOfStudy: profile.year_of_study || '',
@@ -93,13 +102,18 @@ const profileToFormFields = (profile) => {
     parentGuardianIdNumber: profile.parent_guardian_id_number || '',
     parentGuardianPhone: profile.parent_guardian_phone || '',
     parentGuardianEmail: profile.parent_guardian_email || '',
+    nextOfKinName: profile.next_of_kin_name || '',
+    nextOfKinRelationship: profile.next_of_kin_relationship || '',
+    nextOfKinPhone: profile.next_of_kin_phone || '',
+    nextOfKinEmail: profile.next_of_kin_email || '',
   };
 };
 
 const Field = ({ label, error, optional, children }) => (
   <div>
     <label className="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-      {label}{optional && <span className="ml-1 font-medium text-slate-400">Optional</span>}
+      {label}
+      {optional ? <span className="ml-1 font-medium text-slate-400">Optional</span> : <span className="ml-0.5 text-red-500" aria-hidden="true">*</span>}
     </label>
     {children}
     {error && <p className="mt-1 text-xs font-bold text-red-600">{error}</p>}
@@ -165,7 +179,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
         <div className="mb-6 rounded-2xl bg-slate-950 p-6 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800">
           <p className="mb-2 inline-flex rounded-full bg-brand-500/15 px-3 py-1 text-xs font-bold text-brand-200 ring-1 ring-brand-400/20">My Applications</p>
           <h1 className="text-2xl font-bold sm:text-3xl">Choose application type</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-300">Apply for accommodation, university admission, or both — your personal details only need to be entered once.</p>
+          <p className="mt-2 max-w-2xl text-sm text-slate-300">Apply for accommodation, university admission, or both. Your personal details only need to be entered once.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
@@ -329,13 +343,15 @@ const StudentApplicationPage = () => {
 
   const renderPersonalStep = () => (
     <>
-      {stepHeader('Personal information', `Signed in as ${user?.email || ''}. Required fields are checked only on final submit.`, User)}
+      {stepHeader('Personal information', `Signed in as ${user?.email || ''}. Fields marked * are required.`, User)}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <TextInput label="First name" value={form.firstName} onChange={(e) => setValue('firstName', e.target.value)} error={errors.firstName} />
         <TextInput label="Last name" value={form.lastName} onChange={(e) => setValue('lastName', e.target.value)} error={errors.lastName} />
         <TextInput label="SA ID number" value={form.idNumber} onChange={(e) => setValue('idNumber', e.target.value.replace(/\D/g, ''))} error={errors.idNumber} />
         <TextInput label="Phone number" value={form.phoneNumber} onChange={(e) => setValue('phoneNumber', e.target.value)} error={errors.phoneNumber} />
         <TextInput label="Nationality" value={form.nationality} onChange={(e) => setValue('nationality', e.target.value)} optional />
+        <TextInput label="Home language" value={form.homeLanguage} onChange={(e) => setValue('homeLanguage', e.target.value)} error={errors.homeLanguage} optional={applicationType !== 'university'} />
+        <TextInput label="Residential address" value={form.residentialAddress} onChange={(e) => setValue('residentialAddress', e.target.value)} error={errors.residentialAddress} optional={applicationType !== 'university'} />
         <DocumentInput label="Student / applicant ID document" fileName={form.studentIdDocument?.name} onUpload={(file) => uploadDocument(setForm, 'studentIdDocument', file)} onRemove={() => setForm((p) => ({ ...p, studentIdDocument: null }))} error={errors.studentIdDocument} />
       </div>
     </>
@@ -384,6 +400,18 @@ const StudentApplicationPage = () => {
         <TextInput label="Parent/guardian phone" value={form.parentGuardianPhone} onChange={(e) => setValue('parentGuardianPhone', e.target.value)} error={errors.parentGuardianPhone} />
         <TextInput label="Parent/guardian email" type="email" value={form.parentGuardianEmail} onChange={(e) => setValue('parentGuardianEmail', e.target.value)} optional />
         <DocumentInput label="Parent/guardian ID document" fileName={form.parentGuardianIdDocument?.name} onUpload={(file) => uploadDocument(setForm, 'parentGuardianIdDocument', file)} onRemove={() => setForm((p) => ({ ...p, parentGuardianIdDocument: null }))} error={errors.parentGuardianIdDocument} />
+      </div>
+    </>
+  );
+
+  const renderNextOfKinStep = () => (
+    <>
+      {stepHeader('Next of kin', 'Someone we can contact in case of an emergency.', Users)}
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <TextInput label="Next of kin name" value={form.nextOfKinName} onChange={(e) => setValue('nextOfKinName', e.target.value)} error={errors.nextOfKinName} />
+        <TextInput label="Relationship to you" value={form.nextOfKinRelationship} onChange={(e) => setValue('nextOfKinRelationship', e.target.value)} optional placeholder="e.g. Mother, Sibling, Spouse" />
+        <TextInput label="Next of kin phone" value={form.nextOfKinPhone} onChange={(e) => setValue('nextOfKinPhone', e.target.value)} error={errors.nextOfKinPhone} />
+        <TextInput label="Next of kin email" type="email" value={form.nextOfKinEmail} onChange={(e) => setValue('nextOfKinEmail', e.target.value)} optional />
       </div>
     </>
   );
@@ -538,6 +566,10 @@ const StudentApplicationPage = () => {
     if (!form.phoneNumber.trim()) next.phoneNumber = 'Required';
     if (!form.idNumber.trim()) next.idNumber = 'Required';
     else if (!validateSAID(form.idNumber).isValid) next.idNumber = validateSAID(form.idNumber).error;
+    if (!form.homeLanguage.trim()) next.homeLanguage = 'Required';
+    if (!form.residentialAddress.trim()) next.residentialAddress = 'Required';
+    if (!form.nextOfKinName.trim()) next.nextOfKinName = 'Required';
+    if (!form.nextOfKinPhone.trim()) next.nextOfKinPhone = 'Required';
     const validChoices = universityChoices.filter((c) => c.university.trim());
     if (!validChoices.length) next.universityChoices = 'Add at least one university';
     if (!termsAccepted) next.terms = 'Accept the terms before submitting';
@@ -545,9 +577,10 @@ const StudentApplicationPage = () => {
   };
 
   const universityStepWithError = (next) => {
-    if (next.firstName || next.lastName || next.phoneNumber || next.idNumber) return 1;
-    if (next.universityChoices) return 3;
-    return 5;
+    if (next.firstName || next.lastName || next.phoneNumber || next.idNumber || next.homeLanguage || next.residentialAddress) return 1;
+    if (next.nextOfKinName || next.nextOfKinPhone) return 3;
+    if (next.universityChoices) return 4;
+    return 6;
   };
 
   const submitUniversity = async () => {
@@ -583,10 +616,16 @@ const StudentApplicationPage = () => {
   const renderUniversityStep = () => {
     if (step === 1) return renderPersonalStep();
     if (step === 2) return renderStudiesStep();
-    if (step === 3) return (
+    if (step === 3) return renderNextOfKinStep();
+    if (step === 4) return (
       <>
         {stepHeader('University choices', 'Add up to three universities and programmes you want to apply to.', Home)}
         {errors.universityChoices && <p className="mb-3 text-xs font-bold text-red-600">{errors.universityChoices}</p>}
+        <div className="mb-1.5 hidden gap-2 sm:grid sm:grid-cols-[1fr_1fr_auto]">
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">University name<span className="ml-0.5 text-red-500" aria-hidden="true">*</span></span>
+          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Programme<span className="ml-1 font-medium text-slate-400">Optional</span></span>
+          <span />
+        </div>
         <div className="space-y-3">
           {universityChoices.map((choice, i) => (
             <div key={i} className="grid grid-cols-1 gap-2 rounded-2xl border border-slate-200 p-3 dark:border-slate-800 sm:grid-cols-[1fr_1fr_auto]">
@@ -596,12 +635,13 @@ const StudentApplicationPage = () => {
             </div>
           ))}
         </div>
+        <p className="mt-2 text-xs text-slate-400">At least one university choice is required. You can add up to 3.</p>
         {universityChoices.length < 3 && (
           <button type="button" onClick={addUniversityChoice} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-brand-600 hover:underline"><Plus className="h-3.5 w-3.5" />Add another university</button>
         )}
       </>
     );
-    if (step === 4) return (
+    if (step === 5) return (
       <>
         {stepHeader('Grade 11 and Grade 12 June results', 'Add your subjects and marks. You can also upload a copy of your results slip.', Upload)}
         <div className="space-y-4">
@@ -624,7 +664,8 @@ const StudentApplicationPage = () => {
       <>
         {stepHeader('Review and submit', 'Confirm your details before submitting your university application.', ShieldCheck)}
         <div className="space-y-4 text-sm">
-          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="font-bold text-slate-950 dark:text-white">Applicant</p><p className="mt-1 text-slate-500 dark:text-slate-400">{form.firstName} {form.lastName} · {user?.email} · {form.phoneNumber}</p></div>
+          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="font-bold text-slate-950 dark:text-white">Applicant</p><p className="mt-1 text-slate-500 dark:text-slate-400">{form.firstName} {form.lastName} · {user?.email} · {form.phoneNumber}</p><p className="mt-1 text-slate-500 dark:text-slate-400">{form.homeLanguage} · {form.residentialAddress}</p></div>
+          <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="font-bold text-slate-950 dark:text-white">Next of kin</p><p className="mt-1 text-slate-500 dark:text-slate-400">{form.nextOfKinName}{form.nextOfKinRelationship ? ` (${form.nextOfKinRelationship})` : ''} · {form.nextOfKinPhone}</p></div>
           <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="font-bold text-slate-950 dark:text-white">University choices</p><p className="mt-1 text-slate-500 dark:text-slate-400">{universityChoices.filter((c) => c.university.trim()).map((c) => c.programme ? `${c.university} (${c.programme})` : c.university).join(', ') || 'None selected'}</p></div>
           <div className="rounded-2xl border border-slate-200 p-4 dark:border-slate-800"><p className="font-bold text-slate-950 dark:text-white">Results captured</p><p className="mt-1 text-slate-500 dark:text-slate-400">Grade 11: {grade11Results.filter((r) => r.subject.trim()).length} subjects · Grade 12 June: {grade12JuneResults.filter((r) => r.subject.trim()).length} subjects</p></div>
           <label className="flex gap-3 rounded-2xl border border-gold-100 bg-gold-50 p-4 dark:border-gold-900 dark:bg-gold-500/10">
@@ -686,7 +727,7 @@ const StudentApplicationPage = () => {
               <div className="mt-4 space-y-2">
                 {rows.map((row) => (
                   <div key={row.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 p-3 dark:border-slate-800">
-                    <p className="text-sm font-bold text-slate-950 dark:text-white">{isAccommodation ? row.property_name : (row.programme ? `${row.university} — ${row.programme}` : row.university)}</p>
+                    <p className="text-sm font-bold text-slate-950 dark:text-white">{isAccommodation ? row.property_name : (row.programme ? `${row.university} (${row.programme})` : row.university)}</p>
                     <StatusBadge status={row.status} />
                   </div>
                 ))}
@@ -706,7 +747,7 @@ const StudentApplicationPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-bold sm:text-3xl">{isAccommodation ? 'Accommodation' : 'University'} application</h1>
-              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Required fields are checked only on final submit.</p>
+              <p className="mt-2 text-sm text-slate-300">Browse sections freely. Fields marked * are required. They're checked on final submit.</p>
             </div>
             <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-sm font-bold text-white"><ClipboardList className="h-4 w-4" aria-hidden="true" /> Step {step} of {STEPS.length}</div>
           </div>

@@ -19,6 +19,8 @@ class ApplicantProfile(db.Model):
     id_number = db.Column(db.String(20))
     phone_number = db.Column(db.String(30))
     nationality = db.Column(db.String(100))
+    home_language = db.Column(db.String(50))
+    residential_address = db.Column(db.Text)
 
     student_number = db.Column(db.String(50))
     faculty = db.Column(db.String(100))
@@ -31,6 +33,11 @@ class ApplicantProfile(db.Model):
     parent_guardian_id_number = db.Column(db.String(20))
     parent_guardian_phone = db.Column(db.String(30))
     parent_guardian_email = db.Column(db.String(120))
+
+    next_of_kin_name = db.Column(db.String(150))
+    next_of_kin_relationship = db.Column(db.String(50))
+    next_of_kin_phone = db.Column(db.String(30))
+    next_of_kin_email = db.Column(db.String(120))
 
     # Base64 data URIs — same storage pattern as User.profile_picture_url
     student_id_document = db.Column(db.Text)
@@ -56,6 +63,8 @@ class ApplicantProfile(db.Model):
             'id_number': self.id_number,
             'phone_number': self.phone_number,
             'nationality': self.nationality,
+            'home_language': self.home_language,
+            'residential_address': self.residential_address,
             'student_number': self.student_number,
             'faculty': self.faculty,
             'year_of_study': self.year_of_study,
@@ -66,6 +75,10 @@ class ApplicantProfile(db.Model):
             'parent_guardian_id_number': self.parent_guardian_id_number,
             'parent_guardian_phone': self.parent_guardian_phone,
             'parent_guardian_email': self.parent_guardian_email,
+            'next_of_kin_name': self.next_of_kin_name,
+            'next_of_kin_relationship': self.next_of_kin_relationship,
+            'next_of_kin_phone': self.next_of_kin_phone,
+            'next_of_kin_email': self.next_of_kin_email,
             'has_student_id_document': bool(self.student_id_document),
             'has_parent_guardian_id_document': bool(self.parent_guardian_id_document),
             'has_grade11_results_document': bool(self.grade11_results_document),
