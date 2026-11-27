@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, KeyRound } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthShell from '../components/AuthShell';
-import GoogleSignInButton from '../components/GoogleSignInButton';
+import GoogleSignInButton, { googleSignInEnabled } from '../components/GoogleSignInButton';
 import { Alert, Button, Input } from '../components/ui';
 
 const PasswordToggle = ({ shown, onToggle }) => (
@@ -146,12 +146,16 @@ const LoginPage = () => {
       {notice && <Alert tone="success" className="mb-4">{notice}</Alert>}
       {error && <Alert tone="error" className="mb-4">{error}</Alert>}
 
-      <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={setError} loading={googleLoading} label="Continue with Google" />
+      {googleSignInEnabled && (
+        <>
+          <GoogleSignInButton onSuccess={handleGoogleSuccess} onError={setError} loading={googleLoading} label="Continue with Google" />
 
-      <div className="relative my-5" role="separator">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-700" /></div>
-        <div className="relative flex justify-center text-xs"><span className="bg-white px-3 font-medium text-slate-400 dark:bg-slate-900 dark:text-slate-500">or sign in with email</span></div>
-      </div>
+          <div className="relative my-5" role="separator">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200 dark:border-slate-700" /></div>
+            <div className="relative flex justify-center text-xs"><span className="bg-white px-3 font-medium text-slate-500 dark:bg-slate-900 dark:text-slate-400">or sign in with email</span></div>
+          </div>
+        </>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input

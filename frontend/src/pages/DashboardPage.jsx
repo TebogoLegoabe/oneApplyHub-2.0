@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Building, Star, MessageSquare, CalendarDays, ThumbsUp, FileText, ArrowRight,
-  TrendingUp, Users, CheckCircle2, Clock, Home, Award,
+  TrendingUp, Users, CheckCircle2, Clock, Home, Award, Map as MapIcon,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -41,9 +41,10 @@ const StatCard = ({ icon: Icon, label, value, sub, tone, loading }) => (
 );
 
 const QUICK_LINKS = [
-  { to: '/properties', icon: Home, label: 'Browse properties', text: 'Compare verified accommodation.' },
-  { to: '/application', icon: FileText, label: 'My application', text: 'Start or track your application.' },
-  { to: '/bursaries', icon: Award, label: 'Opportunities', text: 'Bursaries closing soon.' },
+  { to: '/properties', icon: Home, label: 'Browse properties', text: 'Compare verified accommodation.', tone: 'from-brand-500 to-brand-700' },
+  { to: '/properties?view=map', icon: MapIcon, label: 'Residence map', text: 'Walking times to your campus.', tone: 'from-lime-400 to-emerald-600' },
+  { to: '/application', icon: FileText, label: 'My application', text: 'Start or track your application.', tone: 'from-coral-500 to-rose-600' },
+  { to: '/bursaries', icon: Award, label: 'Opportunities', text: 'Bursaries closing soon.', tone: 'from-violet-500 to-fuchsia-600' },
 ];
 
 const DashboardPage = () => {
@@ -87,18 +88,24 @@ const DashboardPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-      <Card className="mb-4" padded={false}>
-        <div className="flex flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+      <div className="relative isolate mb-4 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-950 via-brand-800 to-violet-800 px-5 py-6 text-white shadow-float sm:px-8 sm:py-8">
+        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+          <div className="bg-dots absolute inset-0 opacity-50" />
+          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-coral-500/30 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-lime-300/20 blur-3xl" />
+        </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="truncate text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">Welcome back, {firstName}</h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Track accommodation insights, reviews, and your next steps.</p>
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gold-300">Student dashboard</p>
+            <h1 className="truncate text-2xl font-extrabold tracking-tight sm:text-4xl">Welcome back, {firstName}</h1>
+            <p className="mt-1 text-sm text-white/80">Track accommodation insights, reviews, and your next steps.</p>
           </div>
-          <p className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+          <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ring-white/20">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="whitespace-nowrap">{today}</span>
           </p>
         </div>
-      </Card>
+      </div>
 
       {error && (
         <Alert tone="error" className="mb-4" action={<Button size="sm" variant="danger" onClick={fetchData}>Retry</Button>}>{error}</Alert>
@@ -108,10 +115,10 @@ const DashboardPage = () => {
         {stats.map((stat) => <StatCard key={stat.label} {...stat} loading={loading} />)}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-        {QUICK_LINKS.map(({ to, icon: Icon, label, text }) => (
-          <Link key={to} to={to} className="group flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-600 text-white">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {QUICK_LINKS.map(({ to, icon: Icon, label, text, tone }) => (
+          <Link key={to} to={to} className="group flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
+            <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm', tone)}>
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1">
@@ -153,7 +160,7 @@ const DashboardPage = () => {
                       </>
                     )} />}
                   />
-                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#2f5c58" />
+                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#0b66d6" />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -242,11 +249,12 @@ const DashboardPage = () => {
         )}
       </Card>
 
-      <div className="mt-4 rounded-2xl bg-slate-950 p-5 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-coral-700 via-rose-700 to-violet-800 p-5 text-white shadow-float sm:p-7">
+        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h3 className="text-base font-bold">Share your accommodation experience</h3>
-            <p className="mt-1 max-w-2xl text-sm text-slate-300">Your review helps other students make better accommodation decisions.</p>
+            <h3 className="font-display text-xl font-bold">Share your accommodation experience</h3>
+            <p className="mt-1 max-w-2xl text-sm text-white/85">Your review helps other students make better accommodation decisions.</p>
           </div>
           <Button to="/properties" variant="inverse" className="shrink-0">
             <FileText className="h-4 w-4" aria-hidden="true" />Write a review
