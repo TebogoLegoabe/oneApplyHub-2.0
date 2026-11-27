@@ -17,7 +17,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/park-mews/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184096,
+    "longitude": 28.044758,
+    "geo_precision": "street"
   },
   {
     "name": "Campus Central - Girton",
@@ -37,7 +40,10 @@
     ],
     "contact_info": "064-850-8486 | apply@campuscentral.co.za",
     "website": "https://www.campuscentral.co.za/parktown-girton",
-    "approved": true
+    "approved": true,
+    "latitude": -26.178797,
+    "longitude": 28.043297,
+    "geo_precision": "building"
   },
   {
     "name": "Campus Central - St Davids Place",
@@ -57,7 +63,10 @@
     ],
     "contact_info": "071-344-9670 / 064-850-8486 | apply@campuscentral.co.za",
     "website": "https://www.campuscentral.co.za/parktown-st-davids",
-    "approved": true
+    "approved": true,
+    "latitude": -26.181231,
+    "longitude": 28.035742,
+    "geo_precision": "street"
   },
   {
     "name": "Campus Central - The Albany",
@@ -77,7 +86,10 @@
     ],
     "contact_info": "072-281-4499 | apply@campuscentral.co.za",
     "website": "https://www.campuscentral.co.za/parktown-the-albany",
-    "approved": true
+    "approved": true,
+    "latitude": -26.183101,
+    "longitude": 28.034138,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Arteria",
@@ -97,7 +109,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/arteria-parktown/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.177111,
+    "longitude": 28.048079,
+    "geo_precision": "street"
   },
   {
     "name": "Respublica - Yale Village",
@@ -117,7 +132,10 @@
     ],
     "contact_info": "010-200-3000 | info@respublica.co.za",
     "website": "https://respublica.co.za/residence/yale-village/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184227,
+    "longitude": 28.024482,
+    "geo_precision": "street"
   },
   {
     "name": "CJ Students - Mill Junction",
@@ -137,7 +155,10 @@
     ],
     "contact_info": "010-822-2828 | info@cjliving.co.za",
     "website": "https://cjstudents.co.za/mill-junction/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184227,
+    "longitude": 28.024482,
+    "geo_precision": "street"
   },
   {
     "name": "CJ Students - YW Junction",
@@ -157,7 +178,10 @@
     ],
     "contact_info": "087-163-9625 | hello@cjstudents.co.za",
     "website": "https://cjstudents.co.za/yw-junction/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193097,
+    "longitude": 28.039472,
+    "geo_precision": "street"
   },
   {
     "name": "Student Digz - Argyle House",
@@ -178,7 +202,10 @@
     ],
     "contact_info": "071-047-5191 | info@studentdigz.co.za",
     "website": "https://studentdigz.co.za/product-category/building/argyle-center/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.176263,
+    "longitude": 28.04173,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Apex Student",
@@ -199,7 +226,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/apex-studios/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192966,
+    "longitude": 28.034072,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Crescent",
@@ -220,7 +250,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/crescent-studios/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194799,
+    "longitude": 28.03022,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Horizon Heights",
@@ -241,7 +274,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/residences/johannesburg/horizon-heights/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.185657,
+    "longitude": 28.005546,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Kingsway Place",
@@ -262,7 +298,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/kingsway-place/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184126,
+    "longitude": 28.007199,
+    "geo_precision": "building"
   },
   {
     "name": "Thrive Living - Richmond Central",
@@ -283,7 +322,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://thrivestudentliving.co.za/richmond-central/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184109,
+    "longitude": 28.005015,
+    "geo_precision": "street"
   },
   {
     "name": "Thrive Living - Richmond Corner",
@@ -304,7 +346,10 @@
     ],
     "contact_info": "087-820-0640 | hello@thrivestudentliving.co.za",
     "website": "https://richmondcorner.co.za/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.184109,
+    "longitude": 28.005015,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Mvelelo",
@@ -324,7 +369,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/myelelo-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192354,
+    "longitude": 28.035749,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - 56 Jorissen",
@@ -344,7 +392,10 @@
     ],
     "contact_info": "060-017-8099 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/56-jorissen",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193324,
+    "longitude": 28.032972,
+    "geo_precision": "building"
   },
   {
     "name": "South Point - Epozini House",
@@ -364,7 +415,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/46-de-korte",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192841,
+    "longitude": 28.040514,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Geldenhuys House",
@@ -384,7 +438,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/geldenhuys-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192788,
+    "longitude": 28.035551,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Diamond House",
@@ -403,7 +460,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/diamond-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.189713,
+    "longitude": 28.035402,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Melridge House",
@@ -422,7 +482,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/melridge-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.191965,
+    "longitude": 28.035676,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Norvic House",
@@ -441,7 +504,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/norvic-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193097,
+    "longitude": 28.039472,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Blackburn",
@@ -460,7 +526,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/blackburn-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194873,
+    "longitude": 28.031303,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Van Der Stel Place",
@@ -479,7 +548,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/vds",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192354,
+    "longitude": 28.035749,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Argon House",
@@ -498,7 +570,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/argon-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194873,
+    "longitude": 28.031303,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - K.S.I House",
@@ -517,7 +592,10 @@
     ],
     "contact_info": "060-018-9901 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/ksi",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192618,
+    "longitude": 28.036978,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Clifton Heights",
@@ -536,7 +614,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/clifton-heights",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192734,
+    "longitude": 28.042774,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - B-Hive",
@@ -555,7 +636,10 @@
     ],
     "contact_info": "076-011-5702 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/b-hive",
-    "approved": true
+    "approved": true,
+    "latitude": -26.190642,
+    "longitude": 28.036703,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - Phumelela House",
@@ -574,7 +658,10 @@
     ],
     "contact_info": "011-489-1918 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/phumelela-house",
-    "approved": true
+    "approved": true,
+    "latitude": -26.196745,
+    "longitude": 28.038566,
+    "geo_precision": "street"
   },
   {
     "name": "South Point - 90 De Korte",
@@ -593,7 +680,10 @@
     ],
     "contact_info": "011-489-1900 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/90-de-korte",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193629,
+    "longitude": 28.036409,
+    "geo_precision": "building"
   },
   {
     "name": "Campus Africa - 80 Jorissen",
@@ -612,7 +702,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/80-jorissen/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192788,
+    "longitude": 28.035551,
+    "geo_precision": "street"
   },
   {
     "name": "Campus Africa - Amani House",
@@ -633,7 +726,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/49-jorissen/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193395,
+    "longitude": 28.031548,
+    "geo_precision": "address"
   },
   {
     "name": "Campus Africa - Rennie House",
@@ -652,7 +748,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/rennie-house-apartments/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.190477,
+    "longitude": 28.037262,
+    "geo_precision": "building"
   },
   {
     "name": "Campus Africa - Braamlofts",
@@ -671,7 +770,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/braamlofts/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.190642,
+    "longitude": 28.036703,
+    "geo_precision": "street"
   },
   {
     "name": "Campus Africa - YMCA",
@@ -690,7 +792,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/ymca/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194353,
+    "longitude": 28.041008,
+    "geo_precision": "building"
   },
   {
     "name": "Campus Africa - Wynton Joy",
@@ -709,7 +814,10 @@
     ],
     "contact_info": "010-109-1700 / 071-999-1246 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/wynton-joy/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.202981,
+    "longitude": 28.052581,
+    "geo_precision": "street"
   },
   {
     "name": "Units of Jorissen - Rise",
@@ -730,7 +838,10 @@
     ],
     "contact_info": "010-010-9220 | uoj@risestudentliving.com",
     "website": "https://www.risestudentliving.com/UOJS/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192966,
+    "longitude": 28.034072,
+    "geo_precision": "street"
   },
   {
     "name": "Braamfontein Gate",
@@ -755,7 +866,10 @@
     ],
     "contact_info": "071-674-9023 / 082-947-0976 | info@braamfonteingate.co.za",
     "website": "https://www.braamfonteingate.co.za/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194293,
+    "longitude": 28.039876,
+    "geo_precision": "building"
   },
   {
     "name": "Nota Bene",
@@ -777,7 +891,10 @@
     ],
     "contact_info": "087-232-5511 | howzit@urbancircle.co.za",
     "website": "https://www.urbancircle.co.za/residences/nota-bene/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194873,
+    "longitude": 28.031303,
+    "geo_precision": "street"
   },
   {
     "name": "J-One",
@@ -798,7 +915,10 @@
     ],
     "contact_info": "011-403-1111 | stay@j-one.co.za",
     "website": "https://www.j-one.co.za/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.196065,
+    "longitude": 28.040412,
+    "geo_precision": "street"
   },
   {
     "name": "Born Free - The Verge 1",
@@ -818,7 +938,10 @@
     ],
     "contact_info": "063-360-1558 | info@bornfreerentals.co.za",
     "website": "https://bornfreerentals.co.za/application-form-42-de-korte-street-braamfontein/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192841,
+    "longitude": 28.040514,
+    "geo_precision": "street"
   },
   {
     "name": "Born Free - The Verge 2",
@@ -838,7 +961,10 @@
     ],
     "contact_info": "063-360-1558 | info@bornfreerentals.co.za",
     "website": "https://bornfreerentals.co.za/application-form-22-jorissen-street-braamfontein/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192966,
+    "longitude": 28.034072,
+    "geo_precision": "street"
   },
   {
     "name": "Thutong",
@@ -857,7 +983,10 @@
     ],
     "contact_info": "021-002-5051 | info@thutongjunction.co.za",
     "website": "https://thutongjunction.co.za/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192966,
+    "longitude": 28.034072,
+    "geo_precision": "street"
   },
   {
     "name": "UGate Student Residence",
@@ -877,7 +1006,10 @@
     ],
     "contact_info": "087-078-2143 | info@ugate.co.za",
     "website": "https://ugate.co.za/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.19122,
+    "longitude": 28.03514,
+    "geo_precision": "street"
   },
   {
     "name": "93 on Juta",
@@ -894,7 +1026,10 @@
     ],
     "contact_info": "083-264-0005 | goldencitystudentres@gmail.com",
     "website": "https://93juta.com/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194873,
+    "longitude": 28.031303,
+    "geo_precision": "street"
   },
   {
     "name": "95 on Juta",
@@ -911,7 +1046,10 @@
     ],
     "contact_info": "083-264-0005 | goldencitystudentres@gmail.com",
     "website": "https://93juta.com/rooms/95-on-juta/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.194873,
+    "longitude": 28.031303,
+    "geo_precision": "street"
   },
   {
     "name": "Student Digz - Dudley",
@@ -933,7 +1071,10 @@
     ],
     "contact_info": "010-055-1451 | info@studentdigz.co.za",
     "website": "https://studentdigz.co.za/product-category/building/dudley-heights-building/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.193203,
+    "longitude": 28.043583,
+    "geo_precision": "building"
   },
   {
     "name": "Student Digz - Baker House",
@@ -955,7 +1096,10 @@
     ],
     "contact_info": "010-055-1451 | info@studentdigz.co.za",
     "website": "https://studentdigz.co.za/accommodation/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192258,
+    "longitude": 28.043707,
+    "geo_precision": "street"
   },
   {
     "name": "Student Digz - Skyways",
@@ -996,7 +1140,10 @@
     ],
     "contact_info": "061-938-7611 | info@southpoint.co.za",
     "website": "https://www.staysouthpoint.co.za/joburg/relyant",
-    "approved": true
+    "approved": true,
+    "latitude": -26.192879,
+    "longitude": 28.059293,
+    "geo_precision": "street"
   },
   {
     "name": "Campus Africa - Dunvista Mansions",
@@ -1015,6 +1162,9 @@
     ],
     "contact_info": "010-109-1700 / 072-475-4652 | info@campusafrica.co.za",
     "website": "https://campusafrica.co.za/residences/dunvista-mansions/",
-    "approved": true
+    "approved": true,
+    "latitude": -26.189952,
+    "longitude": 28.050105,
+    "geo_precision": "street"
   }
 ]

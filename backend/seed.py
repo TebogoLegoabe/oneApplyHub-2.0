@@ -26,6 +26,8 @@ from app import create_app, db  # noqa: E402  (must come after env setup)
 from app.models import Property  # noqa: E402
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), 'data', 'properties.json')
+# Only real model columns are written; any extra keys in the JSON are ignored.
+_COLUMNS = {column.name for column in Property.__table__.columns} - {'id', 'created_at'}
 
 
 def _load_data() -> list[dict]:
@@ -35,6 +37,7 @@ def _load_data() -> list[dict]:
     cleaned = []
     seen_names = set()
     for rec in records:
+        rec = {key: value for key, value in rec.items() if key in _COLUMNS}
         name = rec.get('name', '').strip()
         if not name:
             click.echo(f'  [SKIP] Record with no name: {rec}', err=True)

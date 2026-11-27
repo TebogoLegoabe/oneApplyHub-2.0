@@ -12,7 +12,7 @@ def add_sample_properties():
 
     # Load from JSON file
     json_path = os.path.join(os.path.dirname(__file__), 'data', 'properties.json')
-    with open(json_path, 'r') as f:
+    with open(json_path, 'r', encoding='utf-8') as f:
         properties_data = json.load(f)
 
     for prop in properties_data:
@@ -29,6 +29,9 @@ def add_sample_properties():
             contact_info=prop['contact_info'],
             website=prop.get('website'),
             approved=prop['approved'],
+            latitude=prop.get('latitude'),
+            longitude=prop.get('longitude'),
+            geo_precision=prop.get('geo_precision'),
         )
         db.session.add(new_property)
 
