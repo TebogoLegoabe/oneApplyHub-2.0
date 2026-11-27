@@ -56,3 +56,9 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright end-to-end tests
+/e2e-build
+/e2e-report
+/e2e-results
+/playwright/.cache
