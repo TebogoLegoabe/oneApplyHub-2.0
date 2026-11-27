@@ -7,9 +7,20 @@ oneApplyHub is a student accommodation platform for matric learners and universi
 ### Property discovery
 
 - Browse verified student accommodation properties
-- Filter by price, location, property type, university, and amenities
-- View NSFAS accredited accommodation
+- Filter by price, location, property type, university, NSFAS accreditation
+- Sort by nearest, price, rating or name
 - See ratings and reviews from students
+
+### Maps and distance to campus (OpenStreetMap)
+
+- Interactive OpenStreetMap map of every residence with price pins, clustering, and markers for all seven Wits and UJ campuses
+- "How far is it?" on every residence: straight-line distance plus walking, cycling and driving estimates to each campus
+- Exact walking route drawn on the map on request (OSRM), and turn-by-turn directions on openstreetmap.org
+- Search by campus ("near Wits Main") with a radius filter (within 1, 2, 3, 5, 10 km), or by the student's own location ("Near me" — kept in the browser, never put in the URL)
+- Nearby residences on each listing
+- Admins pin or correct a residence's location with a map picker and address search
+
+Walking estimates use a detour factor of 1.4× the straight line at 4.5 km/h, calibrated against real OpenStreetMap walking routes from residences to campus. Pins geocoded to a street (not a building) are labelled as approximate.
 
 ### Student reviews
 
@@ -53,6 +64,8 @@ oneApplyHub is a student accommodation platform for matric learners and universi
 - Lucide React
 - Tailwind CSS
 - Context API
+- Leaflet + React Leaflet + Leaflet.markercluster (OpenStreetMap)
+- Playwright + axe-core (end-to-end and accessibility tests)
 
 ### Backend
 
@@ -381,6 +394,61 @@ python create_admin.py
 ```
 
 Only use `docker compose down -v` when you're okay with deleting all local database data.
+
+## 🗺️ Maps: data, configuration and deployment
+
+Property locations live in three columns on `property`: `latitude`, `longitude` and `geo_precision` (`exact` = placed by an admin, `building` / `address` = geocoded, `street` = street midpoint only, so distances are approximate).
+
+Seed coordinates for the properties in `backend/data/properties.json` were geocoded with OpenStreetMap Nominatim:
+
+```powershell
+cd backend
+python geocode_properties.py --dry-run   # re-run only for new properties; it skips ones that already have coordinates
+```
+
+Deploying this update to an existing database:
+
+1. `flask db upgrade` adds the new columns (Railway runs it automatically on deploy).
+2. Run once: `python backfill_locations.py --dry-run`, then `python backfill_locations.py`. It only fills in missing pins and never touches other fields or admin-placed pins.
+3. Pin anything left over in the admin dashboard: **Properties → Location**.
+
+Optional frontend settings (see `frontend/.env.example`):
+
+| Variable | Default | Notes |
+| --- | --- | --- |
+| `REACT_APP_MAP_TILE_URL` | OpenStreetMap standard tiles | Fine for normal traffic. For heavy commercial use, switch to a commercial OSM tile provider. |
+| `REACT_APP_MAP_ATTRIBUTION` | © OpenStreetMap contributors | Must stay visible on the map. |
+| `REACT_APP_ROUTING_URL` | FOSSGIS OSRM (`routing.openstreetmap.de/routed-foot`) | Light use only; routes are fetched on click and cached. Empty value hides the button. |
+
+## ✅ Testing
+
+Backend unit/API tests (SQLite, no Postgres needed):
+
+```powershell
+cd backend
+.\venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt
+python -m pytest tests -q
+```
+
+Frontend unit and page smoke tests (Jest):
+
+```powershell
+cd frontend
+npm test -- --watchAll=false
+```
+
+End-to-end tests (Playwright) run the real stack: the Flask API on a freshly seeded SQLite database (`backend/e2e_server.py`, never your `.env` database) and a production build of the frontend. Map tiles, routing, geocoding and other external requests are answered locally, so the suite is deterministic and never loads OpenStreetMap's servers.
+
+```powershell
+cd frontend
+npx playwright install chromium   # first time only
+npm run e2e                       # builds the e2e bundle, then runs every test
+npm run e2e:test                  # re-run tests without rebuilding
+npx playwright show-report e2e-report
+```
+
+The suite covers the home page, search and filters, distance sorting and radius, "Near me", the map (pins, clusters, previews), property detail distances and walking routes, registration with email verification, sign in/out, the admin location picker, content pages, mobile layouts, and automated WCAG 2.1 AA checks with axe-core.
 
 ## 🔐 Secrets and production notes
 
