@@ -28,9 +28,9 @@ export const DeadlineChip = ({ days }) => {
       className={cn(
         'inline-flex shrink-0 items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold',
         expired
-          ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-300'
+          ? 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300'
           : urgent
-            ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'
+            ? 'bg-amber-50 text-amber-800 dark:bg-amber-500/10 dark:text-amber-300'
             : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
       )}
     >
@@ -54,10 +54,10 @@ const OpportunityCard = ({ opportunity }) => {
   const Icon = meta.icon;
 
   return (
-    <article className={cn('rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition-all duration-200 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900', expired && 'opacity-75')}>
+    <article className={cn('rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-violet-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-violet-500/30 sm:p-6', expired && 'bg-slate-50 dark:bg-slate-900/60')}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3">
-          <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', meta.tone === 'gold' ? 'bg-gold-50 text-gold-700 dark:bg-gold-500/10 dark:text-gold-300' : 'bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300')}>
+          <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white shadow-sm', meta.tone === 'gold' ? 'bg-gradient-to-br from-coral-500 to-rose-600' : 'bg-gradient-to-br from-violet-500 to-brand-700')}>
             <Icon className="h-5 w-5" aria-hidden="true" />
           </span>
           <div className="min-w-0">

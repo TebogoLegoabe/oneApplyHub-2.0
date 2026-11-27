@@ -4,20 +4,24 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100';
 
 const VARIANTS = {
-  primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800',
+  primary: 'bg-brand-600 text-white shadow-glow hover:bg-brand-700 active:bg-brand-800',
+  // Attention-grabbing call to action (apply, search). White text passes WCAG AA on coral-600.
+  accent: 'bg-coral-600 text-white shadow-glow-coral hover:bg-coral-700 active:bg-coral-800',
+  gradient: 'bg-gradient-to-r from-brand-600 via-violet-600 to-fuchsia-600 bg-[length:200%_auto] text-white shadow-glow-violet hover:bg-right',
+  dark: 'bg-ink-950 text-white shadow-sm hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-slate-100',
   secondary:
     'border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800',
   ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white',
   soft: 'bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-300 dark:hover:bg-brand-500/20',
-  gold: 'bg-gold-600 text-white shadow-sm hover:bg-gold-700 active:bg-gold-800',
+  gold: 'bg-gold-400 text-ink-950 shadow-sm hover:bg-gold-300 active:bg-gold-500',
   danger: 'bg-red-600 text-white shadow-sm hover:bg-red-700',
   'danger-soft':
     'border border-red-200 bg-white text-red-600 hover:bg-red-50 dark:border-red-900 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-500/10',
-  inverse: 'bg-white text-slate-950 shadow-sm hover:bg-slate-100',
-  'inverse-outline': 'border border-white/50 text-white hover:border-white hover:bg-white/10',
+  inverse: 'bg-white text-ink-950 shadow-sm hover:bg-slate-100',
+  'inverse-outline': 'border border-white/40 text-white hover:border-white hover:bg-white/10',
 };
 
 const SIZES = {
@@ -35,7 +39,7 @@ const SIZES = {
  */
 const Button = forwardRef(
   ({ variant = 'primary', size = 'md', loading = false, fullWidth = false, className, children, to, href, disabled, type, ...props }, ref) => {
-    const classes = cn(BASE, VARIANTS[variant], SIZES[size], fullWidth && 'w-full', className);
+    const classes = cn(BASE, VARIANTS[variant] || VARIANTS.primary, SIZES[size], fullWidth && 'w-full', className);
     const content = (
       <>
         {loading && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}

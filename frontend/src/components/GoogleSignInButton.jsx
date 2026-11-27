@@ -9,19 +9,19 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
+/** False when REACT_APP_GOOGLE_CLIENT_ID is unset (e.g. local dev) — callers hide the option. */
+export const googleSignInEnabled = Boolean(clientId);
+
 const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue with Google' }) => {
   const [ready, setReady] = useState(false);
   const clientRef = useRef(null);
   const onSuccessRef = useRef(onSuccess);
   useEffect(() => { onSuccessRef.current = onSuccess; });
 
-  const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-
   useEffect(() => {
-    if (!clientId) {
-      onError?.('Google sign-in is not configured.');
-      return;
-    }
+    if (!clientId) return undefined;
 
     const build = () => {
       // initTokenClient opens a real popup every time — no iframe state issues.
@@ -38,13 +38,15 @@ const GoogleSignInButton = ({ onSuccess, onError, loading, label = 'Continue wit
 
     if (window.google?.accounts?.oauth2) {
       build();
-    } else {
-      const t = setInterval(() => {
-        if (window.google?.accounts?.oauth2) { clearInterval(t); build(); }
-      }, 100);
-      return () => clearInterval(t);
+      return undefined;
     }
+    const t = setInterval(() => {
+      if (window.google?.accounts?.oauth2) { clearInterval(t); build(); }
+    }, 100);
+    return () => clearInterval(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!clientId) return null;
 
   const handleClick = () => {
     if (!clientRef.current) return;

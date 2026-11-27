@@ -2,6 +2,20 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
+// Leaflet needs a real browser; maps are covered by the Playwright e2e suite (frontend/e2e).
+jest.mock('./components/map', () => {
+  const actual = jest.requireActual('react');
+  const stub = (testId) => () => actual.createElement('div', { 'data-testid': testId });
+  return {
+    __esModule: true,
+    PropertiesMap: stub('properties-map'),
+    PropertyLocationMap: stub('property-location-map'),
+    LocationPicker: stub('location-picker'),
+    MapSkeleton: stub('map-skeleton'),
+    MapFrame: ({ children }) => actual.createElement(actual.Fragment, null, children),
+  };
+});
+
 jest.mock('./services/api', () => {
   const property = {
     id: 1, name: 'Braam Heights', address: '12 Jorissen St, Braamfontein', description: 'Cosy student residence near campus.',
@@ -27,6 +41,8 @@ jest.mock('./services/api', () => {
     propertiesAPI: {
       getProperties: () => ok({ properties: [property], total: 1, pages: 1 }),
       getProperty: () => ok({ property }),
+      getPropertyMap: () => ok({ properties: [{ ...property, latitude: -26.1932, longitude: 28.0318, distance_km: null }], total: 1, unmapped: 0 }),
+      getNearby: () => ok({ properties: [] }),
     },
     reviewsAPI: {
       getReviews: () => ok({ reviews: [review] }),
@@ -167,7 +183,7 @@ describe('public pages render (signed out)', () => {
   test('Header and Footer', () => {
     const collect = noConsoleErrors();
     mount(<><Header /><Footer /></>, '/');
-    expect(screen.getAllByText('oneApplyHub').length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('link', { name: /oneApplyHub/ }).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByLabelText('Open menu'));
     expect(screen.getByText('Sign up free')).toBeInTheDocument();
     expect(collect()).toEqual([]);

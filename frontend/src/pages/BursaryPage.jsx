@@ -89,7 +89,8 @@ const BursaryCard = ({ bursary }) => {
   const levels = Array.isArray(bursary.level) ? bursary.level : [];
 
   return (
-    <article className={cn('rounded-2xl border border-slate-200 bg-white p-5 shadow-card transition-all duration-200 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900', expired && 'opacity-75')}>
+    <article className={cn('relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-500/30 sm:p-6', expired && 'bg-slate-50 dark:bg-slate-900/60')}>
+      <span className={cn('absolute inset-y-0 left-0 w-1.5', expired ? 'bg-slate-300 dark:bg-slate-700' : 'bg-gradient-to-b from-emerald-400 via-teal-500 to-cyan-600')} aria-hidden="true" />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3">
           <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', fieldColor)}>
@@ -222,6 +223,7 @@ const BursaryPage = () => {
         icon={Award}
         title="Student opportunities"
         description="Bursaries, internships, and graduate programmes in one place. Competitions are coming soon."
+        tone="emerald"
         className="mb-4"
       />
 
@@ -237,18 +239,18 @@ const BursaryPage = () => {
               disabled={comingSoon}
               onClick={() => { setActiveTab(id); setFilters(INITIAL_FILTERS); }}
               className={cn(
-                'rounded-2xl border p-4 text-left shadow-card transition-all duration-200',
+                'rounded-3xl border p-4 text-left shadow-card transition-all duration-200',
                 active
-                  ? 'border-brand-300 bg-brand-50 ring-1 ring-brand-300/60 dark:border-brand-700 dark:bg-brand-500/10 dark:ring-brand-500/30'
-                  : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900',
-                comingSoon ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:hover:border-brand-900',
+                  ? 'border-emerald-300 bg-emerald-50 ring-2 ring-emerald-300/60 dark:border-emerald-700 dark:bg-emerald-500/10 dark:ring-emerald-500/30'
+                  : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
+                comingSoon ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-card-hover dark:hover:border-emerald-900',
               )}
             >
               <div className="flex items-start justify-between gap-3">
-                <span className={cn('flex h-10 w-10 items-center justify-center rounded-xl shadow-sm', active ? 'bg-brand-600 text-white' : 'bg-white text-brand-600 dark:bg-slate-800 dark:text-brand-300')}>
+                <span className={cn('flex h-10 w-10 items-center justify-center rounded-xl shadow-sm', active ? 'bg-gradient-to-br from-emerald-500 to-teal-700 text-white' : 'bg-slate-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300')}>
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                {comingSoon ? <Badge size="sm">Coming soon</Badge> : active && <Badge tone="brand" size="sm">Viewing</Badge>}
+                {comingSoon ? <Badge size="sm">Coming soon</Badge> : active && <Badge tone="success" size="sm">Viewing</Badge>}
               </div>
               <h3 className="mt-3 text-sm font-bold text-slate-950 dark:text-white">{title}</h3>
               <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{text}</p>
@@ -292,10 +294,10 @@ const BursaryPage = () => {
                 onClick={() => setFilter('field', value)}
                 aria-pressed={filters.field === value}
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition-colors',
+                  'inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors',
                   filters.field === value
-                    ? 'bg-brand-600 text-white shadow-sm'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
+                    ? 'bg-ink-950 text-white shadow-sm dark:bg-white dark:text-ink-950'
+                    : cn(FIELD_COLORS[value] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', 'hover:brightness-95'),
                 )}
               >
                 <Icon className="h-3.5 w-3.5" aria-hidden="true" />{label}
@@ -354,7 +356,7 @@ const BursaryPage = () => {
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-base font-bold text-slate-950 dark:text-white sm:text-lg" aria-live="polite">
-            {listTitle} <span className="font-medium text-slate-400">({filtered.length})</span>
+            {listTitle} <span className="font-medium text-slate-500 dark:text-slate-400">({filtered.length})</span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400">Sorted by closest deadline</p>
         </div>
@@ -408,11 +410,12 @@ const BursaryPage = () => {
         </div>
       </section>
 
-      <div className="mt-6 rounded-2xl bg-slate-950 p-5 text-white shadow-card dark:bg-slate-900 dark:ring-1 dark:ring-slate-800 sm:p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-700 via-teal-700 to-brand-800 p-5 text-white shadow-float sm:p-7">
+        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-base font-bold">Plan accommodation and funding together</h3>
-            <p className="mt-1 max-w-2xl text-sm text-slate-300">Apply for accommodation while you track funding opportunities.</p>
+            <h3 className="font-display text-xl font-bold">Plan accommodation and funding together</h3>
+            <p className="mt-1 max-w-2xl text-sm text-white/85">Apply for accommodation while you track funding opportunities.</p>
           </div>
           <Button to={isAuthenticated ? '/application' : '/register'} variant="inverse" className="shrink-0">Apply for accommodation</Button>
         </div>

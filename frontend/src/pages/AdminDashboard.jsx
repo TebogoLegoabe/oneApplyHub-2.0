@@ -2,14 +2,89 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   AlertCircle, Briefcase, Building2, ClipboardList, Crown, DoorOpen, Eye, ExternalLink, GraduationCap, Image as ImageIcon,
-  LayoutDashboard, LogOut, Menu, MessageSquare, Moon, Plus, RefreshCw, Save, Shield, Star, Sun, Trash2, Upload, UserCog, Users, X,
+  LayoutDashboard, LogOut, MapPin, MapPinOff, Menu, MessageSquare, Moon, Plus, RefreshCw, Save, Shield, Star, Sun, Trash2, Upload, UserCog, Users, X,
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import logoImg from '../assets/OneHubLogo.png';
+import Logo from '../components/brand/Logo';
+import { LocationPicker, MapFrame } from '../components/map';
 import { Badge, Button, ConfirmDialog, EmptyState, Input, Modal, Select, Spinner, StatusBadge, Textarea, useToast } from '../components/ui';
 import { cn } from '../utils/cn';
+
+const PRECISION_LABELS = {
+  exact: 'Exact',
+  building: 'Building',
+  address: 'Address',
+  street: 'Street (approx.)',
+};
+
+/** Pin a residence on the map so students see distances to campus. */
+const PropertyLocationModal = ({ property, onClose, onSaved }) => {
+  const toast = useToast();
+  const hasPin = property.latitude != null && property.longitude != null;
+  const [point, setPoint] = useState(hasPin ? { lat: property.latitude, lng: property.longitude } : null);
+  const [draft, setDraft] = useState({ lat: hasPin ? String(property.latitude) : '', lng: hasPin ? String(property.longitude) : '' });
+  const [saving, setSaving] = useState(false);
+
+  const pick = (next) => {
+    setPoint(next);
+    setDraft({ lat: String(next.lat), lng: String(next.lng) });
+  };
+
+  const typeCoordinate = (key) => (event) => {
+    const nextDraft = { ...draft, [key]: event.target.value };
+    setDraft(nextDraft);
+    const lat = Number(nextDraft.lat);
+    const lng = Number(nextDraft.lng);
+    const valid = nextDraft.lat.trim() && nextDraft.lng.trim() && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    setPoint(valid ? { lat, lng } : null);
+  };
+
+  const save = async (clear = false) => {
+    setSaving(true);
+    try {
+      const payload = clear ? { latitude: null, longitude: null } : { latitude: point.lat, longitude: point.lng, geo_precision: 'exact' };
+      const response = await adminAPI.updateProperty(property.id, payload);
+      toast.success(clear ? `Map pin removed for ${property.name}.` : `Location saved for ${property.name}.`);
+      onSaved?.(response.data.property);
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to save the location.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal
+      open
+      onClose={saving ? undefined : onClose}
+      size="lg"
+      title={`Location · ${property.name}`}
+      description={property.address}
+      footer={(
+        <>
+          {hasPin && <Button variant="danger-soft" onClick={() => save(true)} disabled={saving}><MapPinOff className="h-4 w-4" aria-hidden="true" />Remove pin</Button>}
+          <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={() => save(false)} loading={saving} disabled={!point}><Save className="h-4 w-4" aria-hidden="true" />Save location</Button>
+        </>
+      )}
+    >
+      <MapFrame className="h-80 w-full rounded-2xl">
+        <LocationPicker value={point} onChange={pick} initialQuery={property.address} />
+      </MapFrame>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Input label="Latitude" inputMode="decimal" value={draft.lat} onChange={typeCoordinate('lat')} placeholder="-26.1929" />
+        <Input label="Longitude" inputMode="decimal" value={draft.lng} onChange={typeCoordinate('lng')} placeholder="28.0305" />
+      </div>
+      {hasPin && property.geo_precision && (
+        <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+          Current pin accuracy: <span className="font-semibold text-slate-700 dark:text-slate-200">{PRECISION_LABELS[property.geo_precision] || property.geo_precision}</span>. Saving marks it as exact.
+        </p>
+      )}
+    </Modal>
+  );
+};
 
 const Loading = () => (
   <div className="flex justify-center py-16" role="status" aria-label="Loading">
@@ -317,6 +392,7 @@ const PropertiesTab = ({ onChanged }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imagesFor, setImagesFor] = useState(null);
+  const [locationFor, setLocationFor] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -346,12 +422,31 @@ const PropertiesTab = ({ onChanged }) => {
   return (
     <>
       {imagesFor && <PropertyImagesModal property={imagesFor} onClose={() => { setImagesFor(null); load(); }} />}
+      {locationFor && (
+        <PropertyLocationModal
+          property={locationFor}
+          onClose={() => setLocationFor(null)}
+          onSaved={(updated) => {
+            setItems((previous) => previous.map((item) => (item.id === updated.id ? updated : item)));
+            setLocationFor(null);
+          }}
+        />
+      )}
       <ShellCard className="overflow-hidden">
-        <CardTitle title="Properties" description="Approve listings so students can see and apply to them, and manage their photos." action={<Badge tone="brand">{items.length} total</Badge>} />
+        <CardTitle
+          title="Properties"
+          description="Approve listings, manage photos, and pin each residence on the map so students see walking times to campus."
+          action={(
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="brand">{items.length} total</Badge>
+              {items.some((item) => item.latitude == null) && <Badge tone="warning" icon={MapPinOff}>{items.filter((item) => item.latitude == null).length} without a map pin</Badge>}
+            </div>
+          )}
+        />
         {!items.length ? (
           <EmptyState icon={Building2} title="No properties found" description="Properties you manage will appear here." />
         ) : (
-          <Table columns={[{ label: 'Property' }, { label: 'University' }, { label: 'Price' }, { label: 'Status' }, { label: 'Actions', align: 'right' }]}>
+          <Table columns={[{ label: 'Property' }, { label: 'University' }, { label: 'Price' }, { label: 'Map pin' }, { label: 'Status' }, { label: 'Actions', align: 'right' }]}>
             {items.map((property) => (
               <tr key={property.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40">
                 <td className="px-5 py-3">
@@ -371,9 +466,17 @@ const PropertiesTab = ({ onChanged }) => {
                 </td>
                 <td className="px-5 py-3"><Badge>{property.university?.toUpperCase()}</Badge></td>
                 <td className="whitespace-nowrap px-5 py-3 text-slate-600 dark:text-slate-300">R{property.price_min?.toLocaleString()} – R{property.price_max?.toLocaleString()}</td>
+                <td className="px-5 py-3">
+                  {property.latitude != null
+                    ? <Badge tone={property.geo_precision === 'street' ? 'warning' : 'success'} icon={MapPin}>{PRECISION_LABELS[property.geo_precision] || 'Pinned'}</Badge>
+                    : <Badge tone="danger" icon={MapPinOff}>No pin</Badge>}
+                </td>
                 <td className="px-5 py-3"><Badge tone={property.approved ? 'success' : 'warning'}>{property.approved ? 'Approved' : 'Pending'}</Badge></td>
                 <td className="px-5 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
+                    <Button onClick={() => setLocationFor(property)} variant="ghost" size="sm" aria-label={`Set map location for ${property.name}`}>
+                      <MapPin className="h-3.5 w-3.5" aria-hidden="true" />Location
+                    </Button>
                     <Button onClick={() => setImagesFor(property)} variant="ghost" size="sm">
                       <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />Photos{property.images?.length ? ` (${property.images.length})` : ''}
                     </Button>
@@ -1268,12 +1371,10 @@ const AdminDashboard = () => {
         aria-label="Admin navigation"
       >
         <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-          <Link to="/" className="flex items-center gap-3">
-            <img src={logoImg} alt="" className="h-9 w-9 object-contain" />
-            <div>
-              <p className="text-sm font-bold text-slate-950 dark:text-white">oneApplyHub</p>
-              <p className="text-xs text-slate-400">Admin console</p>
-            </div>
+          <Link to="/" className="flex flex-col gap-1 rounded-xl">
+            <Logo />
+            <span className="sr-only"> home</span>
+            <span className="ml-12 w-fit rounded-full bg-gold-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-gold-800 dark:bg-gold-500/15 dark:text-gold-300">Admin console</span>
           </Link>
           <button type="button" onClick={() => setSidebarOpen(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 lg:hidden" aria-label="Close navigation">
             <X className="h-5 w-5" />
@@ -1347,7 +1448,7 @@ const AdminDashboard = () => {
           )}
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6">
+        <main id="main-content" className="flex-1 px-4 py-6 sm:px-6">
           {activeTab === 'Overview' && <Overview stats={stats} user={user} onNav={goTo} onSeedOpportunities={() => setConfirmSeed(true)} seeding={seeding} />}
           {activeTab === 'Properties' && <PropertiesTab onChanged={loadStats} />}
           {activeTab === 'Reviews' && <ReviewsTab onChanged={loadStats} />}

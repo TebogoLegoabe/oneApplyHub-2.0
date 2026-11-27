@@ -25,6 +25,7 @@ from app.models import (
     User,
 )
 from app.utils import utcnow
+from app.utils.geo import GEO_PRECISIONS, parse_coordinate
 
 ACCOMMODATION_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
 UNIVERSITY_VALID_STATUSES = ('pending', 'under_review', 'approved', 'rejected')
@@ -194,6 +195,27 @@ def list_properties():
     return jsonify({'properties': [p.to_dict() for p in results.items], 'total': results.total, 'pages': results.pages, 'current_page': page}), 200
 
 
+def _location_from(data):
+    """Parse latitude/longitude/geo_precision from a request body.
+
+    Returns (fields, error). `fields` is empty when the body does not mention a location.
+    Both coordinates must be given together; send nulls to clear the pin.
+    """
+    if 'latitude' not in data and 'longitude' not in data:
+        return {}, None
+    try:
+        latitude = parse_coordinate(data.get('latitude'), 'lat')
+        longitude = parse_coordinate(data.get('longitude'), 'lng')
+    except (TypeError, ValueError) as exc:
+        return {}, str(exc) if str(exc).startswith(('Latitude', 'Longitude')) else 'Latitude and longitude must be numbers'
+    if (latitude is None) != (longitude is None):
+        return {}, 'Provide both latitude and longitude, or neither'
+    precision = data.get('geo_precision') or ('exact' if latitude is not None else None)
+    if precision is not None and precision not in GEO_PRECISIONS:
+        return {}, f'geo_precision must be one of: {", ".join(GEO_PRECISIONS)}'
+    return {'latitude': latitude, 'longitude': longitude, 'geo_precision': precision if latitude is not None else None}, None
+
+
 @admin_bp.route('/properties', methods=['POST'])
 @admin_required
 def create_property():
@@ -202,6 +224,9 @@ def create_property():
     missing = [field for field in required if not data.get(field)]
     if missing:
         return jsonify({'error': f'Missing required fields: {", ".join(missing)}'}), 400
+    location, location_error = _location_from(data)
+    if location_error:
+        return jsonify({'error': location_error}), 400
     amenities = data.get('amenities', [])
     prop = Property(
         name=data['name'].strip(), address=data['address'].strip(), property_type=data['property_type'],
@@ -210,6 +235,7 @@ def create_property():
         contact_info=data.get('contact_info', '').strip(), website=data.get('website', '').strip(),
         university=data['university'],
         nsfas_accredited=bool(data.get('nsfas_accredited', False)), approved=True,
+        **location,
     )
     try:
         db.session.add(prop)
@@ -235,6 +261,11 @@ def update_property(property_id):
     if not prop:
         return jsonify({'error': 'Property not found'}), 404
     data = request.get_json(silent=True) or {}
+    location, location_error = _location_from(data)
+    if location_error:
+        return jsonify({'error': location_error}), 400
+    for field, value in location.items():
+        setattr(prop, field, value)
     for field in ('name', 'address', 'property_type', 'description', 'contact_info', 'website', 'university'):
         if field in data:
             setattr(prop, field, str(data[field]).strip())

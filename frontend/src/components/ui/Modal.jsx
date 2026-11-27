@@ -40,7 +40,7 @@ const Modal = ({ open, onClose, title, description, size = 'md', children, foote
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
         className={cn(
-          'flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl outline-none animate-scale-in dark:border-slate-700 dark:bg-slate-900 dark:text-white',
+          'flex max-h-[92vh] w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white text-slate-900 shadow-2xl outline-none animate-scale-in dark:border-slate-700 dark:bg-slate-900 dark:text-white',
           SIZES[size],
           className,
         )}

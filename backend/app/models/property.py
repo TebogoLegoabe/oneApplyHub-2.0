@@ -20,6 +20,12 @@ class Property(db.Model):
     university = db.Column(db.String(50))  # 'wits', 'uj', or 'both'
     approved = db.Column(db.Boolean, default=False, nullable=False)
     nsfas_accredited = db.Column(db.Boolean, default=False, nullable=False)
+    # Map position (WGS84). geo_precision records how the pin was placed:
+    # 'exact' (admin picked it on the map), 'building' / 'address' (geocoded),
+    # or 'street' (street midpoint only — distances are approximate).
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    geo_precision = db.Column(db.String(20), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), default=utcnow, nullable=False)
 
     # Relationships
@@ -45,8 +51,14 @@ class Property(db.Model):
     def ordered_images(self):
         return self.images.order_by(PropertyImage.is_primary.desc(), PropertyImage.created_at.asc()).all()
 
-    def to_dict(self) -> dict:
+    @property
+    def has_location(self) -> bool:
+        return self.latitude is not None and self.longitude is not None
+
+    def to_dict(self, rating_stats=None) -> dict:
+        """rating_stats: optional precomputed (average, count) to avoid two queries per property."""
         images = [img.to_dict() for img in self.ordered_images()]
+        average, count = rating_stats if rating_stats is not None else (self.average_rating(), self.review_count())
         return {
             'id': self.id,
             'name': self.name,
@@ -61,8 +73,11 @@ class Property(db.Model):
             'university': self.university,
             'approved': self.approved,
             'nsfas_accredited': self.nsfas_accredited,
-            'average_rating': round(self.average_rating(), 1),
-            'review_count': self.review_count(),
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'geo_precision': self.geo_precision,
+            'average_rating': round(average or 0.0, 1),
+            'review_count': count or 0,
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'images': images,
             'primary_image_url': images[0]['image_url'] if images else None,

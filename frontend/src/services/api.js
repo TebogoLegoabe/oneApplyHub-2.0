@@ -92,6 +92,9 @@ export const statsAPI = {
 export const propertiesAPI = {
   getProperties: (params = {}) => api.get('/properties', { params }),
   getProperty: (id) => api.get(`/properties/${id}`),
+  // Every matching property with a map pin (no pagination) for map views.
+  getPropertyMap: (params = {}, config = {}) => api.get('/properties/map', { params, ...config }),
+  getNearby: (id, limit = 6) => api.get(`/properties/${id}/nearby`, { params: { limit } }),
 };
 
 // Bursaries API
