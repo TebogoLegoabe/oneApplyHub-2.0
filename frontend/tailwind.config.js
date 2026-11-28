@@ -8,7 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
-        display: ['"Bricolage Grotesque"', '"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+        display: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
       },
       colors: {
         // Azure from the oneApplyHub logo (#0068C8). 600+ carries white text at WCAG AA.
@@ -71,10 +71,11 @@ module.exports = {
       boxShadow: {
         card: '0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06)',
         'card-hover': '0 12px 32px -12px rgb(15 23 42 / 0.18), 0 4px 10px -4px rgb(15 23 42 / 0.08)',
-        glow: '0 10px 30px -10px rgb(11 102 214 / 0.55)',
-        'glow-coral': '0 10px 30px -10px rgb(214 58 23 / 0.55)',
-        'glow-violet': '0 10px 30px -10px rgb(124 58 237 / 0.5)',
-        float: '0 24px 60px -20px rgb(7 10 38 / 0.45)',
+        // Kept as neutral elevation tokens; coloured glows read as AI-generated design.
+        glow: '0 1px 2px 0 rgb(15 23 42 / 0.08)',
+        'glow-coral': '0 1px 2px 0 rgb(15 23 42 / 0.08)',
+        'glow-violet': '0 1px 2px 0 rgb(15 23 42 / 0.08)',
+        float: '0 16px 40px -16px rgb(15 23 42 / 0.28)',
       },
       borderRadius: {
         '4xl': '2rem',

@@ -9,9 +9,8 @@ export const LocationPicker = lazy(() => import('./LocationPicker'));
 
 export const MapSkeleton = ({ className }) => (
   <div className={cn('relative flex h-full w-full items-center justify-center overflow-hidden bg-slate-100 dark:bg-slate-900', className)} role="status" aria-label="Loading map">
-    <div className="bg-dots-dark absolute inset-0" aria-hidden="true" />
     <div className="relative flex flex-col items-center gap-2 text-slate-400 dark:text-slate-500">
-      <span className="h-10 w-10 animate-pulse rounded-full bg-gradient-to-br from-brand-300 to-violet-300 dark:from-brand-700 dark:to-violet-700" />
+      <span className="h-10 w-10 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
       <span className="text-xs font-semibold">Loading map…</span>
     </div>
   </div>

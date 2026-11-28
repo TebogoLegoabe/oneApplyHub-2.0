@@ -10,7 +10,7 @@
   }
 
   body {
-    @apply bg-slate-50 font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+    @apply bg-white font-sans text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
   }
 
   h1, h2 {
@@ -23,7 +23,7 @@
   }
 
   ::selection {
-    @apply bg-brand-200 text-brand-950 dark:bg-brand-500/40 dark:text-white;
+    @apply bg-brand-100 text-brand-950 dark:bg-brand-500/40 dark:text-white;
   }
 
   code {
@@ -102,42 +102,10 @@
 
 @layer utilities {
   .skip-link {
-    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-xl focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg;
+    @apply sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg;
   }
 
-  /* Signature gradient used for hero highlights. Written as plain CSS: @apply with a
-     via-* stop emits a second rule that resets the end colour to transparent. The
-     gradient loops back to its first colour so the background-position animation is seamless. */
-  .text-gradient {
-    background-image: linear-gradient(90deg, theme('colors.brand.400'), theme('colors.violet.400'), theme('colors.coral.400'), theme('colors.brand.400'));
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .text-gradient-dark {
-    background-image: linear-gradient(90deg, theme('colors.brand.600'), theme('colors.violet.600'), theme('colors.coral.600'));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  /* Subtle dot grid for hero and banner backgrounds. */
-  .bg-dots {
-    background-image: radial-gradient(rgb(255 255 255 / 0.14) 1px, transparent 1px);
-    background-size: 22px 22px;
-  }
-
-  .bg-dots-dark {
-    background-image: radial-gradient(rgb(15 23 42 / 0.08) 1px, transparent 1px);
-    background-size: 22px 22px;
-  }
-
-  .dark .bg-dots-dark {
-    background-image: radial-gradient(rgb(255 255 255 / 0.06) 1px, transparent 1px);
-  }
-
+  /* Scroll-in reveal for below-the-fold sections (see useReveal in HomePage). */
   .reveal {
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
@@ -174,14 +142,14 @@
 }
 
 .oah-map .leaflet-control-attribution {
-  @apply rounded-tl-lg bg-white/85 px-2 text-[10px] text-slate-600 backdrop-blur dark:bg-slate-900/85 dark:text-slate-300;
+  @apply rounded-tl-md bg-white/90 px-2 text-[10px] text-slate-600 dark:bg-slate-900/90 dark:text-slate-300;
 }
 .oah-map .leaflet-control-attribution a {
   @apply text-brand-700 dark:text-brand-300;
 }
 
 .oah-map .leaflet-bar {
-  @apply overflow-hidden rounded-xl border-0 shadow-lg;
+  @apply overflow-hidden rounded-lg border border-slate-200 shadow-sm dark:border-slate-700;
 }
 .oah-map .leaflet-bar a {
   @apply flex h-9 w-9 items-center justify-center border-b border-slate-100 bg-white text-lg leading-none text-slate-700 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800;
@@ -191,20 +159,20 @@
 }
 
 .oah-map .leaflet-tooltip.oah-tooltip {
-  @apply rounded-lg border-0 bg-ink-950 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg;
+  @apply rounded-md border-0 bg-ink-950 px-2.5 py-1.5 text-xs font-semibold text-white shadow-lg;
 }
 .oah-map .leaflet-tooltip.oah-tooltip::before {
   display: none;
 }
 
-/* Price pins for residences. */
+/* Price pins for residences. The dot shows which students a residence serves. */
 .oah-pin {
-  @apply relative flex -translate-x-1/2 -translate-y-full cursor-pointer items-center gap-1 whitespace-nowrap rounded-full border-2 border-white bg-white px-2.5 py-1 text-xs font-extrabold text-slate-900 shadow-lg transition-transform duration-150;
+  @apply relative flex -translate-x-1/2 -translate-y-full cursor-pointer items-center gap-1 whitespace-nowrap rounded-full border border-slate-300 bg-white px-2.5 py-1 text-xs font-bold text-slate-900 shadow-md transition-transform duration-150;
   width: max-content;
 }
 .oah-pin::after {
   content: '';
-  @apply absolute left-1/2 top-full h-2.5 w-2.5 -translate-x-1/2 -translate-y-1.5 rotate-45 border-b-2 border-r-2 border-white bg-white;
+  @apply absolute left-1/2 top-full h-2 w-2 -translate-x-1/2 -translate-y-1 rotate-45 border-b border-r border-slate-300 bg-white;
 }
 .oah-pin__dot {
   @apply h-2 w-2 shrink-0 rounded-full bg-brand-600;
@@ -213,21 +181,15 @@
   @apply bg-coral-500;
 }
 .oah-pin--both .oah-pin__dot {
-  @apply bg-violet-500;
+  @apply bg-ink-600;
 }
 .oah-pin:hover,
 .oah-pin.is-active {
-  @apply z-10 scale-110 bg-ink-950 text-white;
+  @apply z-10 scale-110 border-ink-950 bg-ink-950 text-white;
 }
 .oah-pin:hover::after,
 .oah-pin.is-active::after {
-  @apply bg-ink-950;
-}
-.oah-pin.is-active {
-  @apply border-gold-300;
-}
-.oah-pin.is-active::after {
-  @apply border-gold-300;
+  @apply border-ink-950 bg-ink-950;
 }
 .leaflet-marker-icon.oah-pin-wrap:hover,
 .leaflet-marker-icon.oah-pin-wrap.is-active {
@@ -236,11 +198,11 @@
 
 /* Clusters of residences. */
 .oah-cluster {
-  @apply flex h-full w-full items-center justify-center rounded-full border-[3px] border-white bg-gradient-to-br from-brand-500 to-violet-600 text-sm font-extrabold text-white shadow-lg;
+  @apply flex h-full w-full items-center justify-center rounded-full border-2 border-white bg-brand-700 text-sm font-bold text-white shadow-md;
 }
 .oah-cluster-wrap::before {
   content: '';
-  @apply absolute -inset-1.5 -z-10 rounded-full bg-brand-500/25;
+  @apply absolute -inset-1 -z-10 rounded-full bg-brand-600/20;
 }
 
 /* Campus markers: the icon is centred on the campus point, the label hangs below it. */
@@ -248,13 +210,16 @@
   @apply relative h-9 w-9 -translate-x-1/2 -translate-y-1/2;
 }
 .oah-campus__icon {
-  @apply flex h-9 w-9 items-center justify-center rounded-xl border-2 border-white bg-gradient-to-br from-brand-500 to-ink-800 text-white shadow-lg;
+  @apply flex h-9 w-9 items-center justify-center rounded-lg border-2 border-white bg-brand-700 text-white shadow-md;
 }
 .oah-campus--uj .oah-campus__icon {
-  @apply from-coral-400 to-coral-700;
+  @apply bg-coral-600;
+}
+.oah-campus--college .oah-campus__icon {
+  @apply bg-emerald-700;
 }
 .oah-campus__label {
-  @apply pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-bold text-white shadow;
+  @apply pointer-events-none absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap rounded bg-ink-950/90 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow;
 }
 .oah-campus.is-active .oah-campus__icon {
   @apply ring-4 ring-gold-300/90;

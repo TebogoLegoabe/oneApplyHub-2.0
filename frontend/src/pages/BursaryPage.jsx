@@ -7,7 +7,8 @@ import {
 } from 'lucide-react';
 import { bursariesAPI, opportunitiesAPI } from '../services/api';
 import OpportunityCard, { daysUntil, formatDeadline, DeadlineChip } from '../components/OpportunityCard';
-import { Alert, Badge, Button, EmptyState, Input, PageHeader, Select, Skeleton } from '../components/ui';
+import { Alert, Badge, Button, Chip, CtaBand, EmptyState, Input, PageHeader, Select, Skeleton } from '../components/ui';
+import { PHOTOS } from '../constants/photos';
 import { cn } from '../utils/cn';
 
 const FIELDS = [
@@ -22,26 +23,6 @@ const FIELDS = [
   { value: 'sciences', label: 'Natural Sciences', icon: FlaskConical },
   { value: 'general', label: 'General / All fields', icon: Globe },
 ];
-
-const FIELD_COLORS = {
-  engineering: 'bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-300',
-  it: 'bg-brand-100 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300',
-  health: 'bg-rose-100 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300',
-  business: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300',
-  accounting: 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-300',
-  education: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-300',
-  law: 'bg-gold-100 text-gold-700 dark:bg-gold-500/10 dark:text-gold-300',
-  sciences: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300',
-  general: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
-};
-
-const FUNDER_TONE = {
-  government: 'brand',
-  corporate: 'neutral',
-  international: 'gold',
-  private: 'warning',
-  professional: 'success',
-};
 
 const TABS = [
   { id: 'bursaries', title: 'Bursaries', text: 'Funding for tuition, books, accommodation, and living costs.', icon: Award },
@@ -84,16 +65,19 @@ const BursaryCard = ({ bursary }) => {
   const days = daysUntil(bursary.deadline);
   const expired = days <= 0;
   const fieldLabel = FIELDS.find((item) => item.value === bursary.field)?.label || bursary.field;
-  const fieldColor = FIELD_COLORS[bursary.field] || FIELD_COLORS.general;
   const requirements = Array.isArray(bursary.requirements) ? bursary.requirements : [];
   const levels = Array.isArray(bursary.level) ? bursary.level : [];
 
   return (
-    <article className={cn('relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-emerald-500/30 sm:p-6', expired && 'bg-slate-50 dark:bg-slate-900/60')}>
-      <span className={cn('absolute inset-y-0 left-0 w-1.5', expired ? 'bg-slate-300 dark:bg-slate-700' : 'bg-gradient-to-b from-emerald-400 via-teal-500 to-cyan-600')} aria-hidden="true" />
+    <article
+      className={cn(
+        'rounded-xl border border-slate-200 p-5 shadow-card transition-colors hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 sm:p-6',
+        expired ? 'bg-slate-50 dark:bg-slate-900/60' : 'bg-white dark:bg-slate-900',
+      )}
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3">
-          <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', fieldColor)}>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
             <FieldIcon field={bursary.field} />
           </span>
           <div className="min-w-0">
@@ -105,8 +89,8 @@ const BursaryCard = ({ bursary }) => {
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        <span className={cn('rounded-full px-2.5 py-1 text-[11px] font-semibold', fieldColor)}>{fieldLabel}</span>
-        {bursary.funder && <Badge tone={FUNDER_TONE[bursary.funder] || 'neutral'} size="sm" className="capitalize">{bursary.funder}</Badge>}
+        {fieldLabel && <Badge tone="brand" size="sm">{fieldLabel}</Badge>}
+        {bursary.funder && <Badge size="sm" className="capitalize">{bursary.funder}</Badge>}
         {levels.map((level) => <Badge key={level} size="sm" className="capitalize">{level}</Badge>)}
       </div>
 
@@ -127,8 +111,8 @@ const BursaryCard = ({ bursary }) => {
           {expanded && (
             <ul className="mt-3 flex flex-wrap gap-1.5 animate-fade-in">
               {requirements.map((requirement) => (
-                <li key={requirement} className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                  <CheckCircle2 className="h-3 w-3 text-emerald-500" aria-hidden="true" />{requirement}
+                <li key={requirement} className="inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />{requirement}
                 </li>
               ))}
             </ul>
@@ -223,7 +207,7 @@ const BursaryPage = () => {
         icon={Award}
         title="Student opportunities"
         description="Bursaries, internships, and graduate programmes in one place. Competitions are coming soon."
-        tone="emerald"
+        image={PHOTOS.witsLibraryLawns}
         className="mb-4"
       />
 
@@ -239,21 +223,22 @@ const BursaryPage = () => {
               disabled={comingSoon}
               onClick={() => { setActiveTab(id); setFilters(INITIAL_FILTERS); }}
               className={cn(
-                'rounded-3xl border p-4 text-left shadow-card transition-all duration-200',
+                'rounded-xl border p-4 text-left shadow-card transition-colors',
                 active
-                  ? 'border-emerald-300 bg-emerald-50 ring-2 ring-emerald-300/60 dark:border-emerald-700 dark:bg-emerald-500/10 dark:ring-emerald-500/30'
-                  : 'border-slate-200/80 bg-white dark:border-slate-800 dark:bg-slate-900',
-                comingSoon ? 'cursor-not-allowed opacity-60' : 'hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-card-hover dark:hover:border-emerald-900',
+                  ? 'border-brand-600 bg-brand-50 ring-1 ring-inset ring-brand-600 dark:border-brand-400 dark:bg-brand-500/10 dark:ring-brand-400'
+                  : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900',
+                comingSoon && 'cursor-not-allowed opacity-60',
+                !comingSoon && !active && 'hover:border-slate-300 dark:hover:border-slate-700',
               )}
             >
               <div className="flex items-start justify-between gap-3">
-                <span className={cn('flex h-10 w-10 items-center justify-center rounded-xl shadow-sm', active ? 'bg-gradient-to-br from-emerald-500 to-teal-700 text-white' : 'bg-slate-100 text-emerald-700 dark:bg-slate-800 dark:text-emerald-300')}>
+                <span className={cn('flex h-10 w-10 items-center justify-center rounded-lg', active ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300')}>
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
-                {comingSoon ? <Badge size="sm">Coming soon</Badge> : active && <Badge tone="success" size="sm">Viewing</Badge>}
+                {comingSoon ? <Badge size="sm">Coming soon</Badge> : active && <Badge tone="brand" size="sm">Viewing</Badge>}
               </div>
               <h3 className="mt-3 text-sm font-bold text-slate-950 dark:text-white">{title}</h3>
-              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-slate-400">{text}</p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400">{text}</p>
             </button>
           );
         })}
@@ -271,7 +256,7 @@ const BursaryPage = () => {
               aria-pressed={clickable ? active : undefined}
               onClick={clickable ? () => setFilter('status', active ? 'all' : status) : undefined}
               className={cn(
-                'rounded-2xl border p-4 text-left shadow-card transition-colors',
+                'rounded-xl border p-4 text-left shadow-card transition-colors',
                 active ? 'border-brand-300 bg-brand-50 dark:border-brand-700 dark:bg-brand-500/10' : 'border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900',
                 clickable && 'cursor-pointer hover:border-brand-300 dark:hover:border-brand-700',
               )}
@@ -284,30 +269,17 @@ const BursaryPage = () => {
       </div>
 
       {isBursaryTab && (
-        <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Filter by field of study">
+        <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Filter by field of study">
           <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Field of study</p>
           <div className="flex flex-wrap gap-2">
-            {FIELDS.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setFilter('field', value)}
-                aria-pressed={filters.field === value}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold transition-colors',
-                  filters.field === value
-                    ? 'bg-ink-950 text-white shadow-sm dark:bg-white dark:text-ink-950'
-                    : cn(FIELD_COLORS[value] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300', 'hover:brightness-95'),
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" aria-hidden="true" />{label}
-              </button>
+            {FIELDS.map(({ value, label, icon }) => (
+              <Chip key={value} icon={icon} active={filters.field === value} onClick={() => setFilter('field', value)}>{label}</Chip>
             ))}
           </div>
         </section>
       )}
 
-      <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Search and filters">
+      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900" aria-label="Search and filters">
         <div className={cn('grid grid-cols-1 gap-3', isBursaryTab ? 'md:grid-cols-5' : 'md:grid-cols-3')}>
           <Input
             icon={Search}
@@ -374,7 +346,7 @@ const BursaryPage = () => {
 
       {loading ? (
         <div className="space-y-3" aria-busy="true">
-          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}
+          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-xl" />)}
         </div>
       ) : error ? (
         <Alert tone="error" title="Could not load opportunities" action={<Button size="sm" variant="danger" onClick={() => window.location.reload()}>Retry</Button>}>{error}</Alert>
@@ -383,7 +355,7 @@ const BursaryPage = () => {
           {filtered.map((item) => (isBursaryTab ? <BursaryCard key={item.id} bursary={item} /> : <OpportunityCard key={item.id} opportunity={item} />))}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
           <EmptyState
             icon={currentItems.length ? Search : AlertCircle}
             title={currentItems.length ? 'No opportunities match your filters' : `No ${activeTabMeta?.title?.toLowerCase() || 'opportunities'} listed yet`}
@@ -393,12 +365,12 @@ const BursaryPage = () => {
         </div>
       )}
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-6" aria-labelledby="checklist-heading">
+      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-5 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-6" aria-labelledby="checklist-heading">
         <h3 id="checklist-heading" className="mb-4 text-sm font-bold text-slate-950 dark:text-white">Application checklist</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {CHECKLIST.map(({ icon: Icon, title, text }) => (
             <div key={title} className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
                 <Icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <div>
@@ -410,16 +382,12 @@ const BursaryPage = () => {
         </div>
       </section>
 
-      <div className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-700 via-teal-700 to-brand-800 p-5 text-white shadow-float sm:p-7">
-        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-display text-xl font-bold">Plan accommodation and funding together</h3>
-            <p className="mt-1 max-w-2xl text-sm text-white/85">Apply for accommodation while you track funding opportunities.</p>
-          </div>
-          <Button to={isAuthenticated ? '/application' : '/register'} variant="inverse" className="shrink-0">Apply for accommodation</Button>
-        </div>
-      </div>
+      <CtaBand
+        className="mt-6"
+        title="Plan accommodation and funding together"
+        description="Apply for accommodation while you track funding opportunities."
+        action={<Button to={isAuthenticated ? '/application' : '/register'} variant="inverse">Apply for accommodation</Button>}
+      />
     </div>
   );
 };

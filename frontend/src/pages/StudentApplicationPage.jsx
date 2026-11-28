@@ -183,7 +183,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
         </div>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <button onClick={() => navigate('/application?type=accommodation')} className="group overflow-hidden rounded-2xl border border-brand-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-brand-400 hover:shadow-xl dark:border-brand-900/60 dark:bg-slate-900">
+          <button onClick={() => navigate('/application?type=accommodation')} className="group overflow-hidden rounded-2xl border border-brand-200 bg-white p-6 text-left shadow-sm transition-colors hover:border-brand-400 hover:shadow-card-hover dark:border-brand-900/60 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300">
                 <Home className="h-7 w-7" />
@@ -205,7 +205,7 @@ const ApplicationTypeCards = ({ accommodationApp, universityApp, loading }) => {
             </div>
           </button>
 
-          <button onClick={() => navigate('/application?type=university')} className="group overflow-hidden rounded-2xl border border-gold-200 bg-white p-6 text-left shadow-sm transition-all hover:-translate-y-1 hover:border-gold-400 hover:shadow-xl dark:border-gold-900/60 dark:bg-slate-900">
+          <button onClick={() => navigate('/application?type=university')} className="group overflow-hidden rounded-2xl border border-gold-200 bg-white p-6 text-left shadow-sm transition-colors hover:border-gold-400 hover:shadow-card-hover dark:border-gold-900/60 dark:bg-slate-900">
             <div className="flex items-start justify-between gap-3">
               <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300">
                 <GraduationCap className="h-7 w-7" />

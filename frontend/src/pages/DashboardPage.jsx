@@ -2,17 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Building, Star, MessageSquare, CalendarDays, ThumbsUp, FileText, ArrowRight,
-  TrendingUp, Users, CheckCircle2, Clock, Home, Award, Map as MapIcon,
+  TrendingUp, Users, CheckCircle2, Clock, Home, Award,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { reviewsAPI } from '../services/api';
 import { formatDate } from '../utils/format';
-import { Alert, Button, Card, CardHeader, EmptyState, Skeleton } from '../components/ui';
+import { Alert, Button, Card, CardHeader, CtaBand, EmptyState, PageHeader, Skeleton } from '../components/ui';
 import { cn } from '../utils/cn';
 
-const STAR_COLORS = ['#ef4444', '#f97316', '#eab308', '#84cc16', '#22c55e'];
+// Brand blue (brand-600): one hue for every bar, matching the other dashboard chart.
+const BAR_COLOR = '#0b66d6';
 
 const ChartTooltip = ({ active, payload, render }) => {
   if (!active || !payload?.length) return null;
@@ -41,10 +42,10 @@ const StatCard = ({ icon: Icon, label, value, sub, tone, loading }) => (
 );
 
 const QUICK_LINKS = [
-  { to: '/properties', icon: Home, label: 'Browse properties', text: 'Compare verified accommodation.', tone: 'from-brand-500 to-brand-700' },
-  { to: '/properties?view=map', icon: MapIcon, label: 'Residence map', text: 'Walking times to your campus.', tone: 'from-lime-400 to-emerald-600' },
-  { to: '/application', icon: FileText, label: 'My application', text: 'Start or track your application.', tone: 'from-coral-500 to-rose-600' },
-  { to: '/bursaries', icon: Award, label: 'Opportunities', text: 'Bursaries closing soon.', tone: 'from-violet-500 to-fuchsia-600' },
+  { to: '/properties', icon: Home, label: 'Browse properties', text: 'List or map, with walking times to campus.' },
+  { to: '/application', icon: FileText, label: 'My application', text: 'Start or track your application.' },
+  { to: '/reviews', icon: MessageSquare, label: 'Reviews', text: 'What students say about each res.' },
+  { to: '/bursaries', icon: Award, label: 'Opportunities', text: 'Bursaries closing soon.' },
 ];
 
 const DashboardPage = () => {
@@ -88,24 +89,18 @@ const DashboardPage = () => {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
-      <div className="relative isolate mb-4 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-950 via-brand-800 to-violet-800 px-5 py-6 text-white shadow-float sm:px-8 sm:py-8">
-        <div className="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
-          <div className="bg-dots absolute inset-0 opacity-50" />
-          <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-coral-500/30 blur-3xl" />
-          <div className="absolute -bottom-24 left-1/4 h-56 w-56 rounded-full bg-lime-300/20 blur-3xl" />
-        </div>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-gold-300">Student dashboard</p>
-            <h1 className="truncate text-2xl font-extrabold tracking-tight sm:text-4xl">Welcome back, {firstName}</h1>
-            <p className="mt-1 text-sm text-white/80">Track accommodation insights, reviews, and your next steps.</p>
-          </div>
-          <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold ring-1 ring-inset ring-white/20">
+      <PageHeader
+        eyebrow="Student dashboard"
+        title={`Welcome back, ${firstName}`}
+        description="Track accommodation insights, reviews, and your next steps."
+        action={(
+          <p className="inline-flex w-fit items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
             <span className="whitespace-nowrap">{today}</span>
           </p>
-        </div>
-      </div>
+        )}
+        className="mb-4"
+      />
 
       {error && (
         <Alert tone="error" className="mb-4" action={<Button size="sm" variant="danger" onClick={fetchData}>Retry</Button>}>{error}</Alert>
@@ -116,9 +111,9 @@ const DashboardPage = () => {
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        {QUICK_LINKS.map(({ to, icon: Icon, label, text, tone }) => (
-          <Link key={to} to={to} className="group flex items-center gap-3 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900">
-            <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm', tone)}>
+        {QUICK_LINKS.map(({ to, icon: Icon, label, text }) => (
+          <Link key={to} to={to} className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-card transition-colors hover:border-brand-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-700">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
               <Icon className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="min-w-0 flex-1">
@@ -160,7 +155,7 @@ const DashboardPage = () => {
                       </>
                     )} />}
                   />
-                  <Bar dataKey="review_count" radius={[0, 8, 8, 0]} maxBarSize={20} fill="#0b66d6" />
+                  <Bar dataKey="review_count" radius={[0, 4, 4, 0]} maxBarSize={20} fill={BAR_COLOR} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -189,9 +184,7 @@ const DashboardPage = () => {
                       </>
                     )} />}
                   />
-                  <Bar dataKey="count" radius={[8, 8, 0, 0]} maxBarSize={40}>
-                    {data.rating_distribution.map((_, index) => <Cell key={index} fill={STAR_COLORS[index]} />)}
-                  </Bar>
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={40} fill={BAR_COLOR} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -223,7 +216,7 @@ const DashboardPage = () => {
         ) : (
           <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-2 lg:grid-cols-3">
             {data.recent_reviews.map((review) => (
-              <article key={review.id} className="flex flex-col rounded-2xl border border-slate-100 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:hover:border-brand-900">
+              <article key={review.id} className="flex flex-col rounded-xl border border-slate-200 p-4 transition-colors hover:border-brand-300 dark:border-slate-800 dark:hover:border-brand-700">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <Link to={`/properties/${review.property_id}`} className="line-clamp-1 text-sm font-semibold leading-snug text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-300">
                     {review.property_name}
@@ -249,18 +242,16 @@ const DashboardPage = () => {
         )}
       </Card>
 
-      <div className="relative mt-4 overflow-hidden rounded-3xl bg-gradient-to-r from-coral-700 via-rose-700 to-violet-800 p-5 text-white shadow-float sm:p-7">
-        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="min-w-0">
-            <h3 className="font-display text-xl font-bold">Share your accommodation experience</h3>
-            <p className="mt-1 max-w-2xl text-sm text-white/85">Your review helps other students make better accommodation decisions.</p>
-          </div>
-          <Button to="/properties" variant="inverse" className="shrink-0">
+      <CtaBand
+        className="mt-4"
+        title="Share your accommodation experience"
+        description="Your review helps other students make better accommodation decisions."
+        action={(
+          <Button to="/properties" variant="inverse">
             <FileText className="h-4 w-4" aria-hidden="true" />Write a review
           </Button>
-        </div>
-      </div>
+        )}
+      />
     </div>
   );
 };

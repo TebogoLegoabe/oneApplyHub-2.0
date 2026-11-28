@@ -4,24 +4,8 @@ import { UNIVERSITIES } from '../../constants/campuses';
 import { cn } from '../../utils/cn';
 import { formatDistance, formatMinutes, walkBand } from '../../utils/geo';
 
-// Residences without photos get one of these, picked per property so a grid of
-// placeholders stays colourful instead of repeating one gradient.
-const PLACEHOLDER_GRADIENTS = [
-  'from-brand-500 via-brand-700 to-ink-900',
-  'from-violet-500 via-indigo-600 to-brand-800',
-  'from-coral-500 via-rose-600 to-fuchsia-800',
-  'from-emerald-500 via-teal-600 to-cyan-800',
-  'from-gold-400 via-orange-500 to-coral-700',
-  'from-fuchsia-500 via-violet-600 to-ink-900',
-];
-
-const placeholderFor = (property) => {
-  const seed = Number(property?.id) || [...String(property?.name || '')].reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  return PLACEHOLDER_GRADIENTS[Math.abs(seed) % PLACEHOLDER_GRADIENTS.length];
-};
-
 /**
- * Property photo with a branded gradient fallback. Listing photos are hot-linked from
+ * Property photo with a quiet neutral fallback. Listing photos are hot-linked from
  * residence websites, so a broken or blocked image falls back instead of showing an icon.
  */
 export const PropertyImage = ({ property, src = property?.primary_image_url, alt = '', className, imgClassName, iconClassName }) => {
@@ -40,10 +24,9 @@ export const PropertyImage = ({ property, src = property?.primary_image_url, alt
     );
   }
   return (
-    <div className={cn('relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br', placeholderFor(property), className)} aria-hidden="true">
-      <div className="bg-dots absolute inset-0 opacity-60" />
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl" />
-      <Building2 className={cn('relative h-10 w-10 text-white/45', iconClassName)} strokeWidth={1.5} />
+    <div className={cn('flex h-full w-full flex-col items-center justify-center gap-1.5 bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500', className)} aria-hidden="true">
+      <Building2 className={cn('h-9 w-9', iconClassName)} strokeWidth={1.5} />
+      <span className="text-[11px] font-medium text-slate-600 dark:text-slate-300">Photo coming soon</span>
     </div>
   );
 };
@@ -60,24 +43,24 @@ export const RatingPill = ({ rating, count, className }) => (
 const UNIVERSITY_STYLES = {
   wits: 'bg-brand-600 text-white',
   uj: 'bg-coral-600 text-white',
-  both: 'bg-violet-600 text-white',
+  both: 'bg-ink-700 text-white',
 };
 
 export const UniversityBadge = ({ university, className }) => (
-  <span className={cn('inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wide shadow-sm', UNIVERSITY_STYLES[university] || 'bg-white text-ink-950', className)}>
+  <span className={cn('inline-flex items-center rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide shadow-sm', UNIVERSITY_STYLES[university] || 'bg-white text-ink-950', className)}>
     {UNIVERSITIES[university]?.label || university}
   </span>
 );
 
 export const NsfasBadge = ({ className, long = false }) => (
-  <span className={cn('inline-flex items-center rounded-full bg-lime-300 px-2.5 py-1 text-[11px] font-extrabold text-ink-950 shadow-sm', className)}>
+  <span className={cn('inline-flex items-center rounded-md bg-emerald-700 px-2 py-0.5 text-[11px] font-bold text-white shadow-sm', className)}>
     {long ? 'NSFAS accredited' : 'NSFAS'}
   </span>
 );
 
 const BAND_STYLES = {
-  easy: 'bg-lime-100 text-lime-900 ring-lime-300 dark:bg-lime-400/15 dark:text-lime-200 dark:ring-lime-400/30',
-  ok: 'bg-amber-100 text-amber-900 ring-amber-300 dark:bg-amber-400/15 dark:text-amber-200 dark:ring-amber-400/30',
+  easy: 'bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-400/15 dark:text-emerald-200 dark:ring-emerald-400/30',
+  ok: 'bg-amber-50 text-amber-900 ring-amber-200 dark:bg-amber-400/15 dark:text-amber-200 dark:ring-amber-400/30',
   far: 'bg-coral-100 text-coral-800 ring-coral-300 dark:bg-coral-500/15 dark:text-coral-200 dark:ring-coral-400/30',
 };
 

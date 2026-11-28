@@ -1,13 +1,13 @@
 import { cn } from '../../utils/cn';
 
-export const CARD_CLASS = 'rounded-2xl border border-slate-200/80 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900';
+export const CARD_CLASS = 'rounded-xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900';
 
 const Card = ({ as: Tag = 'div', className, padded = true, hover = false, children, ...props }) => (
   <Tag
     className={cn(
       CARD_CLASS,
       padded && 'p-5 sm:p-6',
-      hover && 'transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:hover:border-brand-800',
+      hover && 'transition-colors hover:border-brand-300 dark:hover:border-brand-700',
       className,
     )}
     {...props}
@@ -29,7 +29,7 @@ export const CardHeader = ({ title, description, icon: Icon, iconTone = 'brand',
   <div className={cn('flex items-start justify-between gap-4', className)}>
     <div className="flex min-w-0 items-start gap-3">
       {Icon && (
-        <span className={cn('mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', ICON_TONES[iconTone] || ICON_TONES.brand)}>
+        <span className={cn('mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', ICON_TONES[iconTone] || ICON_TONES.brand)}>
           <Icon className="h-4 w-4" aria-hidden="true" />
         </span>
       )}

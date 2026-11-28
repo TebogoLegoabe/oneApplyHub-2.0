@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { Search, Briefcase, GraduationCap, Layers, ArrowUpDown, X, AlertCircle } from 'lucide-react';
 import { opportunitiesAPI } from '../services/api';
 import OpportunityCard, { daysUntil } from '../components/OpportunityCard';
-import { Alert, Button, EmptyState, Input, PageHeader, Skeleton } from '../components/ui';
-import { cn } from '../utils/cn';
+import { Alert, Button, Chip, CtaBand, EmptyState, Input, PageHeader, Skeleton } from '../components/ui';
+import { PHOTOS } from '../constants/photos';
 
 const TYPE_FILTERS = [
   { value: 'all', label: 'All types', icon: Layers },
@@ -59,43 +59,29 @@ const OpportunitiesPage = () => {
         title="Internships & graduate programmes"
         description="Vacation work, learnerships, and entry-level programmes to launch your career."
         action={<Button to="/bursaries" variant="inverse" size="sm">Looking for bursaries?</Button>}
-        tone="violet"
+        image={PHOTOS.mandelaBridge}
         className="mb-4"
       />
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { value: filtered.length, label: 'Matching', tone: 'from-violet-500 to-violet-700' },
-          { value: openCount, label: 'Open now', tone: 'from-lime-400 to-emerald-600' },
-          { value: internshipCount, label: 'Internships', tone: 'from-brand-500 to-brand-700' },
-          { value: graduateCount, label: 'Graduate programmes', tone: 'from-coral-500 to-rose-600' },
-        ].map(({ value, label, tone }) => (
-          <div key={label} className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
-            <span className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', tone)} aria-hidden="true" />
-            <p className="font-display text-2xl font-extrabold leading-none text-slate-950 dark:text-white">{loading ? <Skeleton className="inline-block h-6 w-8" /> : value}</p>
+          { value: filtered.length, label: 'Matching' },
+          { value: openCount, label: 'Open now' },
+          { value: internshipCount, label: 'Internships' },
+          { value: graduateCount, label: 'Graduate programmes' },
+        ].map(({ value, label }) => (
+          <div key={label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+            <p className="text-2xl font-bold leading-none text-slate-950 dark:text-white">{loading ? <Skeleton className="inline-block h-6 w-8" /> : value}</p>
             <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
           </div>
         ))}
       </div>
 
-      <section className="mb-4 rounded-3xl border border-slate-200/80 bg-white p-3 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-4" aria-label="Search and filters">
+      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-3 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-4" aria-label="Search and filters">
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <div className="flex flex-wrap gap-2" role="group" aria-label="Opportunity type">
-            {TYPE_FILTERS.map(({ value, label, icon: Icon }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setFilter('type', value)}
-                aria-pressed={filters.type === value}
-                className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold transition-colors',
-                  filters.type === value
-                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white shadow-glow-violet'
-                    : 'bg-violet-50 text-violet-700 hover:bg-violet-100 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20',
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" aria-hidden="true" />{label}
-              </button>
+            {TYPE_FILTERS.map(({ value, label, icon }) => (
+              <Chip key={value} icon={icon} active={filters.type === value} onClick={() => setFilter('type', value)}>{label}</Chip>
             ))}
           </div>
           <Input
@@ -141,7 +127,7 @@ const OpportunitiesPage = () => {
 
       {loading ? (
         <div className="space-y-3" aria-busy="true">
-          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-2xl" />)}
+          {Array.from({ length: 4 }).map((_, index) => <Skeleton key={index} className="h-44 rounded-xl" />)}
         </div>
       ) : error ? (
         <Alert tone="error" title="Could not load opportunities" action={<Button size="sm" variant="danger" onClick={() => window.location.reload()}>Retry</Button>}>{error}</Alert>
@@ -150,7 +136,7 @@ const OpportunitiesPage = () => {
           {filtered.map((item) => <OpportunityCard key={item.id} opportunity={item} />)}
         </div>
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
           <EmptyState
             icon={opportunities.length ? Search : AlertCircle}
             title={opportunities.length ? 'No opportunities match your filters' : 'No opportunities listed yet'}
@@ -160,16 +146,12 @@ const OpportunitiesPage = () => {
         </div>
       )}
 
-      <div className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-r from-violet-700 via-indigo-700 to-brand-800 p-5 text-white shadow-float sm:p-7">
-        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-display text-xl font-bold">Plan accommodation and career together</h3>
-            <p className="mt-1 max-w-2xl text-sm text-white/85">Apply for accommodation while you track career opportunities.</p>
-          </div>
-          <Button to={isAuthenticated ? '/application' : '/register'} variant="inverse" className="shrink-0">Apply for accommodation</Button>
-        </div>
-      </div>
+      <CtaBand
+        className="mt-6"
+        title="Plan accommodation and career together"
+        description="Apply for accommodation while you track career opportunities."
+        action={<Button to={isAuthenticated ? '/application' : '/register'} variant="inverse">Apply for accommodation</Button>}
+      />
     </div>
   );
 };
