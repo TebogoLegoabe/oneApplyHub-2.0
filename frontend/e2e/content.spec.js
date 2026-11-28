@@ -15,6 +15,8 @@ test.describe('Reviews, bursaries and internships', () => {
   test('bursary hub filters by field and switches to internships', async ({ page }) => {
     await page.goto('/bursaries');
     await expect(page.getByRole('heading', { level: 1, name: 'Student opportunities' })).toBeVisible();
+    // Photo header, credited as its licence requires.
+    await expect(page.getByRole('main').getByRole('link', { name: 'Christophe Hendrickx' })).toBeVisible();
     await expect(page.getByText('NSFAS Bursary', { exact: true })).toBeVisible();
 
     const fields = page.getByRole('region', { name: 'Filter by field of study' });
@@ -39,7 +41,8 @@ test.describe('Reviews, bursaries and internships', () => {
   test('unknown pages show the 404 page with ways back', async ({ page }) => {
     await page.goto('/this-page-does-not-exist');
     await expect(page.getByRole('heading', { level: 1, name: 'Page not found' })).toBeVisible();
-    await page.getByRole('main').getByRole('link', { name: 'Open the map' }).click();
-    await expect(page).toHaveURL(/\/properties\?view=map/);
+    await expect(page.getByRole('main').getByRole('link', { name: 'Go home' })).toHaveAttribute('href', '/');
+    await page.getByRole('main').getByRole('link', { name: 'Find a res' }).click();
+    await expect(page).toHaveURL(/\/properties$/);
   });
 });

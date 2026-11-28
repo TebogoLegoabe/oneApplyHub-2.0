@@ -2,11 +2,13 @@
 Seed script for oneApplyHub.
 
 Usage (from backend/):
-    FLASK_ENV=development python seed.py [--reset] [--dry-run]
+    FLASK_ENV=development python seed.py [--reset] [--dry-run] [--insert-only]
 
 Options:
-    --reset     Delete ALL existing properties before seeding (use with care).
-    --dry-run   Show what would be inserted/updated without writing to DB.
+    --reset        Delete ALL existing properties before seeding (use with care).
+    --dry-run      Show what would be inserted/updated without writing to DB.
+    --insert-only  Only add properties that are not in the database yet; never
+                   update existing ones (safe for production, keeps admin edits).
 """
 import json
 import os
@@ -62,7 +64,9 @@ def _load_data() -> list[dict]:
               help='Delete all existing properties before seeding.')
 @click.option('--dry-run', is_flag=True, default=False,
               help='Preview changes without writing to the database.')
-def seed(reset: bool, dry_run: bool):
+@click.option('--insert-only', is_flag=True, default=False,
+              help='Only add new properties; never update existing ones.')
+def seed(reset: bool, dry_run: bool, insert_only: bool):
     """Seed the database with properties from data/properties.json."""
     app = create_app()
 
@@ -87,7 +91,9 @@ def seed(reset: bool, dry_run: bool):
             name = rec['name']
             existing = Property.query.filter_by(name=name).first()
 
-            if existing:
+            if existing and insert_only:
+                skipped += 1
+            elif existing:
                 if dry_run:
                     click.echo(f'  [dry-run] Would update: {name}')
                     updated += 1

@@ -162,7 +162,7 @@ const Overview = ({ stats, user, onNav, onSeedOpportunities, seeding }) => {
             key={label}
             type="button"
             onClick={() => onNav(tab)}
-            className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-900"
+            className="rounded-xl border border-slate-200 bg-white p-5 text-left shadow-card transition-colors hover:border-brand-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-700"
           >
             <span className={cn('mb-4 flex h-11 w-11 items-center justify-center rounded-xl', tone)}>
               <Icon className="h-5 w-5" aria-hidden="true" />

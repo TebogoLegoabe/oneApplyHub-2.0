@@ -5,20 +5,21 @@ import { reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useHelpfulVotes } from '../hooks/useHelpfulVotes';
 import { formatDate, getRatingBadge, getUniversityCode } from '../utils/format';
-import { Alert, Badge, Button, EmptyState, Input, PageHeader, Select, Skeleton, useToast } from '../components/ui';
+import { Alert, Badge, Button, CtaBand, EmptyState, Input, PageHeader, Select, Skeleton, useToast } from '../components/ui';
+import { PHOTOS } from '../constants/photos';
 import { cn } from '../utils/cn';
 
 const INITIAL_FILTERS = { university: 'all', rating: 'all', search: '', page: 1 };
 const PER_PAGE = 12;
 const SEARCH_DEBOUNCE_MS = 400;
 
-const StatTile = ({ icon: Icon, value, label, tone = 'from-brand-500 to-brand-700' }) => (
-  <div className="flex items-center justify-between gap-3 rounded-3xl border border-slate-200/80 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
+const StatTile = ({ icon: Icon, value, label }) => (
+  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-card dark:border-slate-800 dark:bg-slate-900">
     <div className="min-w-0">
-      <p className="font-display text-2xl font-extrabold leading-none text-slate-950 dark:text-white">{value}</p>
+      <p className="text-2xl font-bold leading-none text-slate-950 dark:text-white">{value}</p>
       <p className="mt-1 truncate text-xs font-medium text-slate-500 dark:text-slate-400">{label}</p>
     </div>
-    <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-sm', tone)}>
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
       <Icon className="h-5 w-5" aria-hidden="true" />
     </span>
   </div>
@@ -32,11 +33,10 @@ const ReviewCard = ({ review, onHelpful, helpfulMarked, helpfulPending }) => {
   const propertyName = review.property_name || review.property?.title || 'Property';
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:border-gold-200 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900 dark:hover:border-gold-500/30 sm:p-6">
-      <span className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-gold-400 via-coral-500 to-violet-600" aria-hidden="true" />
+    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-card transition-colors hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-gold-400 to-coral-600 text-sm font-bold text-white">{initial}</span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">{initial}</span>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{authorName}</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -157,11 +157,11 @@ const ReviewsPage = () => {
         icon={MessageSquare}
         title="Accommodation reviews"
         description="Read student feedback about safety, value, management, location, and overall experience."
-        tone="gold"
+        image={PHOTOS.witsGreatHall}
         className="mb-4"
       />
 
-      <section className="mb-4 rounded-3xl border border-slate-200/80 bg-white p-3 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-4" aria-label="Filters">
+      <section className="mb-4 rounded-xl border border-slate-200 bg-white p-3 shadow-card dark:border-slate-800 dark:bg-slate-900 sm:p-4" aria-label="Filters">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
           <Input
             icon={Search}
@@ -192,15 +192,15 @@ const ReviewsPage = () => {
       )}
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile icon={MessageSquare} value={totalReviews} label="Reviews" tone="from-gold-400 to-orange-600" />
-        <StatTile icon={Star} value={averageRating === '—' ? '—' : `${averageRating} / 5`} label="Average on this page" tone="from-coral-500 to-rose-600" />
-        <StatTile icon={ThumbsUp} value={recommendationCount} label="Recommendations" tone="from-lime-400 to-emerald-600" />
-        <StatTile icon={Home} value={propertiesReviewedCount} label="Properties" tone="from-violet-500 to-violet-700" />
+        <StatTile icon={MessageSquare} value={totalReviews} label="Reviews" />
+        <StatTile icon={Star} value={averageRating === '—' ? '—' : `${averageRating} / 5`} label="Average on this page" />
+        <StatTile icon={ThumbsUp} value={recommendationCount} label="Recommendations" />
+        <StatTile icon={Home} value={propertiesReviewedCount} label="Properties" />
       </div>
 
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-extrabold text-slate-950 dark:text-white sm:text-xl">Recent reviews</h2>
+          <h2 className="text-lg font-bold text-slate-950 dark:text-white sm:text-xl">Recent reviews</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400" aria-live="polite">{totalReviews} review{totalReviews === 1 ? '' : 's'} found</p>
         </div>
         <p className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -210,7 +210,7 @@ const ReviewsPage = () => {
 
       {loading ? (
         <div className="space-y-3" aria-busy="true">
-          {Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-40 rounded-3xl" />)}
+          {Array.from({ length: 5 }).map((_, index) => <Skeleton key={index} className="h-40 rounded-xl" />)}
         </div>
       ) : reviews.length > 0 ? (
         <div className="space-y-3">
@@ -219,7 +219,7 @@ const ReviewsPage = () => {
           ))}
         </div>
       ) : (
-        <div className="rounded-3xl border border-slate-200/80 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
+        <div className="rounded-xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900">
           <EmptyState
             icon={Search}
             title="No reviews found"
@@ -237,16 +237,12 @@ const ReviewsPage = () => {
         </nav>
       )}
 
-      <div className="relative mt-6 overflow-hidden rounded-3xl bg-gradient-to-r from-gold-700 via-orange-700 to-coral-700 p-5 text-white shadow-float sm:p-7">
-        <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h3 className="font-display text-xl font-bold">Share your accommodation experience</h3>
-            <p className="mt-1 max-w-2xl text-sm text-white/85">Help fellow students make better accommodation decisions.</p>
-          </div>
-          <Button to="/properties" variant="inverse" className="shrink-0">Find a property to review</Button>
-        </div>
-      </div>
+      <CtaBand
+        className="mt-6"
+        title="Share your accommodation experience"
+        description="Help fellow students make better accommodation decisions."
+        action={<Button to="/properties" variant="inverse">Find a property to review</Button>}
+      />
     </div>
   );
 };

@@ -4,16 +4,15 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '../../utils/cn';
 
 const BASE =
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl font-semibold transition-all duration-150 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100';
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50';
 
 const VARIANTS = {
-  primary: 'bg-brand-600 text-white shadow-glow hover:bg-brand-700 active:bg-brand-800',
-  // Attention-grabbing call to action (apply, search). White text passes WCAG AA on coral-600.
-  accent: 'bg-coral-600 text-white shadow-glow-coral hover:bg-coral-700 active:bg-coral-800',
-  gradient: 'bg-gradient-to-r from-brand-600 via-violet-600 to-fuchsia-600 bg-[length:200%_auto] text-white shadow-glow-violet hover:bg-right',
+  primary: 'bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:bg-brand-800',
+  // The one warm accent, kept for the main call to action on a page. White text passes WCAG AA on coral-600.
+  accent: 'bg-coral-600 text-white shadow-sm hover:bg-coral-700 active:bg-coral-800',
   dark: 'bg-ink-950 text-white shadow-sm hover:bg-ink-800 dark:bg-white dark:text-ink-950 dark:hover:bg-slate-100',
   secondary:
-    'border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800',
+    'border border-slate-300 bg-white text-slate-800 shadow-sm hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800',
   ghost: 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-white/[0.07] dark:hover:text-white',
   soft: 'bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-500/10 dark:text-brand-300 dark:hover:bg-brand-500/20',
   gold: 'bg-gold-400 text-ink-950 shadow-sm hover:bg-gold-300 active:bg-gold-500',
@@ -21,8 +20,9 @@ const VARIANTS = {
   'danger-soft':
     'border border-red-200 bg-white text-red-600 hover:bg-red-50 dark:border-red-900 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-500/10',
   inverse: 'bg-white text-ink-950 shadow-sm hover:bg-slate-100',
-  'inverse-outline': 'border border-white/40 text-white hover:border-white hover:bg-white/10',
+  'inverse-outline': 'border border-white/50 text-white hover:border-white hover:bg-white/10',
 };
+VARIANTS.gradient = VARIANTS.primary; // legacy name, kept so older call sites still render
 
 const SIZES = {
   xs: 'h-8 px-3 text-xs',

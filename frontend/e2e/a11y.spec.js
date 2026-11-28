@@ -25,8 +25,10 @@ test.describe('Accessibility (axe-core, WCAG 2.1 AA)', () => {
   for (const [name, path] of [
     ['home', '/'],
     ['properties', '/properties'],
+    ['properties map view', '/properties?view=map'],
     ['reviews', '/reviews'],
     ['bursaries', '/bursaries'],
+    ['internships', '/opportunities'],
     ['login', '/login'],
     ['register', '/register'],
     ['404', '/nope'],
@@ -46,11 +48,14 @@ test.describe('Accessibility (axe-core, WCAG 2.1 AA)', () => {
     await scan(page);
   });
 
-  test('dark mode home page has no serious violations', async ({ page }) => {
-    await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
-    await page.goto('/');
-    await expect(page.locator('html')).toHaveClass(/dark/);
-    await page.waitForLoadState('networkidle');
-    await scan(page);
-  });
+  for (const [name, path] of [['home', '/'], ['login', '/login'], ['properties', '/properties']]) {
+    test(`dark mode ${name} page has no serious violations`, async ({ page }) => {
+      await page.addInitScript(() => localStorage.setItem('theme', 'dark'));
+      await page.goto(path);
+      await expect(page.locator('html')).toHaveClass(/dark/);
+      await expect(page.locator('h1').first()).toBeVisible();
+      await page.waitForLoadState('networkidle');
+      await scan(page);
+    });
+  }
 });

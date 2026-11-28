@@ -5,14 +5,18 @@ test.describe('Mobile', () => {
     await page.goto('/');
     await page.getByRole('button', { name: 'Open menu' }).click();
     const menu = page.getByRole('navigation', { name: 'Mobile' });
-    await expect(menu.getByRole('link', { name: 'Map' })).toBeVisible();
+    for (const name of ['Find a res', 'Reviews', 'Bursaries', 'Internships']) {
+      await expect(menu.getByRole('link', { name, exact: true })).toBeVisible();
+    }
+    // The map is part of Find a res now, not a separate menu entry.
+    await expect(menu.getByRole('link', { name: 'Map', exact: true })).toHaveCount(0);
     await expect(menu.getByRole('link', { name: 'Sign up free' })).toBeVisible();
     await menu.getByRole('link', { name: 'Find a res' }).click();
     await expect(page).toHaveURL(/\/properties$/);
     await expect(menu).toBeHidden();
   });
 
-  test('the map opens full screen with its own campus chips and returns to the list', async ({ page }) => {
+  test('the map opens full screen with its own campus picker and returns to the list', async ({ page }) => {
     await page.goto('/properties');
     await expect(page.getByTestId('property-card').first()).toBeVisible();
     await expect(page.getByTestId('properties-map')).toHaveCount(0);
@@ -25,9 +29,11 @@ test.describe('Mobile', () => {
     await expect(page.getByTestId('property-card').first()).toBeHidden();
 
     // Pick a campus without leaving the map.
-    await layer.getByRole('button', { name: 'UJ DFC' }).click();
+    const picker = layer.getByLabel('Distance from campus or college');
+    await picker.selectOption('uj-dfc');
     await expect(page).toHaveURL(/near=uj-dfc/);
-    await expect(layer.getByRole('button', { name: 'UJ DFC' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(picker).toHaveValue('uj-dfc');
+    await expect(layer.locator('.oah-campus.is-active')).toHaveCount(1);
 
     await layer.getByRole('button', { name: 'Show list' }).click();
     await expect(layer).toBeHidden();
@@ -43,15 +49,23 @@ test.describe('Mobile', () => {
     await page.getByLabel('Property type').selectOption('apartment');
     await expect(page).toHaveURL(/type=apartment/);
     await expect(toggle).toContainText('1');
-    await expect(page.getByRole('heading', { level: 2, name: /propert(y|ies) found/ })).not.toHaveText('51 properties found');
+    await expect(page.getByRole('heading', { level: 2, name: /propert(y|ies) found/ })).not.toHaveText('62 properties found');
   });
 
-  test('campus chips scroll horizontally and filter by distance', async ({ page }) => {
+  test('the campus picker filters by distance without sideways scrolling', async ({ page }) => {
     await page.goto('/properties');
-    const chips = page.getByRole('group', { name: 'Distance from campus' });
-    await chips.getByRole('button', { name: 'UJ DFC' }).click();
+    await page.getByLabel('Distance from campus or college').selectOption('uj-dfc');
     await expect(page.getByTestId('distance-badge').first()).toContainText('to UJ DFC');
+    await expect(page.getByRole('group', { name: 'Maximum distance' })).toBeVisible();
     // No horizontal page scroll on a phone.
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
+  test('the sign-in page drops the photo panel and fits the screen', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
+    await expect(page.getByRole('complementary', { name: 'Why oneApplyHub' })).toBeHidden();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
   });

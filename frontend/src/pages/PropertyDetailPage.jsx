@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, ArrowUpRight, Bike, Building2, CalendarDays, Camera, Car, CheckCircle2, ChevronRight, Copy, ExternalLink, Footprints,
+  ArrowLeft, ArrowUpRight, Bike, Building2, CalendarDays, Car, CheckCircle2, ChevronRight, Copy, ExternalLink, Footprints,
   Globe, GraduationCap, Info, Loader2, MapPin, MapPinOff, MessageSquare, Navigation, PenLine, Phone, Route, Share2, ThumbsDown, ThumbsUp,
 } from 'lucide-react';
 import { propertiesAPI, reviewsAPI } from '../services/api';
@@ -9,7 +9,7 @@ import { fetchWalkingRoute, routingEnabled, ROUTING_ATTRIBUTION } from '../servi
 import { useAuth } from '../context/AuthContext';
 import { useHelpfulVotes } from '../hooks/useHelpfulVotes';
 import { parseAmenities, renderAmenityIcon } from '../constants/amenities';
-import { CAMPUSES } from '../constants/campuses';
+import { CAMPUSES, COLLEGE_CAMPUSES, UNIVERSITIES, UNIVERSITY_CAMPUSES, campusesFor } from '../constants/campuses';
 import { MapFrame, PropertyLocationMap } from '../components/map';
 import { DistanceBadge, NsfasBadge, PropertyImage, RatingPill, UniversityBadge } from '../components/property/PropertyBits';
 import { formatCurrency, formatDate, getRatingBadge } from '../utils/format';
@@ -19,10 +19,11 @@ import {
 import { Badge, Button, EmptyState, Skeleton, useToast } from '../components/ui';
 import { cn } from '../utils/cn';
 
-const CARD = 'rounded-3xl border border-slate-200/80 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900';
+const CARD = 'rounded-xl border border-slate-200 bg-white shadow-card dark:border-slate-800 dark:bg-slate-900';
+const GROUP_ICON = { wits: 'bg-brand-700', uj: 'bg-coral-600', college: 'bg-emerald-700' };
 
 const BAND_TEXT = {
-  easy: 'text-lime-700 dark:text-lime-300',
+  easy: 'text-emerald-700 dark:text-emerald-300',
   ok: 'text-amber-700 dark:text-amber-300',
   far: 'text-coral-700 dark:text-coral-300',
 };
@@ -39,12 +40,12 @@ const DetailSkeleton = () => (
     <Skeleton className="mb-6 h-4 w-48" />
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <Skeleton className="h-80 rounded-3xl" />
-        <Skeleton className="h-96 rounded-3xl" />
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-96 rounded-xl" />
       </div>
       <div className="space-y-5">
-        <Skeleton className="h-80 rounded-3xl" />
-        <Skeleton className="h-40 rounded-3xl" />
+        <Skeleton className="h-80 rounded-xl" />
+        <Skeleton className="h-40 rounded-xl" />
       </div>
     </div>
   </div>
@@ -56,7 +57,7 @@ const ReviewItem = ({ review, onHelpful, helpfulMarked, helpfulPending }) => (
   <li className="py-6 first:pt-0 last:pb-0">
     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 text-sm font-bold text-white">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
           {review.author?.charAt(0)?.toUpperCase() || 'S'}
         </span>
         <div className="min-w-0">
@@ -127,7 +128,6 @@ const CampusRow = ({ row, selected, onSelect, routeState, onRoute, from }) => {
   const { campus, straightKm, walkMin, cycleMin, driveMin } = row;
   const band = walkBand(walkMin);
   const route = routeState?.status === 'ready' ? routeState.data : null;
-  const wits = campus.university === 'wits';
   return (
     <li>
       <div
@@ -139,7 +139,7 @@ const CampusRow = ({ row, selected, onSelect, routeState, onRoute, from }) => {
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" onClick={() => onSelect(campus.id)} aria-pressed={selected} className="flex min-w-0 items-center gap-3 rounded-xl text-left">
-            <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white shadow-sm', wits ? 'bg-gradient-to-br from-brand-500 to-ink-800' : 'bg-gradient-to-br from-coral-400 to-coral-700')}>
+            <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white', GROUP_ICON[campus.group] || GROUP_ICON.wits)}>
               <GraduationCap className="h-5 w-5" aria-hidden="true" />
             </span>
             <span className="min-w-0">
@@ -151,15 +151,15 @@ const CampusRow = ({ row, selected, onSelect, routeState, onRoute, from }) => {
           <dl className="grid grid-cols-3 gap-2 text-center sm:w-auto sm:min-w-[15rem]">
             <div className="rounded-xl bg-slate-50 px-2 py-1.5 dark:bg-slate-800/70">
               <dt className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"><Footprints className="h-3 w-3" aria-hidden="true" />Walk</dt>
-              <dd className={cn('text-sm font-extrabold', BAND_TEXT[band])}>{formatMinutes(walkMin)}</dd>
+              <dd className={cn('text-sm font-bold', BAND_TEXT[band])}>{formatMinutes(walkMin)}</dd>
             </div>
             <div className="rounded-xl bg-slate-50 px-2 py-1.5 dark:bg-slate-800/70">
               <dt className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"><Bike className="h-3 w-3" aria-hidden="true" />Cycle</dt>
-              <dd className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatMinutes(cycleMin)}</dd>
+              <dd className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatMinutes(cycleMin)}</dd>
             </div>
             <div className="rounded-xl bg-slate-50 px-2 py-1.5 dark:bg-slate-800/70">
               <dt className="flex items-center justify-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"><Car className="h-3 w-3" aria-hidden="true" />Drive</dt>
-              <dd className="text-sm font-extrabold text-slate-800 dark:text-slate-100">{formatMinutes(driveMin)}</dd>
+              <dd className="text-sm font-bold text-slate-800 dark:text-slate-100">{formatMinutes(driveMin)}</dd>
             </div>
           </dl>
         </div>
@@ -191,9 +191,13 @@ const CampusRow = ({ row, selected, onSelect, routeState, onRoute, from }) => {
 };
 
 const CampusDistances = ({ property }) => {
-  const defaultTab = property.university === 'uj' ? 'uj' : property.university === 'wits' ? 'wits' : 'all';
+  const defaultTab = property.university === 'uj' ? 'uj' : 'wits';
   const [tab, setTab] = useState(defaultTab);
-  const campuses = useMemo(() => (tab === 'all' ? CAMPUSES : CAMPUSES.filter((campus) => campus.university === tab)), [tab]);
+  const campuses = useMemo(() => {
+    if (tab === 'all') return CAMPUSES;
+    if (tab === 'colleges') return COLLEGE_CAMPUSES;
+    return UNIVERSITY_CAMPUSES.filter((campus) => campus.university === tab);
+  }, [tab]);
   const rows = useMemo(() => distancesToCampuses(property, campuses), [property, campuses]);
   const [selectedId, setSelectedId] = useState(() => rows[0]?.campus.id || null);
   const [routes, setRoutes] = useState({});
@@ -218,8 +222,9 @@ const CampusDistances = ({ property }) => {
 
   const selectedRoute = routes[selectedId]?.status === 'ready' ? routes[selectedId].data : null;
   const tabs = [
-    { id: 'wits', label: 'Wits campuses' },
-    { id: 'uj', label: 'UJ campuses' },
+    { id: 'wits', label: 'Wits' },
+    { id: 'uj', label: 'UJ' },
+    { id: 'colleges', label: 'Colleges' },
     { id: 'all', label: 'All' },
   ];
 
@@ -233,8 +238,8 @@ const CampusDistances = ({ property }) => {
             onClick={() => setTab(id)}
             aria-pressed={tab === id}
             className={cn(
-              'rounded-full px-3.5 py-1.5 text-xs font-bold transition-colors',
-              tab === id ? 'bg-ink-950 text-white dark:bg-white dark:text-ink-950' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700',
+              'rounded-md px-3.5 py-1.5 text-sm font-semibold transition-colors',
+              tab === id ? 'bg-ink-950 text-white dark:bg-white dark:text-ink-950' : 'text-slate-600 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 dark:text-slate-300 dark:ring-slate-700 dark:hover:bg-slate-800',
             )}
           >
             {label}
@@ -297,8 +302,8 @@ const NearbyResidences = ({ propertyId }) => {
     <section className="mt-10" aria-labelledby="nearby-heading">
       <div className="mb-4 flex items-end justify-between gap-4">
         <div>
-          <p className="mb-2 inline-flex rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">Nearby</p>
-          <h2 id="nearby-heading" className="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white">Other residences close by</h2>
+          <p className="mb-1 text-sm font-semibold text-brand-700 dark:text-brand-300">Nearby</p>
+          <h2 id="nearby-heading" className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white">Other residences close by</h2>
         </div>
         <Link to="/properties?view=map" className="hidden shrink-0 items-center gap-1 text-sm font-bold text-brand-700 hover:text-brand-800 dark:text-brand-300 sm:inline-flex">
           View on map<ArrowUpRight className="h-4 w-4" aria-hidden="true" />
@@ -308,14 +313,14 @@ const NearbyResidences = ({ propertyId }) => {
         {(items || Array.from({ length: 3 }, (_, index) => ({ id: `skeleton-${index}` }))).map((item) => (
           <li key={item.id}>
             {items ? (
-              <Link to={`/properties/${item.id}`} className="group flex gap-3 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover dark:border-slate-800 dark:bg-slate-900" data-testid="nearby-card">
+              <Link to={`/properties/${item.id}`} className="group flex gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-card transition-colors hover:border-brand-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-brand-700" data-testid="nearby-card">
                 <div className="h-20 w-24 shrink-0 overflow-hidden rounded-xl">
                   <PropertyImage property={item} />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-slate-950 group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300">{item.name}</p>
                   <p className="mt-0.5 text-xs font-semibold text-slate-500 dark:text-slate-400">From {formatCurrency(item.price_min)} / month</p>
-                  <p className="mt-2 inline-flex items-center gap-1 rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-700 dark:bg-violet-500/10 dark:text-violet-300">
+                  <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     <Footprints className="h-3 w-3" aria-hidden="true" />
                     {formatDistance(item.distance_km)} away · {formatMinutes(estimateTravel(item.distance_km).walkMin)} walk
                   </p>
@@ -430,7 +435,7 @@ const PropertyDetailPage = () => {
   const images = property.images || [];
   const activeImage = images[Math.min(activeImageIndex, Math.max(0, images.length - 1))] || null;
   const located = hasCoords(property);
-  const quickDistances = located ? distancesToCampuses(property, CAMPUSES.filter((campus) => property.university === 'both' || campus.university === property.university)).slice(0, 2) : [];
+  const quickDistances = located ? distancesToCampuses(property, campusesFor(property.university)).slice(0, 2) : [];
   const priceRange = property.price_max && property.price_max !== property.price_min
     ? `${formatCurrency(property.price_min)} – ${formatCurrency(property.price_max)}`
     : formatCurrency(property.price_min);
@@ -453,19 +458,13 @@ const PropertyDetailPage = () => {
               {activeImage ? (
                 <PropertyImage property={property} src={activeImage.image_url} alt={activeImage.caption || property.name} />
               ) : (
-                <div className="relative h-full w-full">
-                  <PropertyImage property={{ ...property, primary_image_url: null }} iconClassName="h-14 w-14" />
-                  <span className="absolute inset-x-0 bottom-6 flex items-center justify-center gap-2 text-sm font-semibold text-white/80">
-                    <Camera className="h-4 w-4" aria-hidden="true" />Photos coming soon
-                  </span>
-                </div>
+                <PropertyImage property={{ ...property, primary_image_url: null }} iconClassName="h-14 w-14" />
               )}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/40 to-transparent" aria-hidden="true" />
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2 sm:left-5 sm:top-5">
+                            <div className="absolute left-4 top-4 flex flex-wrap gap-2 sm:left-5 sm:top-5">
                 <UniversityBadge university={property.university} />
                 {property.nsfas_accredited && <NsfasBadge long />}
               </div>
-              <span className="absolute right-4 top-4 rounded-full bg-black/50 px-3 py-1.5 text-xs font-semibold capitalize text-white backdrop-blur sm:right-5 sm:top-5">{property.property_type}</span>
+              <span className="absolute right-4 top-4 rounded-md bg-black/60 px-2.5 py-1 text-xs font-semibold capitalize text-white sm:right-5 sm:top-5">{property.property_type}</span>
               {images.length > 1 && (
                 <span className="absolute bottom-4 right-5 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
                   {activeImageIndex + 1} / {images.length}
@@ -492,7 +491,7 @@ const PropertyDetailPage = () => {
             <div className="p-5 sm:p-7">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <h1 className="text-2xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl">{property.name}</h1>
+                  <h1 className="text-2xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-3xl">{property.name}</h1>
                   <p className="mt-2 flex items-start gap-1.5 text-sm text-slate-500 dark:text-slate-400">
                     <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-coral-500" aria-hidden="true" />
                     {property.address}
@@ -521,11 +520,11 @@ const PropertyDetailPage = () => {
           <section className={cn(CARD, 'scroll-mt-24 p-5 sm:p-7')} aria-labelledby="location-heading">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-lime-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-lime-800 dark:bg-lime-400/10 dark:text-lime-300">
+                <p className="mb-1 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 dark:text-brand-300">
                   <Footprints className="h-3.5 w-3.5" aria-hidden="true" />Location
                 </p>
-                <h2 id="location-heading" className="scroll-mt-24 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-2xl">How far is it from campus?</h2>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Walking, cycling and driving times from {property.name} to Wits and UJ campuses.</p>
+                <h2 id="location-heading" className="scroll-mt-24 text-xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-2xl">How far is it from campus?</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Walking, cycling and driving times from {property.name} to Wits and UJ campuses and nearby colleges.</p>
               </div>
               {located && (
                 <Button size="sm" variant="secondary" href={osmViewUrl(property)} target="_blank" rel="noopener noreferrer" className="shrink-0">
@@ -562,11 +561,11 @@ const PropertyDetailPage = () => {
           {/* Amenities */}
           {amenities.length > 0 && (
             <section className={cn(CARD, 'p-5 sm:p-7')} aria-labelledby="amenities-heading">
-              <h2 id="amenities-heading" className="mb-4 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">Amenities &amp; features</h2>
+              <h2 id="amenities-heading" className="mb-4 text-xl font-bold tracking-tight text-slate-950 dark:text-white">Amenities &amp; features</h2>
               <ul className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                {amenities.map((amenity, index) => (
+                {amenities.map((amenity) => (
                   <li key={amenity} className="flex items-center gap-3 rounded-2xl bg-slate-50 p-3.5 dark:bg-slate-800/60">
-                    <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm', ['bg-brand-600', 'bg-coral-600', 'bg-violet-600', 'bg-emerald-700', 'bg-gold-700', 'bg-cyan-700'][index % 6])}>
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-brand-700 ring-1 ring-slate-200 dark:bg-slate-900 dark:text-brand-300 dark:ring-slate-700">
                       {renderAmenityIcon(amenity, 'h-4 w-4')}
                     </span>
                     <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{amenity}</span>
@@ -580,7 +579,7 @@ const PropertyDetailPage = () => {
           <section className={cn(CARD, 'p-5 sm:p-7')} aria-labelledby="reviews-heading">
             <div className="mb-5 flex items-center justify-between gap-4">
               <div>
-                <h2 id="reviews-heading" className="text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">Student reviews</h2>
+                <h2 id="reviews-heading" className="text-xl font-bold tracking-tight text-slate-950 dark:text-white">Student reviews</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{reviewCount} verified review{reviewCount === 1 ? '' : 's'}</p>
               </div>
               {isAuthenticated ? (
@@ -621,12 +620,11 @@ const PropertyDetailPage = () => {
         <aside className="lg:col-span-1" aria-label="Pricing and contact">
           <div className="space-y-5 lg:sticky lg:top-24">
             <div className={cn(CARD, 'overflow-hidden')}>
-              <div className="relative bg-gradient-to-br from-ink-950 via-brand-900 to-violet-900 p-5 text-white sm:p-6">
-                <div className="bg-dots absolute inset-0 opacity-40" aria-hidden="true" />
-                <p className="relative text-xs font-bold uppercase tracking-wider text-white/70">Monthly rent</p>
-                <p className="relative mt-1 font-display text-3xl font-extrabold tracking-tight">{priceRange}</p>
+              <div className="border-b border-slate-100 p-5 dark:border-slate-800 sm:p-6">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Monthly rent</p>
+                <p className="mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">{priceRange}</p>
                 {property.nsfas_accredited && (
-                  <p className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-lime-300 px-2.5 py-1 text-xs font-bold text-ink-950">
+                  <p className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-inset ring-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/30">
                     <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />NSFAS accredited
                   </p>
                 )}
@@ -663,7 +661,7 @@ const PropertyDetailPage = () => {
                     {property.website && (
                       <div className="flex items-start gap-3">
                         <dt className="sr-only">Website</dt>
-                        <Globe className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" aria-hidden="true" />
+                        <Globe className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
                         <dd className="min-w-0">
                           <a href={property.website} target="_blank" rel="noopener noreferrer" className="block truncate font-semibold text-brand-700 transition-colors hover:text-brand-800 dark:text-brand-300">
                             {websiteLabel}
@@ -681,11 +679,11 @@ const PropertyDetailPage = () => {
 
                 <dl className="mt-5 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5 text-center dark:border-slate-800">
                   <div className="rounded-2xl bg-gold-50 py-3 dark:bg-gold-500/10">
-                    <dd className="font-display text-2xl font-extrabold text-slate-950 dark:text-white">{reviewCount}</dd>
+                    <dd className="text-2xl font-bold text-slate-950 dark:text-white">{reviewCount}</dd>
                     <dt className="mt-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400">Reviews</dt>
                   </div>
                   <div className="rounded-2xl bg-brand-50 py-3 dark:bg-brand-500/10">
-                    <dd className="font-display text-2xl font-extrabold text-slate-950 dark:text-white">{amenities.length}</dd>
+                    <dd className="text-2xl font-bold text-slate-950 dark:text-white">{amenities.length}</dd>
                     <dt className="mt-0.5 text-xs font-semibold text-slate-600 dark:text-slate-400">Amenities</dt>
                   </div>
                 </dl>
@@ -701,7 +699,7 @@ const PropertyDetailPage = () => {
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-slate-500 dark:text-slate-400">University</dt>
-                  <dd className="font-semibold text-slate-900 dark:text-white">{property.university?.toUpperCase()}</dd>
+                  <dd className="font-semibold text-slate-900 dark:text-white">{UNIVERSITIES[property.university]?.label || property.university}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="text-slate-500 dark:text-slate-400">NSFAS</dt>

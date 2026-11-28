@@ -1,16 +1,31 @@
 const { test, expect, API, STUDENT, login } = require('./fixtures');
 
 test.describe('Accounts', () => {
-  test('a student signs in, uses the dashboard and the residence map, then signs out', async ({ page }) => {
+  test('the sign-in page pairs the form with a credited campus photo', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('heading', { level: 1, name: 'Welcome back' })).toBeVisible();
+    const panel = page.getByRole('complementary', { name: 'Why oneApplyHub' });
+    await expect(panel).toBeVisible();
+    await expect(panel.getByRole('heading', { name: 'Your next home, closer to campus.' })).toBeVisible();
+    await expect(panel.getByRole('link', { name: 'Heather Elke' })).toHaveAttribute('href', /commons\.wikimedia\.org/);
+  });
+
+  test('a student signs in, uses the dashboard and the map in Browse Properties, then signs out', async ({ page }) => {
     await login(page, STUDENT);
     await expect(page).toHaveURL(/\/dashboard$/);
     await expect(page.getByRole('heading', { level: 1, name: `Welcome back, ${STUDENT.firstName}` })).toBeVisible();
 
+    // Browsing and the map are one page now, so there is no separate "Residence map" entry.
     const nav = page.getByRole('navigation', { name: 'Main' });
-    await nav.getByRole('link', { name: 'Residence map' }).click();
+    await expect(nav.getByRole('link', { name: 'Residence map' })).toHaveCount(0);
+    await nav.getByRole('link', { name: 'Browse Properties' }).click();
+    await expect(page).toHaveURL(/\/properties$/);
+    await expect(nav.getByRole('link', { name: 'Browse Properties' })).toHaveAttribute('aria-current', 'page');
+
+    await page.getByRole('group', { name: 'Layout' }).getByRole('button', { name: 'Map' }).click();
     await expect(page).toHaveURL(/\/properties\?view=map/);
-    await expect(nav.getByRole('link', { name: 'Residence map' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByTestId('properties-map')).toBeVisible();
+    await expect(nav.getByRole('link', { name: 'Browse Properties' })).toHaveAttribute('aria-current', 'page');
 
     await page.getByRole('button', { name: 'Log Out' }).click();
     await expect(page).toHaveURL(/\/$/);

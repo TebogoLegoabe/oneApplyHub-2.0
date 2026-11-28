@@ -37,7 +37,7 @@ export const clusterIcon = (cluster) => {
 
 export const campusIcon = (campus, active = false) => L.divIcon({
   className: 'oah-campus-wrap',
-  html: `<div class="oah-campus oah-campus--${escapeHtml(campus.university)}${active ? ' is-active' : ''}"><span class="oah-campus__icon">${GRADUATION_CAP}</span><span class="oah-campus__label">${escapeHtml(campus.short)}</span></div>`,
+  html: `<div class="oah-campus oah-campus--${escapeHtml(campus.group || campus.university)}${active ? ' is-active' : ''}"><span class="oah-campus__icon">${GRADUATION_CAP}</span><span class="oah-campus__label">${escapeHtml(campus.short)}</span></div>`,
   iconSize: [0, 0],
   iconAnchor: [0, 0],
 });

@@ -6,7 +6,8 @@ test.describe('Admin — pin a residence on the map', () => {
     await expect(page).toHaveURL(/\/admin$/);
     await page.getByRole('button', { name: /^Properties/ }).click();
 
-    await expect(page.getByText('1 without a map pin')).toBeVisible();
+    // Seed data: Skyways plus the two Campus Central residences still need pins.
+    await expect(page.getByText('3 without a map pin')).toBeVisible();
     const row = page.getByRole('row', { name: /Student Digz - Skyways/ });
     await expect(row.getByText('No pin')).toBeVisible();
     await row.getByRole('button', { name: 'Set map location for Student Digz - Skyways' }).click();
@@ -32,10 +33,10 @@ test.describe('Admin — pin a residence on the map', () => {
     await expect(page.getByText('Location saved for Student Digz - Skyways.')).toBeVisible();
     await expect(dialog).toBeHidden();
     await expect(row.getByText('Exact')).toBeVisible();
-    await expect(page.getByText('1 without a map pin')).toBeHidden();
+    await expect(page.getByText('2 without a map pin')).toBeVisible();
 
     // The public page now shows distances to campus.
-    await page.goto('/properties?search=Skyways&view=list');
+    await page.goto('/properties?search=Skyways');
     await page.getByRole('link', { name: 'Student Digz - Skyways' }).click();
     await expect(page.getByTestId('campus-row').first()).toBeVisible();
     await expect(page.getByText('Exact (set by our team)')).toBeVisible();
@@ -47,6 +48,7 @@ test.describe('Admin — pin a residence on the map', () => {
     await page.getByRole('dialog').getByRole('button', { name: 'Remove pin' }).click();
     await expect(page.getByText('Map pin removed for Student Digz - Skyways.')).toBeVisible();
     await expect(page.getByRole('row', { name: /Student Digz - Skyways/ }).getByText('No pin')).toBeVisible();
+    await expect(page.getByText('3 without a map pin')).toBeVisible();
   });
 
   test('impossible coordinates cannot be saved', async ({ page }) => {
