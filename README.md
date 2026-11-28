@@ -6,17 +6,18 @@ oneApplyHub is a student accommodation platform for matric learners and universi
 
 ### Property discovery
 
-- Browse verified student accommodation properties
+- Browse 62 verified residences in and around Braamfontein, Parktown, Auckland Park and Doornfontein
 - Filter by price, location, property type, university, NSFAS accreditation
 - Sort by nearest, price, rating or name
 - See ratings and reviews from students
 
 ### Maps and distance to campus (OpenStreetMap)
 
-- Interactive OpenStreetMap map of every residence with price pins, clustering, and markers for all seven Wits and UJ campuses
-- "How far is it?" on every residence: straight-line distance plus walking, cycling and driving estimates to each campus
+- One "Find a res" page: a list by default, with a **Map** toggle that opens a compact map beside the list (full screen on phones). `?view=map` links straight to it.
+- Markers for all seven Wits and UJ campuses plus five colleges: IIE Rosebank College, Boston City Campus, CityVarsity and Damelin in Braamfontein, and Central Johannesburg TVET College (Parktown)
+- "How far is it?" on every residence: straight-line distance plus walking, cycling and driving estimates to each campus or college, grouped as Wits / UJ / Colleges / All
 - Exact walking route drawn on the map on request (OSRM), and turn-by-turn directions on openstreetmap.org
-- Search by campus ("near Wits Main") with a radius filter (within 1, 2, 3, 5, 10 km), or by the student's own location ("Near me" — kept in the browser, never put in the URL)
+- Search by campus or college ("Distance from Wits Main") with a radius filter (within 1, 2, 3, 5, 10 km), or by the student's own location ("Near me" — kept in the browser, never put in the URL)
 - Nearby residences on each listing
 - Admins pin or correct a residence's location with a map picker and address search
 
@@ -408,9 +409,15 @@ python geocode_properties.py --dry-run   # re-run only for new properties; it sk
 
 Deploying this update to an existing database:
 
-1. `flask db upgrade` adds the new columns (Railway runs it automatically on deploy).
-2. Run once: `python backfill_locations.py --dry-run`, then `python backfill_locations.py`. It only fills in missing pins and never touches other fields or admin-placed pins.
-3. Pin anything left over in the admin dashboard: **Properties → Location**.
+1. `flask db upgrade` (Railway runs it automatically on deploy) adds the location columns, and data migration `d8e9f0a1b2c3` fills in the pin for every seeded residence that doesn't have one yet. It matches by name, only writes empty pins, and never touches other fields or admin-placed pins. `python backfill_locations.py` does the same job by hand if you ever need it again.
+2. Add the new residences without touching existing ones: `python seed.py --insert-only --dry-run`, then `python seed.py --insert-only`.
+3. Pin anything left over in the admin dashboard: **Properties → Location**. Three seeded residences have no confirmed address yet: Student Digz - Skyways, Campus Central - On Empire and Campus Central - St Andrews.
+
+Campuses and colleges (names, coordinates, map groups) are defined in `frontend/src/constants/campuses.js`.
+
+### Photos
+
+Campus and city photos come from Wikimedia Commons under Creative Commons licences or the public domain. They are resized to WebP in `frontend/public/images/` and listed in `frontend/src/constants/photos.js` with the photographer, licence and source page. The licences require attribution, so always render a photo with `<PhotoCredit>` (the `PageHeader` `image` prop and `CtaBand` do this for you).
 
 Optional frontend settings (see `frontend/.env.example`):
 
@@ -448,7 +455,7 @@ npm run e2e:test                  # re-run tests without rebuilding
 npx playwright show-report e2e-report
 ```
 
-The suite covers the home page, search and filters, distance sorting and radius, "Near me", the map (pins, clusters, previews), property detail distances and walking routes, registration with email verification, sign in/out, the admin location picker, content pages, mobile layouts, and automated WCAG 2.1 AA checks with axe-core.
+The suite covers the home page (photos and credits, campus and college explorer), search and filters, distance sorting and radius from campuses and colleges, "Near me", the list/map toggle (pins, clusters, previews), property detail distances and walking routes, the sign-in page, registration with email verification, sign in/out, the admin location picker, content pages, mobile layouts, and automated WCAG 2.1 AA checks with axe-core in light and dark mode.
 
 ## 🔐 Secrets and production notes
 
