@@ -9,20 +9,20 @@ const propertyId = async (request, name) => {
 };
 
 test.describe('Property detail — how far is it?', () => {
-  test('lists every campus nearest first and draws the exact walking route', async ({ page, request }) => {
+  test('lists campuses nearest first, by group, and draws the exact walking route', async ({ page, request }) => {
     await page.goto(`/properties/${await propertyId(request, 'Braamfontein Gate')}`);
     await expect(page.getByRole('heading', { level: 1, name: 'Braamfontein Gate' })).toBeVisible();
 
     const section = page.getByRole('region', { name: 'How far is it from campus?' });
     const rows = section.getByTestId('campus-row');
-    // Serves both universities, so all seven campuses are listed — Wits Main is closest.
-    await expect(rows).toHaveCount(7);
+    // Serves both universities: the Wits tab opens first and Wits Main is closest.
+    await expect(rows).toHaveCount(3);
     await expect(rows.first()).toContainText('Wits Main Campus');
     await expect(rows.first()).toContainText(/\d+ min/);
 
     const map = section.getByTestId('property-location-map');
     await expect(map.locator('.oah-home')).toBeVisible();
-    await expect(map.locator('.oah-campus')).toHaveCount(7);
+    await expect(map.locator('.oah-campus')).toHaveCount(3);
 
     await rows.first().getByRole('button', { name: 'Exact walking route' }).click();
     await expect(rows.first().getByTestId('route-result')).toContainText(/Walking route: [\d.]+ (km|m) · \d+ min/);
@@ -31,9 +31,18 @@ test.describe('Property detail — how far is it?', () => {
 
     await expect(rows.first().getByRole('link', { name: /Directions/ })).toHaveAttribute('href', /openstreetmap\.org\/directions\?engine=fossgis_osrm_foot&route=/);
 
-    await section.getByRole('button', { name: 'UJ campuses' }).click();
+    await section.getByRole('button', { name: 'UJ', exact: true }).click();
     await expect(rows).toHaveCount(4);
     for (const text of await rows.allInnerTexts()) expect(text).toMatch(/^UJ /);
+
+    // Braamfontein colleges get their own tab, with their own markers.
+    await section.getByRole('button', { name: 'Colleges', exact: true }).click();
+    await expect(rows).toHaveCount(5);
+    await expect(rows.first()).toContainText(/\d+ min/);
+    await expect(map.locator('.oah-campus--college')).toHaveCount(5);
+
+    await section.getByRole('button', { name: 'All', exact: true }).click();
+    await expect(rows).toHaveCount(12);
   });
 
   test('quick distance badges and amenities show in the summary', async ({ page, request }) => {
