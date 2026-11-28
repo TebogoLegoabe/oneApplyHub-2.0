@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ThumbsUp, CalendarDays, Search, MessageSquare, Star, Home, ArrowUpDown } from 'lucide-react';
+import { ThumbsUp, CalendarDays, Search, MessageSquare, Star, Building2, ArrowUpDown } from 'lucide-react';
 import { reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useHelpfulVotes } from '../hooks/useHelpfulVotes';
@@ -195,7 +195,7 @@ const ReviewsPage = () => {
         <StatTile icon={MessageSquare} value={totalReviews} label="Reviews" />
         <StatTile icon={Star} value={averageRating === '—' ? '—' : `${averageRating} / 5`} label="Average on this page" />
         <StatTile icon={ThumbsUp} value={recommendationCount} label="Recommendations" />
-        <StatTile icon={Home} value={propertiesReviewedCount} label="Properties" />
+        <StatTile icon={Building2} value={propertiesReviewedCount} label="Properties" />
       </div>
 
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

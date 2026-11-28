@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Building, Star, MessageSquare, CalendarDays, ThumbsUp, FileText, ArrowRight,
-  TrendingUp, Users, CheckCircle2, Clock, Home, Award,
+  Building2, Star, MessageSquare, CalendarDays, ThumbsUp, FileText, ArrowRight, TrendingUp, CheckCircle2, Clock,
+  Award,
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useAuth } from '../context/AuthContext';
@@ -42,7 +42,7 @@ const StatCard = ({ icon: Icon, label, value, sub, tone, loading }) => (
 );
 
 const QUICK_LINKS = [
-  { to: '/properties', icon: Home, label: 'Browse properties', text: 'List or map, with walking times to campus.' },
+  { to: '/properties', icon: Building2, label: 'Browse properties', text: 'List or map, with walking times to campus.' },
   { to: '/application', icon: FileText, label: 'My application', text: 'Start or track your application.' },
   { to: '/reviews', icon: MessageSquare, label: 'Reviews', text: 'What students say about each res.' },
   { to: '/bursaries', icon: Award, label: 'Opportunities', text: 'Bursaries closing soon.' },
@@ -81,7 +81,7 @@ const DashboardPage = () => {
   const hasRatingData = data?.rating_distribution?.some((item) => item.count > 0);
 
   const stats = [
-    { icon: Building, label: 'Properties', value: overview.total_properties ?? 0, sub: 'Approved listings', tone: 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300' },
+    { icon: Building2, label: 'Properties', value: overview.total_properties ?? 0, sub: 'Approved listings', tone: 'bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-300' },
     { icon: MessageSquare, label: 'Reviews', value: overview.total_reviews ?? 0, sub: 'Published reviews', tone: 'bg-gold-50 text-gold-600 dark:bg-gold-500/10 dark:text-gold-300' },
     { icon: Star, label: 'Average rating', value: overview.avg_rating > 0 ? `${overview.avg_rating} / 5` : '—', sub: 'Platform average', tone: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-300' },
     { icon: ThumbsUp, label: 'Recommend', value: overview.recommend_pct > 0 ? `${overview.recommend_pct}%` : '—', sub: 'Of reviewers', tone: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300' },
@@ -138,7 +138,7 @@ const DashboardPage = () => {
             {loading ? (
               <Skeleton className="h-60" />
             ) : !data?.top_properties?.length ? (
-              <EmptyState compact icon={Building} title="No review data yet" description="Insights will appear once reviews are approved." />
+              <EmptyState compact icon={Building2} title="No review data yet" description="Insights will appear once reviews are approved." />
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={data.top_properties} layout="vertical" margin={{ top: 0, right: 12, left: 0, bottom: 0 }}>
@@ -195,7 +195,7 @@ const DashboardPage = () => {
       <Card className="mt-4 overflow-hidden" padded={false}>
         <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
           <CardHeader
-            icon={Users}
+            icon={MessageSquare}
             title="Recent reviews"
             description="Latest approved feedback from students."
             action={<Button to="/reviews" variant="ghost" size="sm">See all <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" /></Button>}

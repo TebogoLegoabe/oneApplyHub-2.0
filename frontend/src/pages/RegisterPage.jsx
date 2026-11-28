@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, GraduationCap, Building, Eye, EyeOff, ArrowRight, UserPlus } from 'lucide-react';
+import { Mail, Lock, User, GraduationCap, BookOpen, Eye, EyeOff, ArrowRight, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import AuthShell from '../components/AuthShell';
 import { Alert, Button, Input, Select } from '../components/ui';
@@ -105,7 +105,7 @@ const RegisterPage = () => {
             <option value="">Select…</option>
             {YEAR_OPTIONS.map((year) => <option key={year} value={year}>{year}</option>)}
           </Select>
-          <Select label="Faculty or field" icon={Building} name="faculty" value={formData.faculty} onChange={handleChange} required>
+          <Select label="Faculty or field" icon={BookOpen} name="faculty" value={formData.faculty} onChange={handleChange} required>
             <option value="">Select…</option>
             {FACULTY_OPTIONS.map((faculty) => <option key={faculty} value={faculty}>{faculty}</option>)}
           </Select>

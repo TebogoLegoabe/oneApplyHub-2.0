@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import {
   ArrowLeft, ArrowUpRight, Bike, Building2, CalendarDays, Car, CheckCircle2, ChevronRight, Copy, ExternalLink, Footprints,
-  Globe, GraduationCap, Info, Loader2, MapPin, MapPinOff, MessageSquare, Navigation, PenLine, Phone, Route, Share2, ThumbsDown, ThumbsUp,
+  Globe, Info, Loader2, MapPin, MapPinOff, MessageSquare, Navigation, PenLine, Phone, Route, Share2, ThumbsDown, ThumbsUp,
 } from 'lucide-react';
 import { propertiesAPI, reviewsAPI } from '../services/api';
 import { fetchWalkingRoute, routingEnabled, ROUTING_ATTRIBUTION } from '../services/routing';
@@ -11,7 +11,7 @@ import { useHelpfulVotes } from '../hooks/useHelpfulVotes';
 import { parseAmenities, renderAmenityIcon } from '../constants/amenities';
 import { CAMPUSES, COLLEGE_CAMPUSES, UNIVERSITIES, UNIVERSITY_CAMPUSES, campusesFor } from '../constants/campuses';
 import { MapFrame, PropertyLocationMap } from '../components/map';
-import { DistanceBadge, NsfasBadge, PropertyImage, RatingPill, UniversityBadge } from '../components/property/PropertyBits';
+import { CampusIcon, DistanceBadge, NsfasBadge, PropertyImage, RatingPill, UniversityBadge } from '../components/property/PropertyBits';
 import { formatCurrency, formatDate, getRatingBadge } from '../utils/format';
 import {
   distancesToCampuses, estimateTravel, formatDistance, formatMinutes, hasCoords, osmDirectionsUrl, osmViewUrl, toPoint, walkBand,
@@ -140,7 +140,7 @@ const CampusRow = ({ row, selected, onSelect, routeState, onRoute, from }) => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" onClick={() => onSelect(campus.id)} aria-pressed={selected} className="flex min-w-0 items-center gap-3 rounded-xl text-left">
             <span className={cn('flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-white', GROUP_ICON[campus.group] || GROUP_ICON.wits)}>
-              <GraduationCap className="h-5 w-5" aria-hidden="true" />
+              <CampusIcon campus={campus} className="h-5 w-5" />
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-bold text-slate-950 dark:text-white">{campus.name}</span>

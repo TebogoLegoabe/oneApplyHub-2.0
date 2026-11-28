@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Car, Footprints, Star } from 'lucide-react';
+import { Building2, Car, Footprints, GraduationCap, School, Star } from 'lucide-react';
 import { UNIVERSITIES } from '../../constants/campuses';
 import { cn } from '../../utils/cn';
 import { formatDistance, formatMinutes, walkBand } from '../../utils/geo';
@@ -39,6 +39,12 @@ export const RatingPill = ({ rating, count, className }) => (
     <span className="sr-only">{rating > 0 ? ` out of 5 from ${count} review${count === 1 ? '' : 's'}` : ' — no reviews yet'}</span>
   </span>
 );
+
+/** Graduation cap for a university campus, a school building for a college. Decorative. */
+export const CampusIcon = ({ campus, className = 'h-4 w-4' }) => {
+  const Icon = campus?.kind === 'college' ? School : GraduationCap;
+  return <Icon className={className} aria-hidden="true" />;
+};
 
 const UNIVERSITY_STYLES = {
   wits: 'bg-brand-600 text-white',

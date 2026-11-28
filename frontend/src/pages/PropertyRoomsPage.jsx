@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Building2, Download, DoorOpen, Layers, Plus, Sparkles, Trash2, UserMinus, Users, BedDouble } from 'lucide-react';
+import { ArrowLeft, Building2, Download, DoorOpen, Layers, Plus, Zap, Trash2, UserMinus, Users, BedDouble } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import { Alert, Badge, Button, ConfirmDialog, EmptyState, Input, PageLoader, Select } from '../components/ui';
 import { cn } from '../utils/cn';
@@ -246,7 +246,7 @@ const PropertyRoomsPage = () => {
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleExport} variant="inverse"><Download className="h-4 w-4" aria-hidden="true" />Download spreadsheet</Button>
               <Button onClick={handleAutoAllocate} variant="inverse-outline" disabled={saving || !unallocated.length}>
-                <Sparkles className="h-4 w-4" aria-hidden="true" />Auto-allocate pending
+                <Zap className="h-4 w-4" aria-hidden="true" />Auto-allocate pending
               </Button>
             </div>
           </div>
