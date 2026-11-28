@@ -4,7 +4,9 @@ const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => 
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
 }[char]));
 
+// Lucide "graduation-cap" (universities) and "school" (colleges), inlined because Leaflet markers take HTML strings.
 const GRADUATION_CAP = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>';
+const SCHOOL = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10"/><path d="M18 5v17"/><path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg>';
 const HOUSE = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 const PIN = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path fill="#d63a17" stroke="#fff" stroke-width="1.5" d="M12 22s-7-6.2-7-12a7 7 0 1 1 14 0c0 5.8-7 12-7 12z"/><circle cx="12" cy="10" r="2.8" fill="#fff"/></svg>';
 
@@ -37,7 +39,7 @@ export const clusterIcon = (cluster) => {
 
 export const campusIcon = (campus, active = false) => L.divIcon({
   className: 'oah-campus-wrap',
-  html: `<div class="oah-campus oah-campus--${escapeHtml(campus.group || campus.university)}${active ? ' is-active' : ''}"><span class="oah-campus__icon">${GRADUATION_CAP}</span><span class="oah-campus__label">${escapeHtml(campus.short)}</span></div>`,
+  html: `<div class="oah-campus oah-campus--${escapeHtml(campus.group || campus.university)}${active ? ' is-active' : ''}"><span class="oah-campus__icon">${campus.kind === 'college' ? SCHOOL : GRADUATION_CAP}</span><span class="oah-campus__label">${escapeHtml(campus.short)}</span></div>`,
   iconSize: [0, 0],
   iconAnchor: [0, 0],
 });

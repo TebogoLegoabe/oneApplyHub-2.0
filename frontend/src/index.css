@@ -224,6 +224,11 @@
 .oah-campus.is-active .oah-campus__icon {
   @apply ring-4 ring-gold-300/90;
 }
+/* Braamfontein's colleges are a few hundred metres apart, so their labels would overlap when
+   zoomed out. There, only the selected college keeps its label; the others show it on hover. */
+.oah-compact-college-labels .oah-campus--college:not(.is-active) .oah-campus__label {
+  display: none;
+}
 
 /* The residence on its own detail page: a teardrop whose tip sits on the point. */
 .oah-home {

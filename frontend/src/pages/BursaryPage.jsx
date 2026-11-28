@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
-  Search, ExternalLink, BookOpen, Award, CheckCircle2, Building, Cpu, HeartPulse,
-  Briefcase, Scale, FlaskConical, HardHat, GraduationCap, Landmark, Globe, ChevronDown, ChevronUp,
-  Target, Bookmark, ArrowUpDown, X, AlertCircle,
+  Search, ExternalLink, BookOpen, Award, CheckCircle2, CalendarClock, Cpu, HeartPulse, Briefcase, Scale, FlaskConical,
+  HardHat, GraduationCap, Calculator, Globe, ChevronDown, ChevronUp, Target, Bookmark, ArrowUpDown, X, AlertCircle,
+  FileCheck2, Layers,
 } from 'lucide-react';
 import { bursariesAPI, opportunitiesAPI } from '../services/api';
 import OpportunityCard, { daysUntil, formatDeadline, DeadlineChip } from '../components/OpportunityCard';
@@ -12,12 +12,12 @@ import { PHOTOS } from '../constants/photos';
 import { cn } from '../utils/cn';
 
 const FIELDS = [
-  { value: 'all', label: 'All fields', icon: BookOpen },
+  { value: 'all', label: 'All fields', icon: Layers },
   { value: 'engineering', label: 'Engineering', icon: HardHat },
   { value: 'it', label: 'IT & Computer Science', icon: Cpu },
   { value: 'health', label: 'Health & Medical', icon: HeartPulse },
   { value: 'business', label: 'Business & Finance', icon: Briefcase },
-  { value: 'accounting', label: 'Accounting', icon: Landmark },
+  { value: 'accounting', label: 'Accounting', icon: Calculator },
   { value: 'education', label: 'Education & Teaching', icon: GraduationCap },
   { value: 'law', label: 'Law', icon: Scale },
   { value: 'sciences', label: 'Natural Sciences', icon: FlaskConical },
@@ -42,8 +42,8 @@ const INITIAL_FILTERS = { field: 'all', funder: 'all', level: 'all', status: 'al
 
 const CHECKLIST = [
   { icon: Bookmark, title: 'Shortlist early', text: 'Keep a list of bursaries and their deadlines in one place.' },
-  { icon: GraduationCap, title: 'Prepare documents', text: 'Have your ID, transcript, proof of registration, and CV ready.' },
-  { icon: Building, title: 'Apply ahead of time', text: 'Corporate bursaries often close months before funding starts.' },
+  { icon: FileCheck2, title: 'Prepare documents', text: 'Have your ID, transcript, proof of registration, and CV ready.' },
+  { icon: CalendarClock, title: 'Apply ahead of time', text: 'Corporate bursaries often close months before funding starts.' },
 ];
 
 const matchesStatus = (item, status) => {

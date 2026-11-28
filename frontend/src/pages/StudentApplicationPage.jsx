@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
   ArrowRight,
+  Building2,
   CheckCircle,
   ClipboardList,
   GraduationCap,
@@ -11,6 +12,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  University,
   Upload,
   User,
   Users,
@@ -24,7 +26,7 @@ import { INPUT_CLASS, PageLoader, StatusBadge } from '../components/ui';
 const ACCOMMODATION_STEPS = [
   { id: 1, title: 'Personal', icon: User },
   { id: 2, title: 'Studies', icon: GraduationCap },
-  { id: 3, title: 'Accommodation', icon: MapPin },
+  { id: 3, title: 'Accommodation', icon: Building2 },
   { id: 4, title: 'Guardian', icon: Users },
   { id: 5, title: 'Documents', icon: Upload },
   { id: 6, title: 'Review', icon: CheckCircle },
@@ -34,7 +36,7 @@ const UNIVERSITY_STEPS = [
   { id: 1, title: 'Personal', icon: User },
   { id: 2, title: 'Studies', icon: GraduationCap },
   { id: 3, title: 'Next of Kin', icon: Users },
-  { id: 4, title: 'Universities', icon: Home },
+  { id: 4, title: 'Universities', icon: University },
   { id: 5, title: 'Results', icon: Upload },
   { id: 6, title: 'Review', icon: CheckCircle },
 ];

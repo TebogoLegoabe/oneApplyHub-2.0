@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Award, BadgeCheck, Building2, Camera, ChevronRight, FileText, GraduationCap, Home, LogOut, Moon, Shield, Star, Sun, UserRound, X,
+  Award, BadgeCheck, Building2, Camera, ChevronRight, FileText, GraduationCap, LayoutDashboard, LogOut, MessageSquare,
+  Moon, Shield, Sun, UserRound, X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,9 +10,9 @@ import { cn } from '../../utils/cn';
 import Logo from '../brand/Logo';
 
 const NAV_ITEMS = [
-  { to: '/dashboard', icon: Home, label: 'Dashboard', match: (path) => path === '/dashboard' },
+  { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', match: (path) => path === '/dashboard' },
   { to: '/properties', icon: Building2, label: 'Browse Properties', match: (path) => path.startsWith('/properties') },
-  { to: '/reviews', icon: Star, label: 'Reviews', match: (path) => path.startsWith('/reviews') },
+  { to: '/reviews', icon: MessageSquare, label: 'Reviews', match: (path) => path.startsWith('/reviews') },
   { to: '/bursaries', icon: Award, label: 'Opportunities Hub', match: (path) => path.startsWith('/bursaries') || path.startsWith('/opportunities') },
   { to: '/application', icon: FileText, label: 'My Application', match: (path) => path.startsWith('/application') },
 ];

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, Award, Briefcase, FileText, LayoutDashboard, LogOut, Menu, Moon, Search, Shield, Star, Sun, X,
+  ArrowRight, Award, Briefcase, FileText, LayoutDashboard, LogOut, Menu, MessageSquare, Moon, Search, Shield, Sun, X,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -10,7 +10,7 @@ import Logo from '../brand/Logo';
 
 const NAV_LINKS = [
   { to: '/properties', label: 'Find a res', icon: Search, match: (path) => path.startsWith('/properties') },
-  { to: '/reviews', label: 'Reviews', icon: Star, match: (path) => path.startsWith('/reviews') },
+  { to: '/reviews', label: 'Reviews', icon: MessageSquare, match: (path) => path.startsWith('/reviews') },
   { to: '/bursaries', label: 'Bursaries', icon: Award, match: (path) => path.startsWith('/bursaries') },
   { to: '/opportunities', label: 'Internships', icon: Briefcase, match: (path) => path.startsWith('/opportunities') },
 ];

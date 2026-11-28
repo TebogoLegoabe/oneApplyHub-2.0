@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Facebook, GraduationCap, Linkedin, Mail, MapPin } from 'lucide-react';
+import { ArrowRight, Mail, MapPin } from 'lucide-react';
 import { CAMPUS_BY_ID } from '../../constants/campuses';
 import Logo from '../brand/Logo';
+import { FacebookIcon, LinkedInIcon } from '../brand/SocialIcons';
+import { CampusIcon } from '../property/PropertyBits';
 
 const PLATFORM_LINKS = [
   { to: '/properties', label: 'Find accommodation' },
@@ -20,8 +22,8 @@ const ACCOUNT_LINKS = [
 const NEAR_LINKS = ['wits-main', 'wits-education', 'uj-apk', 'uj-dfc', 'rosebank-college', 'cjc-parktown'];
 
 const SOCIAL_LINKS = [
-  { href: 'https://www.facebook.com/profile.php?id=61573343413373', label: 'Facebook', icon: Facebook },
-  { href: 'https://www.linkedin.com/company/oneapplyhub/', label: 'LinkedIn', icon: Linkedin },
+  { href: 'https://www.facebook.com/profile.php?id=61573343413373', label: 'Facebook', icon: FacebookIcon },
+  { href: 'https://www.linkedin.com/company/oneapplyhub/', label: 'LinkedIn', icon: LinkedInIcon },
 ];
 
 const FooterLink = ({ to, label }) => (
@@ -76,7 +78,7 @@ const Footer = () => (
               return (
                 <li key={id}>
                   <Link to={`/properties?near=${campus.id}&sort=distance`} className="inline-flex items-center gap-2 text-sm text-slate-300 transition-colors hover:text-white">
-                    <GraduationCap className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />{campus.short}
+                    <CampusIcon campus={campus} className="h-3.5 w-3.5 text-slate-400" />{campus.short}
                   </Link>
                 </li>
               );

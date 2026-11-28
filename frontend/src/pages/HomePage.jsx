@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  ArrowRight, Award, BadgeCheck, Briefcase, Car, CheckCircle2, ClipboardCheck, FileText, Footprints, GraduationCap,
-  Home, MapPin, ScanSearch, Search, ShieldCheck, Star, TrendingUp, Users, Wallet,
+  ArrowRight, Award, Briefcase, Building2, Car, CheckCircle2, FileText, Footprints, GraduationCap, ListChecks, MapPin,
+  MessageSquare, ScanSearch, Search, Send, ShieldCheck, Star, Users, Wallet,
 } from 'lucide-react';
 import { propertiesAPI, statsAPI } from '../services/api';
 import { CAMPUS_BY_ID, CAMPUS_GROUPS, COLLEGE_CAMPUSES, UNIVERSITY_CAMPUSES } from '../constants/campuses';
@@ -43,22 +43,22 @@ const useReveal = () => {
 };
 
 const STAT_CONFIGS = [
-  { icon: Home, key: 'properties', label: 'Verified properties', format: (value) => `${value}+` },
+  { icon: Building2, key: 'properties', label: 'Verified properties', format: (value) => `${value}+` },
   { icon: Users, key: 'students', label: 'Registered students', format: (value) => `${value}+` },
-  { icon: CheckCircle2, key: 'reviews', label: 'Verified reviews', format: (value) => `${value}` },
-  { icon: TrendingUp, key: 'avg_rating', label: 'Average rating', format: (value) => `${value} / 5` },
+  { icon: MessageSquare, key: 'reviews', label: 'Verified reviews', format: (value) => `${value}` },
+  { icon: Star, key: 'avg_rating', label: 'Average rating', format: (value) => `${value} / 5` },
 ];
 
 const STEPS = [
   { icon: ScanSearch, title: 'Search', text: 'Pick your campus or college and see every residence sorted by walking time.' },
-  { icon: ClipboardCheck, title: 'Compare', text: 'Read verified reviews, check NSFAS status and shortlist your favourites.' },
-  { icon: BadgeCheck, title: 'Apply', text: 'Submit one application for up to three residences and track each decision.' },
+  { icon: ListChecks, title: 'Compare', text: 'Read verified reviews, check NSFAS status and shortlist your favourites.' },
+  { icon: Send, title: 'Apply', text: 'Submit one application for up to three residences and track each decision.' },
 ];
 
 const FEATURES = [
   { icon: Footprints, title: 'Know the walk before you sign', text: 'Every listing shows walking, cycling and driving times to all Wits and UJ campuses and the Braamfontein colleges.' },
   { icon: ShieldCheck, title: 'Verified listings', text: 'Our team checks every property before students can apply.' },
-  { icon: Star, title: 'Honest student reviews', text: 'Safety, value, location, cleanliness and management — rated by people who lived there.' },
+  { icon: MessageSquare, title: 'Honest student reviews', text: 'Safety, value, location, cleanliness and management — rated by people who lived there.' },
   { icon: Wallet, title: 'NSFAS-friendly', text: 'Filter to NSFAS-accredited residences in one tap.' },
   { icon: FileText, title: 'One application, three residences', text: 'Enter your details once and track every decision from your dashboard.' },
 ];
